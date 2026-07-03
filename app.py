@@ -65,6 +65,15 @@ class Expense(db.Model):
             self.year  = self.date.year
 
 
+class MerchantMemory(db.Model):
+    id          = db.Column(db.Integer, primary_key=True)
+    user_id     = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    merchant    = db.Column(db.String(200), nullable=False)
+    category    = db.Column(db.String(50),  nullable=False)
+    updated_at  = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    __table_args__ = (db.UniqueConstraint('user_id', 'merchant'),)
+
+
 class PushSub(db.Model):
     id         = db.Column(db.Integer, primary_key=True)
     user_id    = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -232,12 +241,29 @@ def add_expense():
 def edit_expense(id):
     e = Expense.query.filter_by(id=id, user_id=session['user_id']).first_or_404()
     e.amount      = float(request.form['amount'])
-    e.category    = request.form['category']
+    new_category  = request.form['category']
     e.description = request.form.get('description', '')
     entry_date    = datetime.strptime(request.form['date'], '%Y-%m-%d').date()
     e.date  = entry_date
     e.month = entry_date.month
     e.year  = entry_date.year
+
+    # حفظ في ذاكرة المتاجر إذا تغيّرت الفئة وفيه اسم متجر
+    if new_category != e.category and e.description:
+        merchant_key = e.description.strip().upper()
+        mem = MerchantMemory.query.filter_by(
+            user_id=session['user_id'], merchant=merchant_key).first()
+        if mem:
+            mem.category   = new_category
+            mem.updated_at = datetime.utcnow()
+        else:
+            db.session.add(MerchantMemory(
+                user_id  = session['user_id'],
+                merchant = merchant_key,
+                category = new_category
+            ))
+
+    e.category = new_category
     db.session.commit()
     flash('تم التعديل ✅', 'success')
     return redirect(url_for('index', month=e.month, year=e.year))
@@ -462,8 +488,16 @@ import re as _re
 from flask import send_from_directory
 import requests as _requests
 
-def ai_categorize(merchant_name):
-    """تصنيف ذكي لاسم المتجر باستخدام Gemini AI"""
+def ai_categorize(merchant_name, user_id=None):
+    """تصنيف ذكي: ذاكرة المتاجر → Gemini AI → كلمات مفتاحية"""
+
+    # ١. تحقق من ذاكرة المتاجر أولاً
+    if user_id:
+        merchant_key = merchant_name.strip().upper()
+        mem = MerchantMemory.query.filter_by(user_id=user_id, merchant=merchant_key).first()
+        if mem:
+            return mem.category
+
     api_key = os.environ.get('GEMINI_API_KEY') or os.environ.get('MISTRAL_API_KEY')
     if not api_key:
         return _fallback_categorize(merchant_name)
@@ -604,8 +638,8 @@ def sms_webhook():
     desc_match = _re.search(r'في\s+(?:[\d\w]+-)?(.+?)\s+بتاريخ', message_body)
     description = desc_match.group(1).strip() if desc_match else 'بنك مسقط - دفعة تلقائية'
 
-    # تصنيف ذكي بالذكاء الاصطناعي
-    cat = ai_categorize(description)
+    # تصنيف ذكي بالذكاء الاصطناعي مع ذاكرة المتاجر
+    cat = ai_categorize(description, user_id=user.id)
 
     expense = Expense(
         user_id     = user.id,
