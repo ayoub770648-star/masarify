@@ -134,6 +134,12 @@ body.light .btn-add {
 }
 body.light .modal { background: #fff; border-color: rgba(37,99,235,.15); }
 body.light footer { background: #fff; border-top-color: rgba(37,99,235,.1); }
+
+/* إزالة التدرج الداكن من البطاقات في الوضع الفاتح */
+body.light .stat-card { background: #fff !important; }
+body.light .stat-card:nth-child(1) { border-color: rgba(220,38,38,.25) !important;   box-shadow: inset 0 0 40px rgba(220,38,38,.04); }
+body.light .stat-card:nth-child(2) { border-color: rgba(217,119,6,.25) !important;   box-shadow: inset 0 0 40px rgba(217,119,6,.04); }
+body.light .stat-card:nth-child(3) { border-color: rgba(124,58,237,.25) !important;  box-shadow: inset 0 0 40px rgba(124,58,237,.04); }
 body.light .brand-name {
   background: linear-gradient(90deg, #2563eb, #7c3aed);
   -webkit-background-clip: text;
