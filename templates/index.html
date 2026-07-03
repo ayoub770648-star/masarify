@@ -955,12 +955,6 @@ footer {
 
           function drawCenter(label, amount, color) {
             const isLight = document.body.classList.contains('light');
-            const bg = isLight ? '#ffffff' : (getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() || '#111827');
-            ctx.beginPath();
-            ctx.arc(cx, cy, R - thickness/2 - 2, 0, 2*Math.PI);
-            ctx.fillStyle = bg;
-            ctx.fill();
-
             const textColor  = isLight ? '#000000' : '#ffffff';
             const mutedColor = isLight ? '#64748b' : '#94a3b8';
             ctx.textAlign = 'center';
