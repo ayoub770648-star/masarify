@@ -1006,17 +1006,12 @@ footer {
             const my = (e.clientY - rect.top)  * (SIZE / rect.height);
             const dx = mx - cx, dy = my - cy;
             const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < R - thickness/2 - 2 || dist > R + thickness/2 + 4) {
-              // نقر على الوسط أو خارج الدائرة — رجوع للإجمالي
-              drawCenter('ر.ع  •  الإجمالي', total.toFixed(3), null);
-              return;
-            }
+            draw(); // أعد رسم الكانفاس أولاً لتنظيف المركز
+            if (dist < R - thickness/2 - 2 || dist > R + thickness/2 + 4) return;
             let angle = Math.atan2(dy, dx);
             if (angle < -Math.PI/2) angle += 2*Math.PI;
-            // تحويل للمقياس نفسه (start من -π/2)
             let a = angle + Math.PI/2;
             if (a < 0) a += 2*Math.PI;
-
             for (const s of sliceAngles) {
               let st = s.start + Math.PI/2, en = s.end + Math.PI/2;
               if (st < 0) { st += 2*Math.PI; en += 2*Math.PI; }
