@@ -480,38 +480,58 @@ def ai_categorize(merchant_name):
         "personal=العناية الشخصية الصالون الحلاقة, other=أخرى"
     )
 
+    valid = [c[0] for c in CATEGORIES]
+
     prompt = (
-        f"Merchant name: '{merchant_name}'\n"
-        f"Categories: {categories}\n"
-        f"Reply with ONLY the category key (e.g. food, coffee, petrol). No explanation."
+        f"Merchant name from bank SMS: '{merchant_name}'\n"
+        f"Choose ONE category key from this list:\n"
+        f"housing, food, groceries, coffee, petrol, carwash, carmaint, "
+        f"health, pharmacy, education, entertainment, clothing, internet, "
+        f"subscriptions, gifts, travel, personal, other\n\n"
+        f"Rules:\n"
+        f"- coffee/cafe/tea/juice/drink → coffee\n"
+        f"- restaurant/burger/pizza/shawarma/grill/مطعم → food\n"
+        f"- lulu/carrefour/supermarket/hypermarket/market/grocery → groceries\n"
+        f"- petrol/fuel/gas station/محطة → petrol\n"
+        f"- pharmacy/drug/صيدلية → pharmacy\n"
+        f"- hospital/clinic/medical/doctor → health\n"
+        f"- salon/barber/spa/beauty → personal\n"
+        f"- hotel/airline/travel/airport → travel\n"
+        f"Reply with ONLY the key word. Nothing else."
     )
 
+    def _extract_cat(text):
+        text = text.strip().lower()
+        # البحث عن أول كلمة مفتاحية صحيحة في الرد
+        for word in _re.findall(r'[a-z]+', text):
+            if word in valid:
+                return word
+        return None
+
     try:
-        # جرّب Gemini أولاً
         if os.environ.get('GEMINI_API_KEY'):
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={os.environ['GEMINI_API_KEY']}"
             resp = _requests.post(url, json={
                 "contents": [{"parts": [{"text": prompt}]}],
-                "generationConfig": {"maxOutputTokens": 10, "temperature": 0}
-            }, timeout=5)
+                "generationConfig": {"maxOutputTokens": 15, "temperature": 0}
+            }, timeout=6)
             if resp.ok:
-                text = resp.json()['candidates'][0]['content']['parts'][0]['text'].strip().lower()
-                cat = _re.sub(r'[^a-z]', '', text)
-                valid = [c[0] for c in CATEGORIES]
-                return cat if cat in valid else 'other'
+                text = resp.json()['candidates'][0]['content']['parts'][0]['text']
+                cat  = _extract_cat(text)
+                if cat:
+                    return cat
 
-        # Mistral كبديل
         if os.environ.get('MISTRAL_API_KEY'):
             resp = _requests.post("https://api.mistral.ai/v1/chat/completions", json={
                 "model": "mistral-small-latest",
                 "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 10, "temperature": 0
-            }, headers={"Authorization": f"Bearer {os.environ['MISTRAL_API_KEY']}"}, timeout=5)
+                "max_tokens": 15, "temperature": 0
+            }, headers={"Authorization": f"Bearer {os.environ['MISTRAL_API_KEY']}"}, timeout=6)
             if resp.ok:
-                text = resp.json()['choices'][0]['message']['content'].strip().lower()
-                cat = _re.sub(r'[^a-z]', '', text)
-                valid = [c[0] for c in CATEGORIES]
-                return cat if cat in valid else 'other'
+                text = resp.json()['choices'][0]['message']['content']
+                cat  = _extract_cat(text)
+                if cat:
+                    return cat
 
     except Exception:
         pass
