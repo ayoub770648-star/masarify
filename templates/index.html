@@ -961,7 +961,7 @@ footer {
             ctx.fillStyle = bg;
             ctx.fill();
 
-            const textColor  = '#000000';
+            const textColor  = isLight ? '#000000' : '#ffffff';
             const mutedColor = isLight ? '#64748b' : '#94a3b8';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
