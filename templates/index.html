@@ -955,16 +955,14 @@ footer {
 
           function drawCenter(label, amount, color) {
             const isLight = document.body.classList.contains('light');
-            const textColor  = isLight ? '#000000' : '#ffffff';
+            const bgColor    = isLight ? '#ffffff' : '#1e293b';
+            const textColor  = isLight ? '#1e293b' : '#f1f5f9';
             const mutedColor = isLight ? '#64748b' : '#94a3b8';
-            // clear center area before drawing text
-            const innerR = R - thickness / 2 - 4;
-            ctx.save();
+            // fill center circle to erase previous text
             ctx.beginPath();
-            ctx.arc(cx, cy, innerR, 0, 2 * Math.PI);
-            ctx.clip();
-            ctx.clearRect(cx - innerR, cy - innerR, innerR * 2, innerR * 2);
-            ctx.restore();
+            ctx.arc(cx, cy, R - thickness / 2 - 3, 0, 2 * Math.PI);
+            ctx.fillStyle = bgColor;
+            ctx.fill();
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.font = 'bold 26px Outfit, sans-serif';
