@@ -90,6 +90,15 @@ class Budget(db.Model):
     amount  = db.Column(db.Float, nullable=False)
 
 
+class NotifLog(db.Model):
+    """تتبع الإشعارات المرسلة لتجنب التكرار"""
+    id         = db.Column(db.Integer, primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    notif_type = db.Column(db.String(50), nullable=False)
+    sent_date  = db.Column(db.Date, nullable=False, default=date.today)
+    __table_args__ = (db.UniqueConstraint('user_id', 'notif_type', 'sent_date'),)
+
+
 with app.app_context():
     db.create_all()
 
@@ -661,6 +670,138 @@ def sms_webhook():
     }), 200
 
 
+@app.route('/api/ai_insights', methods=['GET'])
+@login_required
+def ai_insights():
+    import calendar as cal_mod
+    from collections import defaultdict
+
+    user_id = session['user_id']
+    now = date.today()
+
+    # جلب آخر 3 أشهر من المصروفات
+    expenses = Expense.query.filter(
+        Expense.user_id == user_id,
+        Expense.date >= date(now.year - (1 if now.month <= 3 else 0),
+                            (now.month - 3) % 12 or 12,
+                            1)
+    ).all()
+
+    if not expenses:
+        return jsonify({'insights': [], 'tip': 'أضف مصاريف أولاً لتحصل على تحليلات ذكية!'})
+
+    # إحصاءات
+    by_weekday = defaultdict(float)   # 0=Mon..6=Sun
+    by_category = defaultdict(float)
+    by_week = defaultdict(float)
+    daily_totals = defaultdict(float)
+    current_month_exp = [e for e in expenses if e.month == now.month and e.year == now.year]
+    prev_month = (now.month - 2) % 12 + 1
+    prev_year  = now.year if now.month > 1 else now.year - 1
+    prev_month_exp = [e for e in expenses if e.month == prev_month and e.year == prev_year]
+
+    for e in expenses:
+        by_weekday[e.date.weekday()] += e.amount
+        by_category[e.category] += e.amount
+        daily_totals[e.date] += e.amount
+
+    # أيام الأسبوع بالعربية
+    days_ar = ['الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت','الأحد']
+
+    insights = []
+    cat_map = {k: v for k, v, _ in CATEGORIES}
+
+    # ١. أكثر يوم إنفاقاً
+    if by_weekday:
+        busiest_day = max(by_weekday, key=by_weekday.get)
+        avg = by_weekday[busiest_day] / max(1, sum(1 for e in expenses if e.date.weekday() == busiest_day))
+        insights.append({
+            'icon': '📅',
+            'title': f'يوم {days_ar[busiest_day]} أعلى أيامك إنفاقاً',
+            'detail': f'متوسط {avg:,.0f} لكل {days_ar[busiest_day]}'
+        })
+
+    # ٢. أعلى فئة
+    if by_category:
+        top_cat = max(by_category, key=by_category.get)
+        top_pct = by_category[top_cat] / sum(by_category.values()) * 100
+        insights.append({
+            'icon': '🏆',
+            'title': f'{cat_map.get(top_cat, top_cat)} تستهلك {top_pct:.0f}٪ من إنفاقك',
+            'detail': f'المجموع {by_category[top_cat]:,.0f}'
+        })
+
+    # ٣. مقارنة الشهر الحالي بالسابق
+    curr_total = sum(e.amount for e in current_month_exp)
+    prev_total = sum(e.amount for e in prev_month_exp)
+    if prev_total > 0:
+        diff_pct = (curr_total - prev_total) / prev_total * 100
+        if abs(diff_pct) >= 5:
+            direction = 'زاد' if diff_pct > 0 else 'انخفض'
+            emoji = '📈' if diff_pct > 0 else '📉'
+            insights.append({
+                'icon': emoji,
+                'title': f'إنفاقك هذا الشهر {direction} {abs(diff_pct):.0f}٪',
+                'detail': f'الشهر الماضي: {prev_total:,.0f} | هذا الشهر: {curr_total:,.0f}'
+            })
+
+    # ٤. أعلى يوم إنفاق
+    if daily_totals:
+        peak_day = max(daily_totals, key=daily_totals.get)
+        insights.append({
+            'icon': '🔥',
+            'title': f'أعلى يوم إنفاق كان {peak_day.strftime("%-d/%-m")}',
+            'detail': f'{daily_totals[peak_day]:,.0f} في يوم واحد'
+        })
+
+    # ٥. متوسط يومي هذا الشهر
+    if current_month_exp:
+        days_passed = now.day
+        daily_avg = curr_total / days_passed
+        projected = daily_avg * cal_mod.monthrange(now.year, now.month)[1]
+        insights.append({
+            'icon': '🔮',
+            'title': f'توقع نهاية الشهر: {projected:,.0f}',
+            'detail': f'بناءً على متوسطك اليومي {daily_avg:,.0f}'
+        })
+
+    # توليد نصيحة AI
+    api_key = os.environ.get('GEMINI_API_KEY')
+    tip = None
+    if api_key and by_category:
+        try:
+            import requests as _req, json as _json
+            top_cats = sorted(by_category.items(), key=lambda x: -x[1])[:3]
+            cats_text = '، '.join(f'{cat_map.get(c,c)} ({v:,.0f})' for c, v in top_cats)
+            prompt = (
+                f"المستخدم أنفق هذا الشهر على: {cats_text}. "
+                f"المجموع {curr_total:,.0f}. "
+                f"اكتب نصيحة ذكية واحدة مختصرة بالعربية (جملة واحدة فقط، بدون تحية)."
+            )
+            r = _req.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}",
+                json={'contents': [{'parts': [{'text': prompt}]}]},
+                timeout=8
+            )
+            if r.ok:
+                tip = r.json()['candidates'][0]['content']['parts'][0]['text'].strip()
+        except Exception:
+            pass
+
+    return jsonify({'insights': insights, 'tip': tip})
+
+
+@app.route('/api/verify_pin', methods=['POST'])
+@login_required
+def verify_pin():
+    data = request.get_json() or {}
+    pin  = str(data.get('pin', ''))
+    user = User.query.get(session['user_id'])
+    if user and check_password_hash(user.pin_hash, pin):
+        return jsonify({'ok': True})
+    return jsonify({'error': 'رمز خاطئ'}), 401
+
+
 @app.route('/api/change_pin', methods=['POST'])
 @login_required
 def change_pin():
@@ -741,24 +882,114 @@ def send_push(user_id, title, body):
 @app.route('/api/check_budget_notify')
 @login_required
 def check_budget_notify():
-    """يُستدعى من الـ frontend عند فتح التطبيق للتحقق من الميزانية"""
+    return smart_notify()
+
+
+def _already_sent(user_id, notif_type, today):
+    return NotifLog.query.filter_by(
+        user_id=user_id, notif_type=notif_type, sent_date=today).first() is not None
+
+
+def _mark_sent(user_id, notif_type, today):
+    try:
+        db.session.add(NotifLog(user_id=user_id, notif_type=notif_type, sent_date=today))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+
+@app.route('/api/smart_notify')
+@login_required
+def smart_notify():
+    """نظام إشعارات ذكي شامل — يُستدعى عند فتح التطبيق"""
+    import calendar as cal_mod
+    from collections import defaultdict
+
     user_id = session['user_id']
     today   = date.today()
-    budget  = Budget.query.filter_by(user_id=user_id, month=today.month, year=today.year).first()
-    if not budget:
-        return jsonify({'ok': True, 'no_budget': True})
-    total = db.session.query(db.func.sum(Expense.amount))\
-              .filter_by(user_id=user_id, month=today.month, year=today.year).scalar() or 0
-    pct = total / budget.amount * 100
-    if pct >= 100:
-        send_push(user_id, '⚠️ تجاوزت الميزانية!',
-                  f'صرفت {total:.3f} ر.ع من {budget.amount:.3f} ر.ع')
-        return jsonify({'alert': 'exceeded', 'pct': round(pct,1)})
-    elif pct >= 90:
-        send_push(user_id, '🔔 اقتربت من الميزانية',
-                  f'استهلكت {pct:.0f}% من ميزانية الشهر')
-        return jsonify({'alert': 'warning', 'pct': round(pct,1)})
-    return jsonify({'ok': True, 'pct': round(pct,1)})
+    results = []
+
+    # ── ١. تنبيه الميزانية (80 / 90 / 100٪) ──
+    budget = Budget.query.filter_by(user_id=user_id, month=today.month, year=today.year).first()
+    if budget:
+        total = db.session.query(db.func.sum(Expense.amount))\
+                  .filter_by(user_id=user_id, month=today.month, year=today.year).scalar() or 0
+        pct = total / budget.amount * 100
+
+        if pct >= 100 and not _already_sent(user_id, 'budget_100', today):
+            send_push(user_id, '🚨 تجاوزت ميزانيتك!',
+                      f'صرفت {total:.3f} من {budget.amount:.3f} ر.ع هذا الشهر')
+            _mark_sent(user_id, 'budget_100', today)
+            results.append('budget_100')
+        elif pct >= 90 and not _already_sent(user_id, 'budget_90', today):
+            send_push(user_id, '⚠️ 90٪ من ميزانيتك!',
+                      f'بقي لك {budget.amount - total:.3f} ر.ع فقط هذا الشهر')
+            _mark_sent(user_id, 'budget_90', today)
+            results.append('budget_90')
+        elif pct >= 80 and not _already_sent(user_id, 'budget_80', today):
+            send_push(user_id, '🔔 80٪ من ميزانيتك',
+                      f'صرفت {pct:.0f}٪ — بقي {budget.amount - total:.3f} ر.ع')
+            _mark_sent(user_id, 'budget_80', today)
+            results.append('budget_80')
+
+    # ── ٢. تقرير أسبوعي (كل أحد) ──
+    if today.weekday() == 6 and not _already_sent(user_id, 'weekly', today):
+        week_start = today - __import__('datetime').timedelta(days=6)
+        week_total = db.session.query(db.func.sum(Expense.amount))\
+                       .filter(Expense.user_id == user_id,
+                               Expense.date >= week_start,
+                               Expense.date <= today).scalar() or 0
+        from collections import defaultdict
+        by_cat = defaultdict(float)
+        for e in Expense.query.filter(Expense.user_id == user_id,
+                                      Expense.date >= week_start,
+                                      Expense.date <= today).all():
+            by_cat[e.category] += e.amount
+        cat_map = {k: v for k, v, _ in CATEGORIES}
+        top = max(by_cat, key=by_cat.get) if by_cat else None
+        top_name = cat_map.get(top, top) if top else ''
+        send_push(user_id, f'📊 تقرير الأسبوع',
+                  f'صرفت {week_total:.3f} ر.ع هذا الأسبوع'
+                  + (f' · أعلى فئة: {top_name}' if top_name else ''))
+        _mark_sent(user_id, 'weekly', today)
+        results.append('weekly')
+
+    # ── ٣. نصيحة يومية بـ Gemini ──
+    api_key = os.environ.get('GEMINI_API_KEY')
+    if api_key and not _already_sent(user_id, 'daily_tip', today):
+        try:
+            import requests as _req
+            expenses_month = Expense.query.filter_by(
+                user_id=user_id, month=today.month, year=today.year).all()
+            if len(expenses_month) >= 5:
+                from collections import defaultdict
+                by_cat = defaultdict(float)
+                for e in expenses_month:
+                    by_cat[e.category] += e.amount
+                cat_map = {k: v for k, v, _ in CATEGORIES}
+                top_cats = sorted(by_cat.items(), key=lambda x: -x[1])[:2]
+                cats_text = ' و'.join(cat_map.get(c, c) for c, _ in top_cats)
+                total_m = sum(e.amount for e in expenses_month)
+                days_left = cal_mod.monthrange(today.year, today.month)[1] - today.day
+                prompt = (
+                    f"المستخدم أنفق {total_m:.0f} ر.ع هذا الشهر، أعلى فئاته: {cats_text}، "
+                    f"بقي {days_left} يوم في الشهر. "
+                    f"اكتب نصيحة مالية ذكية قصيرة جداً بالعربية (جملة واحدة فقط)."
+                )
+                r = _req.post(
+                    f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}",
+                    json={'contents': [{'parts': [{'text': prompt}]}]},
+                    timeout=8
+                )
+                if r.ok:
+                    tip = r.json()['candidates'][0]['content']['parts'][0]['text'].strip()
+                    send_push(user_id, '💡 نصيحة اليوم', tip)
+                    _mark_sent(user_id, 'daily_tip', today)
+                    results.append('daily_tip')
+        except Exception:
+            pass
+
+    return jsonify({'ok': True, 'sent': results})
 
 
 if __name__ == '__main__':

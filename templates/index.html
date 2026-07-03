@@ -8,48 +8,69 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="مصاريفي">
-<meta name="theme-color" content="#4f6ef7">
+<meta name="theme-color" content="#0b0e1a">
 <link rel="apple-touch-icon" href="/static/icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 .num { font-family: 'Outfit', sans-serif; font-variant-numeric: tabular-nums; }
-:root {
-  --bg: #f5f7fa;
-  --surface: #ffffff;
-  --surface2: #f0f2f5;
-  --surface3: #e8ebf0;
-  --border: rgba(0,0,0,.08);
-  --text: #1a1d23;
-  --muted: #8a93a8;
-  --accent: #4f6ef7;
-  --accent-dim: rgba(79,110,247,.1);
-  --green: #10b981;
-  --green-dim: rgba(16,185,129,.1);
-  --red: #ef4444;
-  --red-dim: rgba(239,68,68,.08);
-  --red-soft: rgba(239,68,68,.15);
-  --blue: #4f6ef7;
-  --blue-dim: rgba(79,110,247,.1);
-  --radius: 20px;
-  --radius-sm: 14px;
-}
-/* DARK MODE */
-body.dark {
-  --bg: #0f1117;
-  --surface: #1a1d2e;
-  --surface2: #222639;
-  --surface3: #2a2f45;
-  --border: rgba(255,255,255,.08);
-  --text: #f1f5f9;
-  --muted: #6b7a9e;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; transition: background .3s, color .3s; }
 
-/* HEADER */
+/* ── NEON CARDS THEME (Default Dark) ── */
+:root {
+  --bg:       #0b0e1a;
+  --surface:  #111827;
+  --surface2: #1a2235;
+  --surface3: #212d42;
+  --border:   rgba(255,255,255,.07);
+  --border2:  rgba(255,255,255,.12);
+  --text:     #e2e8f0;
+  --muted:    #64748b;
+  --accent:   #22d3ee;
+  --accent-dim: rgba(34,211,238,.12);
+  --green:    #34d399;
+  --green-dim: rgba(52,211,153,.12);
+  --red:      #f87171;
+  --red-dim:  rgba(248,113,113,.1);
+  --red-soft: rgba(248,113,113,.2);
+  --blue:     #818cf8;
+  --blue-dim: rgba(129,140,248,.1);
+  --purple:   #a78bfa;
+  --pink:     #f472b6;
+  --amber:    #fbbf24;
+  --radius:   22px;
+  --radius-sm: 16px;
+
+  /* نيون كارد ألوان الفئات */
+  --c0:#22d3ee; --c1:#f472b6; --c2:#fbbf24; --c3:#34d399;
+  --c4:#a78bfa; --c5:#38bdf8; --c6:#fb923c; --c7:#84cc16;
+  --c8:#e879f9; --c9:#818cf8;
+}
+
+/* LIGHT MODE (optional) */
+body.light {
+  --bg: #f0f4ff;
+  --surface: #ffffff;
+  --surface2: #eef2ff;
+  --surface3: #e0e7ff;
+  --border: rgba(0,0,0,.08);
+  --border2: rgba(0,0,0,.14);
+  --text: #0f172a;
+  --muted: #64748b;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Cairo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background .3s, color .3s;
+}
+
+/* ── HEADER ── */
 header {
-  background: var(--surface);
+  background: rgba(17,24,39,.9);
+  backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
   padding: 14px 24px;
   display: flex; align-items: center; justify-content: space-between;
@@ -57,201 +78,321 @@ header {
 }
 .brand { display: flex; align-items: center; gap: 12px; }
 .brand-icon {
-  width: 40px; height: 40px;
-  background: linear-gradient(135deg, #4f6ef7, #7c3aed);
-  border-radius: 12px;
+  width: 42px; height: 42px;
+  background: linear-gradient(135deg, #22d3ee, #818cf8);
+  border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.2rem;
-  box-shadow: 0 4px 16px rgba(79,110,247,.2);
+  box-shadow: 0 0 20px rgba(34,211,238,.35);
 }
-.brand-name { font-size: 1rem; font-weight: 900; }
-.brand-sub  { font-size: .72rem; color: var(--muted); }
+.brand-name { font-size: 1rem; font-weight: 900; color: var(--text); }
+.brand-sub  { font-size: .7rem; color: var(--muted); }
 .hdr-right { display: flex; align-items: center; gap: 10px; }
 .user-chip {
   display: flex; align-items: center; gap: 6px;
-  background: var(--surface2); border: 1px solid var(--border);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
   border-radius: 999px; padding: 5px 14px;
-  font-size: .8rem; font-weight: 700; color: var(--muted);
+  font-size: .8rem; font-weight: 700; color: var(--accent);
 }
-.dot-online { width: 7px; height: 7px; background: #10b981; border-radius: 50%; box-shadow: 0 0 6px #10b981; }
+.dot-online {
+  width: 7px; height: 7px; background: #34d399; border-radius: 50%;
+  box-shadow: 0 0 8px #34d399;
+}
 .btn-out {
-  padding: 6px 14px; background: var(--red-dim); border: 1px solid var(--red-soft);
+  padding: 7px 16px;
+  background: rgba(248,113,113,.1);
+  border: 1px solid rgba(248,113,113,.25);
   color: var(--red); border-radius: 999px; font-size: .78rem; font-weight: 700;
-  text-decoration: none; font-family: inherit; cursor: pointer; transition: background .2s;
+  text-decoration: none; font-family: inherit; cursor: pointer; transition: all .2s;
 }
-.btn-out:hover { background: rgba(244,63,94,.18); }
+.btn-out:hover { background: rgba(248,113,113,.2); }
 
-/* MONTH BAR */
+/* ── MONTH BAR ── */
 .month-bar {
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  padding: 10px 24px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: rgba(17,24,39,.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 24px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
 }
 .month-bar label { font-size: .8rem; color: var(--muted); font-weight: 700; }
 .month-bar select, .search-input {
-  padding: 6px 12px; background: var(--surface2);
-  border: 1px solid var(--border); border-radius: 10px;
+  padding: 7px 13px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 11px;
   color: var(--text); font-size: .82rem; font-family: inherit; outline: none; cursor: pointer;
+  transition: border-color .2s;
 }
 .month-bar select:focus, .search-input:focus { border-color: var(--accent); }
 .search-input { width: 180px; cursor: text; }
 .search-input::placeholder { color: var(--muted); }
 .btn-view {
-  padding: 6px 20px; background: linear-gradient(135deg, #4f6ef7, #6366f1);
-  color: white; border: none; border-radius: 10px;
-  font-size: .82rem; font-weight: 800; cursor: pointer; font-family: inherit;
+  padding: 7px 20px;
+  background: linear-gradient(135deg, #22d3ee, #818cf8);
+  color: #0b0e1a; border: none; border-radius: 11px;
+  font-size: .82rem; font-weight: 900; cursor: pointer; font-family: inherit;
 }
 .btn-export {
-  padding: 6px 14px; background: var(--green-dim); border: 1px solid rgba(16,185,129,.2);
-  color: var(--green); border-radius: 10px; font-size: .8rem; font-weight: 700;
+  padding: 7px 14px;
+  background: rgba(52,211,153,.1);
+  border: 1px solid rgba(52,211,153,.25);
+  color: var(--green); border-radius: 11px; font-size: .8rem; font-weight: 700;
   text-decoration: none; font-family: inherit; white-space: nowrap;
+  transition: background .2s; cursor: pointer;
 }
+.btn-export:hover { background: rgba(52,211,153,.18); }
 
-/* FLASH */
+/* ── FLASH ── */
 .flash-wrap { padding: 12px 24px 0; }
-.flash { padding: 10px 16px; border-radius: 12px; font-weight: 700; font-size: .85rem; margin-bottom: 8px; border: 1px solid; }
-.flash.success { background: rgba(16,185,129,.1); color: #10b981; border-color: rgba(16,185,129,.2); }
-.flash.info    { background: rgba(99,102,241,.1);  color: #818cf8; border-color: rgba(99,102,241,.2); }
-.flash.error   { background: var(--red-dim); color: var(--red); border-color: var(--red-soft); }
+.flash { padding: 10px 16px; border-radius: 13px; font-weight: 700; font-size: .85rem; margin-bottom: 8px; border: 1px solid; }
+.flash.success { background: rgba(52,211,153,.1);  color: #34d399; border-color: rgba(52,211,153,.2); }
+.flash.info    { background: rgba(129,140,248,.1); color: #818cf8; border-color: rgba(129,140,248,.2); }
+.flash.error   { background: var(--red-dim);       color: var(--red); border-color: var(--red-soft); }
 
-/* CONTAINER */
-.wrap { max-width: 1100px; margin: 0 auto; padding: 20px 24px; }
+/* ── LAYOUT ── */
+.wrap { max-width: 1100px; margin: 0 auto; padding: 22px 24px; }
 
-/* STATS ROW */
-.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+/* ── STATS ROW ── */
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 22px; }
 @media(max-width:700px){ .stats-row { grid-template-columns: 1fr 1fr; } }
 @media(max-width:460px){ .stats-row { grid-template-columns: 1fr; } }
 
 .stat-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); padding: 18px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 20px 22px;
   position: relative; overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
 }
-.stat-label { font-size: .72rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
-.stat-value { font-size: 1.6rem; font-weight: 900; line-height: 1; font-family: 'Outfit', sans-serif; font-variant-numeric: tabular-nums; }
-.stat-sub   { font-size: .72rem; color: var(--muted); margin-top: 5px; }
-.stat-icon  { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 2rem; opacity: .1; }
+.stat-card:hover { transform: translateY(-2px); }
+.stat-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.03), transparent);
+  pointer-events: none;
+}
+.stat-label {
+  font-size: .7rem; color: var(--muted); font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;
+}
+.stat-value {
+  font-size: 1.7rem; font-weight: 900; line-height: 1;
+  font-family: 'Outfit', sans-serif; font-variant-numeric: tabular-nums;
+}
+.stat-sub   { font-size: .72rem; color: var(--muted); margin-top: 6px; }
+.stat-icon  {
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  font-size: 2.2rem; opacity: .06;
+}
 
-/* BUDGET BAR */
-.budget-bar-wrap { margin-top: 10px; }
-.budget-bar-track { height: 6px; background: var(--surface3); border-radius: 6px; overflow: hidden; }
-.budget-bar-fill  { height: 100%; border-radius: 6px; transition: width .6s; }
+/* ── BUDGET BAR ── */
+.budget-bar-wrap { margin-top: 12px; }
+.budget-bar-track {
+  height: 5px; background: var(--surface3); border-radius: 5px; overflow: hidden;
+}
+.budget-bar-fill  { height: 100%; border-radius: 5px; transition: width .8s cubic-bezier(.4,0,.2,1); }
 
-/* CATEGORY PILLS */
+/* ── CATEGORY PILLS ── */
 .cat-summary { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
 .cat-pill {
   display: flex; align-items: center; gap: 6px;
-  background: var(--surface2); border: 1px solid var(--border);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
   border-radius: 999px; padding: 5px 14px;
   font-size: .8rem; font-weight: 700; color: var(--muted);
 }
 .cat-pill .pill-amount { color: var(--red); }
 
-/* MAIN GRID */
-.main-grid { display: grid; grid-template-columns: 380px 1fr; gap: 20px; margin-bottom: 20px; }
+/* ── MAIN GRID ── */
+.main-grid { display: grid; grid-template-columns: 390px 1fr; gap: 20px; margin-bottom: 22px; }
 @media(max-width:860px){ .main-grid { grid-template-columns: 1fr; } }
 
-/* PANEL */
-.panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+/* ── PANEL ── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius); overflow: hidden;
+}
 .panel-hdr {
-  padding: 16px 20px; font-size: .9rem; font-weight: 800;
+  padding: 17px 22px; font-size: .9rem; font-weight: 800;
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 8px; color: var(--accent);
 }
 .panel-body { padding: 20px; }
 
-/* FORM */
+/* ── FORM ── */
 .frow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
 @media(max-width:500px){ .frow { grid-template-columns: 1fr; } }
-.fg { display: flex; flex-direction: column; gap: 4px; }
-.fg label { font-size: .75rem; font-weight: 700; color: var(--muted); }
+.fg { display: flex; flex-direction: column; gap: 5px; }
+.fg label { font-size: .74rem; font-weight: 700; color: var(--muted); letter-spacing: .03em; }
 .fg input, .fg select {
-  padding: 10px 12px; background: var(--surface2);
-  border: 1px solid var(--border); border-radius: 10px;
-  color: var(--text); font-size: .85rem; font-family: inherit; outline: none; transition: border-color .2s;
+  padding: 11px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  color: var(--text); font-size: .85rem; font-family: inherit; outline: none;
+  transition: border-color .2s, box-shadow .2s;
 }
-.fg input:focus, .fg select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,.1); }
-.fg input::placeholder { color: #d1d5db; }
+.fg input:focus, .fg select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(34,211,238,.12);
+}
+.fg input::placeholder { color: var(--muted); }
 .btn-add {
-  width: 100%; padding: 12px;
-  background: linear-gradient(135deg, #4f6ef7, #7c3aed);
-  color: white; border: none; border-radius: 12px;
-  font-size: .9rem; font-weight: 900; cursor: pointer; font-family: inherit;
-  margin-top: 6px; transition: opacity .2s, transform .1s; letter-spacing: .02em;
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, #22d3ee, #818cf8);
+  color: #0b0e1a; border: none; border-radius: 14px;
+  font-size: .92rem; font-weight: 900; cursor: pointer; font-family: inherit;
+  margin-top: 8px; transition: opacity .2s, transform .15s;
+  letter-spacing: .02em;
+  box-shadow: 0 4px 20px rgba(34,211,238,.25);
 }
-.btn-add:hover  { opacity: .85; }
+.btn-add:hover  { opacity: .88; }
 .btn-add:active { transform: scale(.98); }
 
-/* TX LIST */
+/* ── TX LIST ── */
 .divider { height: 1px; background: var(--border); margin: 18px 0; }
 .tx-list { display: flex; flex-direction: column; gap: 7px; max-height: 420px; overflow-y: auto; }
-.tx-list::-webkit-scrollbar { width: 4px; }
-.tx-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+.tx-list::-webkit-scrollbar { width: 3px; }
+.tx-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
 .tx {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 13px; border-radius: 12px;
-  background: var(--surface2); border: 1px solid var(--border); transition: border-color .15s;
+  padding: 11px 14px; border-radius: 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  transition: border-color .2s, background .2s;
 }
-.tx:hover { border-color: rgba(244,63,94,.25); }
+.tx:hover {
+  border-color: rgba(34,211,238,.25);
+  background: var(--surface3);
+}
 .tx-l { display: flex; align-items: center; gap: 10px; }
-.tx-ico { width: 36px; height: 36px; background: var(--red-dim); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; flex-shrink: 0; }
+.tx-ico {
+  width: 38px; height: 38px;
+  background: rgba(34,211,238,.08);
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; flex-shrink: 0;
+}
 .tx-name { font-weight: 700; font-size: .85rem; }
 .tx-date { font-size: .7rem; color: var(--muted); margin-top: 2px; }
 .tx-r { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-.tx-amt { font-weight: 900; font-size: .95rem; color: var(--red); font-family: 'Outfit', sans-serif; }
+.tx-amt {
+  font-weight: 900; font-size: .95rem;
+  font-family: 'Outfit', sans-serif;
+  font-variant-numeric: tabular-nums;
+}
 .btn-del {
   background: none; border: none; color: var(--muted); cursor: pointer;
-  padding: 5px 7px; border-radius: 8px; font-size: .85rem; transition: color .15s, background .15s;
+  padding: 5px 7px; border-radius: 9px; font-size: .85rem;
+  transition: color .15s, background .15s;
 }
 .btn-del:hover { color: var(--red); background: var(--red-dim); }
 .btn-edit {
   background: none; border: none; color: var(--muted); cursor: pointer;
-  padding: 5px 7px; border-radius: 8px; font-size: .85rem; transition: color .15s, background .15s;
+  padding: 5px 7px; border-radius: 9px; font-size: .85rem;
+  transition: color .15s, background .15s;
 }
 .btn-edit:hover { color: var(--accent); background: var(--accent-dim); }
 
-.empty { text-align: center; padding: 36px 20px; color: var(--muted); }
-.empty-ico { font-size: 2rem; opacity: .4; margin-bottom: 8px; }
+.empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+.empty-ico { font-size: 2.5rem; opacity: .3; margin-bottom: 10px; }
 .empty-txt { font-size: .83rem; }
 
-/* CHART */
-.chart-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; margin-bottom: 20px; }
+/* ── CHART ── */
+.chart-panel {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius); padding: 22px; margin-bottom: 20px;
+}
 .chart-hdr { font-size: .9rem; font-weight: 800; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
-.ch-dot { width: 8px; height: 8px; background: linear-gradient(135deg, #4f6ef7, #7c3aed); border-radius: 50%; }
+.ch-dot {
+  width: 8px; height: 8px;
+  background: linear-gradient(135deg, #22d3ee, #818cf8);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(34,211,238,.5);
+}
 
-/* MODAL */
+/* ── MODAL ── */
 .modal-ov {
   display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,.75); backdrop-filter: blur(8px);
+  background: rgba(0,0,0,.8);
+  backdrop-filter: blur(10px);
   z-index: 999; align-items: center; justify-content: center;
 }
 .modal-ov.on { display: flex; }
 .modal {
-  background: var(--surface); border: 1px solid var(--border);
+  background: var(--surface);
+  border: 1px solid var(--border2);
   border-radius: var(--radius); padding: 28px 24px;
   max-width: 420px; width: 94%;
-  box-shadow: 0 24px 80px rgba(0,0,0,.6);
+  box-shadow: 0 24px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(34,211,238,.06);
 }
 .modal h3 { font-size: 1rem; font-weight: 900; margin-bottom: 16px; }
 .modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
 .btn-cancel {
-  padding: 9px 22px; border: 1px solid var(--border); border-radius: 10px;
-  background: var(--surface2); color: var(--text); font-family: inherit; font-size: .85rem; font-weight: 700; cursor: pointer;
+  padding: 10px 22px; border: 1px solid var(--border2); border-radius: 11px;
+  background: var(--surface2); color: var(--text);
+  font-family: inherit; font-size: .85rem; font-weight: 700; cursor: pointer;
 }
 .btn-confirm {
-  padding: 9px 22px; background: var(--red); color: white; border: none;
-  border-radius: 10px; font-family: inherit; font-size: .85rem; font-weight: 700; cursor: pointer; text-decoration: none;
+  padding: 10px 22px; background: var(--red); color: white; border: none;
+  border-radius: 11px; font-family: inherit; font-size: .85rem; font-weight: 700;
+  cursor: pointer; text-decoration: none;
 }
 .btn-save {
-  padding: 9px 22px; background: linear-gradient(135deg,#4f6ef7,#6366f1); color: white; border: none;
-  border-radius: 10px; font-family: inherit; font-size: .85rem; font-weight: 700; cursor: pointer;
+  padding: 10px 22px;
+  background: linear-gradient(135deg, #22d3ee, #818cf8);
+  color: #0b0e1a; border: none;
+  border-radius: 11px; font-family: inherit; font-size: .85rem; font-weight: 700; cursor: pointer;
 }
 
-footer { text-align: center; padding: 18px; color: var(--muted); font-size: .73rem; border-top: 1px solid var(--border); }
+/* ── NEON CATEGORY ROW ── */
+.neon-cat-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  margin-bottom: 9px;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color .2s, background .2s;
+}
+.neon-cat-row:hover { background: var(--surface3); }
+.neon-cat-icon {
+  width: 46px; height: 46px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; flex-shrink: 0;
+}
+.neon-cat-amt {
+  font-family: 'Outfit', sans-serif;
+  font-size: .92rem; font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── NEON PILL TAG ── */
+.npill {
+  display: inline-flex; align-items: center; gap: 4px;
+  border-radius: 999px; padding: 3px 10px;
+  font-size: .75rem; font-weight: 700; border: 1px solid;
+}
+
+footer {
+  text-align: center; padding: 20px;
+  color: var(--muted); font-size: .72rem;
+  border-top: 1px solid var(--border);
+}
 
 @media(max-width:600px){
   header { padding: 12px 16px; }
-  .wrap { padding: 14px 16px; }
+  .wrap  { padding: 14px 14px; }
+  .month-bar { padding: 10px 14px; }
 }
 </style>
 </head>
@@ -262,8 +403,8 @@ footer { text-align: center; padding: 18px; color: var(--muted); font-size: .73r
   <div class="brand">
     <div class="brand-icon">💸</div>
     <div>
-      <div class="brand-name">تتبع المصروفات</div>
-      <div class="brand-sub">راقب إنفاقك الشهري</div>
+      <div class="brand-name" style="background:linear-gradient(90deg,#22d3ee,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">مصاريفي</div>
+      <div class="brand-sub">راقب إنفاقك بذكاء</div>
     </div>
   </div>
   <div class="hdr-right">
@@ -274,6 +415,26 @@ footer { text-align: center; padding: 18px; color: var(--muted); font-size: .73r
 </header>
 
 <!-- SETTINGS MODAL -->
+<!-- ── AUTO-LOCK OVERLAY ── -->
+<div id="lockOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);align-items:center;justify-content:center;flex-direction:column;">
+  <div style="background:var(--surface);border-radius:28px;padding:36px 32px;width:92%;max-width:360px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.5);">
+    <div style="font-size:3rem;margin-bottom:16px;">🔒</div>
+    <div style="font-size:1.1rem;font-weight:900;margin-bottom:6px;">الجلسة مقفلة</div>
+    <div style="font-size:.82rem;color:var(--muted);margin-bottom:28px;">أدخل الرمز للمتابعة</div>
+    <div id="lockDots" style="display:flex;justify-content:center;gap:12px;margin-bottom:24px;">
+      <span class="ldot"></span><span class="ldot"></span><span class="ldot"></span><span class="ldot"></span>
+    </div>
+    <div id="lockError" style="font-size:.8rem;color:#ef4444;min-height:18px;margin-bottom:12px;"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+      {% for n in [1,2,3,4,5,6,7,8,9,'',0,'⌫'] %}
+      <button onclick="lockKey('{{n}}')"
+        style="background:var(--surface2);border:1px solid var(--border);border-radius:16px;padding:16px;font-size:1.2rem;font-weight:700;cursor:pointer;color:var(--text);{% if n == '' %}visibility:hidden;{% endif %}">{{n}}</button>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<style>.ldot{width:12px;height:12px;border-radius:50%;background:var(--border);transition:background .2s;} .ldot.filled{background:var(--accent);}</style>
+
 <div id="settingsModal" class="modal-ov" style="display:none;align-items:center;">
   <div class="modal" style="max-width:420px;width:92%;padding:0;overflow:hidden;border-radius:24px;">
 
@@ -378,80 +539,91 @@ footer { text-align: center; padding: 18px; color: var(--muted); font-size: .73r
     </select>
     <input class="search-input" type="text" name="q" placeholder="🔍 بحث..." value="{{ search }}">
     <a href="/export_excel?month={{ current_month }}&year={{ current_year }}" class="btn-export">⬇️ Excel</a>
-    <button type="button" onclick="toggleReport()" class="btn-export" style="background:linear-gradient(135deg,#8b5cf6,#6366f1);color:white;border:none;cursor:pointer;">📊 التقرير</button>
+    <button type="button" onclick="toggleReport()" class="btn-export" style="background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.35);color:#a78bfa;">📊 التقرير</button>
+    <button type="button" onclick="toggleAI()" class="btn-export" style="background:rgba(34,211,238,.15);border:1px solid rgba(34,211,238,.35);color:#22d3ee;">🤖 ذكاء</button>
   </div>
 </form>
 
 <!-- REPORT PANEL -->
 <div id="reportPanel" style="display:none;max-width:1100px;margin:0 auto 16px;padding:0 16px;">
   <div class="panel" style="padding:24px;">
-    <div style="font-size:.9rem;font-weight:800;color:var(--accent);margin-bottom:20px;">📊 ملخص شهر {{ arabic_months[current_month] }} {{ current_year }}</div>
+    <div style="font-size:.9rem;font-weight:800;background:linear-gradient(90deg,#22d3ee,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:20px;">📊 ملخص شهر {{ arabic_months[current_month] }} {{ current_year }}</div>
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:20px;">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:22px;">
 
-      <!-- إجمالي الشهر -->
-      <div style="background:var(--surface2);border-radius:16px;padding:18px;text-align:center;">
-        <div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;">💸 إجمالي الشهر</div>
-        <div style="font-family:'Outfit',sans-serif;font-size:1.6rem;font-weight:900;color:var(--red);">{{ "%.3f"|format(all_total) }}</div>
-        <div style="font-size:.72rem;color:var(--muted);">ر.ع</div>
+      <div style="background:linear-gradient(135deg,rgba(248,113,113,.1),var(--surface2));border:1px solid rgba(248,113,113,.2);border-radius:18px;padding:18px;text-align:center;">
+        <div style="font-size:.72rem;color:rgba(248,113,113,.7);font-weight:700;margin-bottom:6px;">💸 إجمالي الشهر</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1.6rem;font-weight:900;color:#f87171;">{{ "%.3f"|format(all_total) }}</div>
+        <div style="font-size:.7rem;color:var(--muted);">ر.ع</div>
       </div>
 
-      <!-- مقارنة بالشهر السابق -->
-      <div style="background:var(--surface2);border-radius:16px;padding:18px;text-align:center;">
-        <div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;">📈 مقارنة بالشهر السابق</div>
+      <div style="background:linear-gradient(135deg,{% if diff_pct is not none and diff_pct > 0 %}rgba(248,113,113,.1){% else %}rgba(52,211,153,.1){% endif %},var(--surface2));border:1px solid {% if diff_pct is not none and diff_pct > 0 %}rgba(248,113,113,.2){% else %}rgba(52,211,153,.2){% endif %};border-radius:18px;padding:18px;text-align:center;">
+        <div style="font-size:.72rem;color:var(--muted);font-weight:700;margin-bottom:6px;">📈 مقارنة بالشهر السابق</div>
         {% if diff_pct is not none %}
-          <div style="font-family:'Outfit',sans-serif;font-size:1.6rem;font-weight:900;color:{% if diff_pct > 0 %}var(--red){% else %}var(--green){% endif %};">
-            {{ '+' if diff_pct > 0 else '' }}{{ diff_pct }}%
-          </div>
-          <div style="font-size:.72rem;color:var(--muted);">{{ 'زيادة' if diff_pct > 0 else 'توفير' }} عن الشهر السابق</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:1.6rem;font-weight:900;color:{% if diff_pct > 0 %}#f87171{% else %}#34d399{% endif %};">{{ '+' if diff_pct > 0 else '' }}{{ diff_pct }}%</div>
+          <div style="font-size:.7rem;color:var(--muted);">{{ 'زيادة' if diff_pct > 0 else 'توفير' }}</div>
         {% else %}
-          <div style="font-size:1rem;color:var(--muted);padding-top:8px;">لا توجد بيانات</div>
+          <div style="font-size:.9rem;color:var(--muted);padding-top:8px;">لا توجد بيانات</div>
         {% endif %}
       </div>
 
-      <!-- متوسط الإنفاق اليومي -->
-      <div style="background:var(--surface2);border-radius:16px;padding:18px;text-align:center;">
-        <div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;">📆 متوسط اليوم</div>
+      <div style="background:linear-gradient(135deg,rgba(34,211,238,.08),var(--surface2));border:1px solid rgba(34,211,238,.2);border-radius:18px;padding:18px;text-align:center;">
+        <div style="font-size:.72rem;color:rgba(34,211,238,.7);font-weight:700;margin-bottom:6px;">📆 متوسط اليوم</div>
         {% set days_passed = expenses|map(attribute='date')|list|unique|list|length %}
         {% set daily_avg = (all_total / days_passed) if days_passed > 0 else 0 %}
-        <div style="font-family:'Outfit',sans-serif;font-size:1.6rem;font-weight:900;color:var(--accent);">{{ "%.3f"|format(daily_avg) }}</div>
-        <div style="font-size:.72rem;color:var(--muted);">ر.ع / يوم ({{ days_passed }} يوم)</div>
+        <div style="font-family:'Outfit',sans-serif;font-size:1.6rem;font-weight:900;color:#22d3ee;">{{ "%.3f"|format(daily_avg) }}</div>
+        <div style="font-size:.7rem;color:var(--muted);">ر.ع / يوم ({{ days_passed }} يوم)</div>
       </div>
 
-      <!-- أعلى فئة -->
       {% if by_cat %}
         {% set top_cat_key = by_cat|dictsort(by='value',reverse=True)|first %}
         {% set top_cat = get_cat(top_cat_key[0]) %}
-        <div style="background:var(--surface2);border-radius:16px;padding:18px;text-align:center;">
-          <div style="font-size:.78rem;color:var(--muted);margin-bottom:6px;">🏆 أعلى فئة إنفاقاً</div>
+        <div style="background:linear-gradient(135deg,rgba(251,191,36,.08),var(--surface2));border:1px solid rgba(251,191,36,.2);border-radius:18px;padding:18px;text-align:center;">
+          <div style="font-size:.72rem;color:rgba(251,191,36,.7);font-weight:700;margin-bottom:6px;">🏆 أعلى فئة</div>
           <div style="font-size:2rem;">{{ top_cat[2] }}</div>
-          <div style="font-size:.9rem;font-weight:800;color:var(--text);margin-top:4px;">{{ top_cat[1] }}</div>
-          <div style="font-family:'Outfit',sans-serif;font-size:.85rem;color:var(--red);font-weight:700;">{{ "%.3f"|format(top_cat_key[1]) }} ر.ع</div>
+          <div style="font-size:.85rem;font-weight:800;color:var(--text);margin-top:4px;">{{ top_cat[1] }}</div>
+          <div style="font-family:'Outfit',sans-serif;font-size:.8rem;color:#fbbf24;font-weight:700;">{{ "%.3f"|format(top_cat_key[1]) }} ر.ع</div>
         </div>
       {% endif %}
-
     </div>
 
-    <!-- شريط الفئات -->
     {% if all_total > 0 %}
-    <div style="font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:10px;">توزيع الإنفاق حسب الفئة</div>
-    {% set colors = ['#4f6ef7','#f43f5e','#f59e0b','#10b981','#8b5cf6','#06b6d4','#ec4899','#84cc16','#f97316','#6366f1'] %}
+    <div style="font-size:.76rem;font-weight:700;color:var(--muted);margin-bottom:12px;letter-spacing:.04em;">توزيع الإنفاق حسب الفئة</div>
+    {% set neon = ['#22d3ee','#f472b6','#fbbf24','#34d399','#a78bfa','#38bdf8','#fb923c','#84cc16','#e879f9','#818cf8'] %}
     {% for cat_key, cat_amt in by_cat|dictsort(by='value',reverse=True) %}
       {% set cat = get_cat(cat_key) %}
       {% set pct = (cat_amt / all_total * 100)|round(1) %}
-      {% set clr = colors[loop.index0 % 10] %}
-      <div style="margin-bottom:10px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-          <span style="font-size:.8rem;font-weight:700;color:var(--text);">{{ cat[2] }} {{ cat[1] }}</span>
-          <span style="font-family:'Outfit',sans-serif;font-size:.8rem;font-weight:700;color:{{ clr }};">{{ "%.3f"|format(cat_amt) }} ر.ع &nbsp;·&nbsp; {{ pct }}%</span>
+      {% set clr = neon[loop.index0 % 10] %}
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+          <span style="font-size:.82rem;font-weight:700;color:var(--text);">{{ cat[2] }} {{ cat[1] }}</span>
+          <span style="font-family:'Outfit',sans-serif;font-size:.8rem;font-weight:700;color:{{ clr }};">{{ "%.3f"|format(cat_amt) }} ر.ع · {{ pct }}%</span>
         </div>
-        <div style="height:8px;background:var(--surface3);border-radius:8px;overflow:hidden;">
-          <div style="height:100%;width:{{ pct }}%;background:{{ clr }};border-radius:8px;transition:width .6s;"></div>
+        <div style="height:6px;background:rgba(255,255,255,.06);border-radius:6px;overflow:hidden;">
+          <div style="height:100%;width:{{ pct }}%;background:{{ clr }};border-radius:6px;box-shadow:0 0 8px {{ clr }}60;transition:width .8s cubic-bezier(.4,0,.2,1);"></div>
         </div>
       </div>
     {% endfor %}
     {% endif %}
+  </div>
+</div>
 
+<!-- AI INSIGHTS PANEL -->
+<div id="aiPanel" style="display:none;max-width:1100px;margin:0 auto 16px;padding:0 16px;">
+  <div class="panel" style="padding:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="font-size:.9rem;font-weight:800;color:#06b6d4;">🤖 تحليلات ذكية</div>
+      <div id="aiLoader" style="font-size:.78rem;color:var(--muted);">جاري التحليل...</div>
+    </div>
+
+    <!-- نصيحة AI -->
+    <div id="aiTip" style="display:none;background:linear-gradient(135deg,rgba(6,182,212,.12),rgba(59,130,246,.08));border:1px solid rgba(6,182,212,.3);border-radius:16px;padding:16px 18px;margin-bottom:20px;">
+      <div style="font-size:.78rem;color:#06b6d4;font-weight:700;margin-bottom:6px;">💡 نصيحة مخصصة لك</div>
+      <div id="aiTipText" style="font-size:.9rem;line-height:1.7;color:var(--text);"></div>
+    </div>
+
+    <!-- بطاقات الإحصاءات -->
+    <div id="aiCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;"></div>
   </div>
 </div>
 
@@ -471,43 +643,46 @@ footer { text-align: center; padding: 18px; color: var(--muted); font-size: .73r
   <!-- STATS ROW -->
   <div class="stats-row">
     <!-- Total -->
-    <div class="stat-card" style="border-color:rgba(244,63,94,.2);background:linear-gradient(135deg,#1e1224,#121830);">
-      <div class="stat-label">إجمالي الشهر</div>
-      <div class="stat-value" style="color:var(--red);">{{ "%.3f"|format(all_total) }} <small style="font-size:.9rem;opacity:.6;">ر.ع</small></div>
+    <div class="stat-card" style="border-color:rgba(248,113,113,.25);background:linear-gradient(135deg,rgba(248,113,113,.08),rgba(17,24,39,1));">
+      <div class="stat-label" style="color:rgba(248,113,113,.7);">إجمالي الشهر</div>
+      <div class="stat-value" style="color:#f87171;">
+        {{ "%.3f"|format(all_total) }}
+        <small style="font-size:.75rem;font-weight:600;opacity:.55;">ر.ع</small>
+      </div>
       <div class="stat-sub">{{ arabic_months[current_month] }} {{ current_year }}</div>
-      <div class="stat-icon">💸</div>
+      <div class="stat-icon" style="opacity:.07;">💸</div>
     </div>
 
     <!-- Budget -->
-    <div class="stat-card" style="border-color:rgba(245,158,11,.2);">
-      <div class="stat-label">الميزانية</div>
+    <div class="stat-card" style="border-color:rgba(251,191,36,.25);background:linear-gradient(135deg,rgba(251,191,36,.06),rgba(17,24,39,1));">
+      <div class="stat-label" style="color:rgba(251,191,36,.7);">الميزانية</div>
       {% if budget_amount %}
-        <div class="stat-value" style="color:var(--accent);">{{ "%.3f"|format(budget_amount) }} <small style="font-size:.9rem;opacity:.6;">ر.ع</small></div>
+        <div class="stat-value" style="color:#fbbf24;">{{ "%.3f"|format(budget_amount) }} <small style="font-size:.75rem;font-weight:600;opacity:.55;">ر.ع</small></div>
         <div class="budget-bar-wrap">
-          <div class="budget-bar-track">
-            <div class="budget-bar-fill" style="width:{{ [budget_pct,100]|min }}%;background:{% if budget_pct >= 90 %}var(--red){% elif budget_pct >= 70 %}#f59e0b{% else %}var(--green){% endif %};"></div>
+          <div class="budget-bar-track" style="background:rgba(255,255,255,.06);">
+            <div class="budget-bar-fill" style="width:{{ [budget_pct,100]|min }}%;background:{% if budget_pct >= 90 %}#f87171{% elif budget_pct >= 70 %}#fbbf24{% else %}#34d399{% endif %};box-shadow:0 0 8px {% if budget_pct >= 90 %}rgba(248,113,113,.5){% elif budget_pct >= 70 %}rgba(251,191,36,.5){% else %}rgba(52,211,153,.5){% endif %};"></div>
           </div>
-          <div class="stat-sub" style="margin-top:4px;">{{ budget_pct }}% مستهلك{% if budget_pct >= 90 %} ⚠️{% endif %}</div>
+          <div class="stat-sub" style="margin-top:5px;">{{ budget_pct }}% مستهلك{% if budget_pct >= 90 %} ⚠️{% endif %}</div>
         </div>
       {% else %}
         <div class="stat-value" style="color:var(--muted);font-size:1rem;">غير محدد</div>
-        <div class="stat-sub"><button onclick="openBudget()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-family:inherit;font-size:.78rem;font-weight:700;">+ تحديد ميزانية</button></div>
+        <div class="stat-sub"><button onclick="openSettings()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-family:inherit;font-size:.78rem;font-weight:700;">+ تحديد ميزانية</button></div>
       {% endif %}
-      <div class="stat-icon">🎯</div>
+      <div class="stat-icon" style="opacity:.07;">🎯</div>
     </div>
 
     <!-- Comparison -->
-    <div class="stat-card" style="border-color:rgba(99,102,241,.2);">
-      <div class="stat-label">مقارنة بالشهر السابق</div>
+    <div class="stat-card" style="border-color:rgba(129,140,248,.25);background:linear-gradient(135deg,rgba(129,140,248,.07),rgba(17,24,39,1));">
+      <div class="stat-label" style="color:rgba(129,140,248,.7);">مقارنة بالشهر السابق</div>
       {% if diff_pct is not none %}
-        <div class="stat-value" style="color:{% if diff_pct > 0 %}var(--red){% else %}var(--green){% endif %};">
+        <div class="stat-value" style="color:{% if diff_pct > 0 %}#f87171{% else %}#34d399{% endif %};">
           {{ '+' if diff_pct > 0 else '' }}{{ diff_pct }}%
         </div>
         <div class="stat-sub">الشهر السابق: {{ "%.3f"|format(prev_total) }} ر.ع</div>
       {% else %}
         <div class="stat-value" style="color:var(--muted);font-size:1rem;">لا توجد بيانات</div>
       {% endif %}
-      <div class="stat-icon">📊</div>
+      <div class="stat-icon" style="opacity:.07;">📊</div>
     </div>
   </div>
 
@@ -517,15 +692,15 @@ footer { text-align: center; padding: 18px; color: var(--muted); font-size: .73r
 
     <!-- ADD + LIST -->
     <div class="panel">
-      <div class="panel-hdr" style="justify-content:space-between;">
-        <span>● إضافة مصروف</span>
+      <div class="panel-hdr" style="justify-content:space-between;background:linear-gradient(135deg,rgba(34,211,238,.06),transparent);">
+        <span style="background:linear-gradient(90deg,#22d3ee,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:900;">✦ إضافة مصروف</span>
         <div style="display:flex;gap:8px;">
           <button type="button" onclick="document.getElementById('receiptCamera').click()"
-            style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:linear-gradient(135deg,#38bdf8,#0ea5e9);border:none;border-radius:10px;color:white;font-family:inherit;font-size:.8rem;font-weight:800;cursor:pointer;">
+            style="display:flex;align-items:center;gap:5px;padding:6px 13px;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);border-radius:11px;color:#22d3ee;font-family:inherit;font-size:.8rem;font-weight:800;cursor:pointer;">
             📷 كاميرا
           </button>
           <button type="button" onclick="document.getElementById('receiptGallery').click()"
-            style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:linear-gradient(135deg,#818cf8,#a78bfa);border:none;border-radius:10px;color:white;font-family:inherit;font-size:.8rem;font-weight:800;cursor:pointer;">
+            style="display:flex;align-items:center;gap:5px;padding:6px 13px;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);border-radius:11px;color:#a78bfa;font-family:inherit;font-size:.8rem;font-weight:800;cursor:pointer;">
             🖼️ معرض
           </button>
         </div>
@@ -582,7 +757,7 @@ footer { text-align: center; padding: 18px; color: var(--muted); font-size: .73r
 
       {% if expenses %}
       <div class="panel" style="padding:20px;">
-        <div style="font-size:.85rem;font-weight:800;color:var(--accent);margin-bottom:16px;">📊 توزيع المصروفات</div>
+        <div style="font-size:.85rem;font-weight:900;background:linear-gradient(90deg,#22d3ee,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px;">📊 توزيع المصروفات</div>
 
         <!-- Donut Chart -->
         {% if all_total > 0 %}
@@ -609,7 +784,7 @@ footer { text-align: center; padding: 18px; color: var(--muted); font-size: .73r
       </div>
 
       <div class="panel" style="padding:20px;">
-        <div style="font-size:.85rem;font-weight:800;color:var(--accent);margin-bottom:16px;">📋 المصروفات حسب الفئة</div>
+        <div style="font-size:.85rem;font-weight:900;background:linear-gradient(90deg,#f472b6,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:16px;">📋 المصروفات حسب الفئة</div>
 
         <!-- فئات قابلة للطي مع المصروفات -->
         {% set ns = namespace(grouped={}) %}
@@ -620,38 +795,41 @@ footer { text-align: center; padding: 18px; color: var(--muted); font-size: .73r
           {% set _ = ns.grouped[e.category].append(e) %}
         {% endfor %}
 
-        {% set colors = ['#4f6ef7','#f43f5e','#f59e0b','#10b981','#8b5cf6','#06b6d4','#ec4899','#84cc16','#f97316','#6366f1'] %}
+        {% set neon = ['#22d3ee','#f472b6','#fbbf24','#34d399','#a78bfa','#38bdf8','#fb923c','#84cc16','#e879f9','#818cf8'] %}
         {% for cat_key, cat_expenses in ns.grouped.items()|sort(attribute='1.0.id', reverse=True) %}
           {% set cat = get_cat(cat_key) %}
           {% set cat_total = cat_expenses|sum(attribute='amount') %}
           {% set pct = (cat_total / all_total * 100)|round(1) if all_total > 0 else 0 %}
           {% set uid = loop.index %}
-          {% set clr = colors[(loop.index0) % 10] %}
+          {% set clr = neon[(loop.index0) % 10] %}
 
-          <div onclick="toggleCat('cat-{{ uid }}')"
-            style="display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--surface2);border-radius:16px;margin-bottom:8px;cursor:pointer;user-select:none;">
-            <div style="width:44px;height:44px;border-radius:13px;background:{{ clr }}22;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">{{ cat[2] }}</div>
-            <div style="flex:1;">
-              <div style="font-size:.85rem;font-weight:800;color:var(--text);">{{ cat[1] }}</div>
-              <div style="font-size:.72rem;color:var(--muted);margin-top:2px;">{{ pct }}% · {{ cat_expenses|length }} مصروف</div>
+          <div onclick="toggleCat('cat-{{ uid }}')" class="neon-cat-row" style="border-color:{{ clr }}22;">
+            <div class="neon-cat-icon" style="background:{{ clr }}18;border:1px solid {{ clr }}33;">{{ cat[2] }}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:.86rem;font-weight:800;color:var(--text);">{{ cat[1] }}</div>
+              <div style="display:flex;align-items:center;gap:6px;margin-top:3px;">
+                <span class="npill" style="background:{{ clr }}14;color:{{ clr }};border-color:{{ clr }}30;font-size:.68rem;">{{ pct }}%</span>
+                <span style="font-size:.7rem;color:var(--muted);">{{ cat_expenses|length }} مصروف</span>
+              </div>
             </div>
             <div style="text-align:left;flex-shrink:0;">
-              <div style="font-size:.88rem;font-weight:800;color:var(--red);font-family:'Outfit',sans-serif;">{{ "%.3f"|format(cat_total) }}</div>
-              <div style="font-size:.7rem;color:var(--muted);">ر.ع</div>
+              <div class="neon-cat-amt" style="color:{{ clr }};">{{ "%.3f"|format(cat_total) }}</div>
+              <div style="font-size:.68rem;color:var(--muted);text-align:left;">ر.ع</div>
             </div>
-            <div id="arr-{{ uid }}" style="color:var(--muted);font-size:.75rem;margin-right:2px;">▼</div>
+            <div id="arr-{{ uid }}" style="color:var(--muted);font-size:.7rem;transition:transform .25s;">▼</div>
           </div>
 
-          <div id="cat-{{ uid }}" style="display:none;margin-bottom:10px;padding-right:10px;border-right:3px solid {{ clr }}44;">
+          <div id="cat-{{ uid }}" style="display:none;margin-bottom:12px;padding-right:12px;border-right:2px solid {{ clr }}40;">
             {% for e in cat_expenses|sort(attribute='id', reverse=True) %}
-              <div class="tx" style="margin-bottom:6px;">
+              <div class="tx" style="margin-bottom:6px;border-color:{{ clr }}1a;">
                 <div class="tx-l">
+                  <div class="tx-ico" style="background:{{ clr }}14;">{{ cat[2] }}</div>
                   <div>
-                    <div class="tx-date">{{ e.date.strftime('%Y/%m/%d') }}{% if e.description %} · {{ e.description }}{% endif %}</div>
+                    <div class="tx-date" style="font-size:.72rem;">{{ e.date.strftime('%Y/%m/%d') }}{% if e.description %} · {{ e.description }}{% endif %}</div>
                   </div>
                 </div>
                 <div class="tx-r">
-                  <span class="tx-amt" style="color:#f59e0b;">{{ "%.3f"|format(e.amount) }}</span>
+                  <span class="tx-amt" style="color:{{ clr }};">{{ "%.3f"|format(e.amount) }}</span>
                   <button class="btn-edit" onclick="event.stopPropagation();openEdit({{ e.id }}, {{ e.amount }}, '{{ e.category }}', '{{ e.description or '' }}', '{{ e.date }}')">✏️</button>
                   <button class="btn-del" onclick="event.stopPropagation();confirmDel('/delete_expense/{{ e.id }}', '{{ "%.3f"|format(e.amount) }} ر.ع')">🗑</button>
                 </div>
@@ -666,7 +844,7 @@ footer { text-align: center; padding: 18px; color: var(--muted); font-size: .73r
           if (!canvas) return;
           const data   = [{% for key, exps in ns.grouped.items()|sort(attribute='1.0.amount',reverse=True) %}{{ exps|sum(attribute='amount') }}{% if not loop.last %},{% endif %}{% endfor %}];
           const labels = [{% for key, exps in ns.grouped.items()|sort(attribute='1.0.amount',reverse=True) %}"{{ get_cat(key)[1] }}"{% if not loop.last %},{% endif %}{% endfor %}];
-          const colors = ['#4f6ef7','#f43f5e','#f59e0b','#10b981','#8b5cf6','#06b6d4','#ec4899','#84cc16','#f97316','#6366f1'];
+          const colors = ['#22d3ee','#f472b6','#fbbf24','#34d399','#a78bfa','#38bdf8','#fb923c','#84cc16','#e879f9','#818cf8'];
           const total  = data.reduce((a,b)=>a+b,0);
           if (!total) return;
 
@@ -786,13 +964,13 @@ footer { text-align: center; padding: 18px; color: var(--muted); font-size: .73r
 
 <!-- DELETE MODAL -->
 <div class="modal-ov" id="delModal">
-  <div class="modal">
-    <div style="font-size:2rem;margin-bottom:8px;">🗑️</div>
-    <h3>تأكيد الحذف</h3>
-    <p id="delTxt" style="color:var(--muted);font-size:.85rem;margin-bottom:20px;"></p>
-    <div class="modal-btns">
-      <button class="btn-cancel" onclick="closeDel()">إلغاء</button>
-      <a id="delBtn" class="btn-confirm">حذف</a>
+  <div class="modal" style="text-align:center;padding:32px 28px;">
+    <div style="width:60px;height:60px;background:rgba(239,68,68,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin:0 auto 16px;">🗑️</div>
+    <div style="font-size:1rem;font-weight:900;margin-bottom:8px;">حذف المصروف؟</div>
+    <p id="delTxt" style="color:var(--muted);font-size:.85rem;margin-bottom:24px;line-height:1.6;"></p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <button onclick="closeDel()" style="padding:12px;border-radius:14px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:.9rem;font-weight:700;cursor:pointer;">إلغاء</button>
+      <a id="delBtn" style="padding:12px;border-radius:14px;background:#ef4444;color:white;font-size:.9rem;font-weight:700;text-decoration:none;display:flex;align-items:center;justify-content:center;cursor:pointer;">حذف نهائياً</a>
     </div>
   </div>
 </div>
@@ -834,7 +1012,11 @@ footer { text-align: center; padding: 18px; color: var(--muted); font-size: .73r
   </div>
 </div>
 
-<footer>تتبع المصروفات — {{ current_year }}</footer>
+<footer style="background:var(--surface);border-top:1px solid var(--border);">
+  <span style="background:linear-gradient(90deg,#22d3ee,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:700;">مصاريفي</span>
+  <span style="margin:0 8px;opacity:.3;">·</span>
+  <span>{{ current_year }}</span>
+</footer>
 
 <script>
 let myChart = null;
@@ -851,7 +1033,7 @@ async function loadChart(mode) {
   if (myChart) myChart.destroy();
   const isDaily = currentMode === 'daily';
   const today = new Date().getDate();
-  const barColors = ['#10b981','#f43f5e','#a78bfa','#38bdf8','#f59e0b','#ec4899','#84cc16','#06b6d4','#f97316','#6366f1','#14b8a6','#e879f9'];
+  const barColors = ['#22d3ee','#f472b6','#fbbf24','#34d399','#a78bfa','#38bdf8','#fb923c','#84cc16','#e879f9','#818cf8','#22d3ee','#f472b6'];
   const activeIdx = isDaily ? (today - 1) : (CURRENT_MONTH - 1);
   myChart = new Chart(ctx, {
     type: 'bar',
@@ -960,8 +1142,9 @@ async function testSMS() {
 // DELETE
 function confirmDel(url, amount) {
   document.getElementById('delBtn').href = url;
-  document.getElementById('delTxt').textContent = `حذف مصروف بقيمة ${amount}؟`;
+  document.getElementById('delTxt').textContent = `سيتم حذف مصروف بقيمة ${amount} بشكل نهائي ولا يمكن التراجع عنه.`;
   document.getElementById('delModal').classList.add('on');
+  if (navigator.vibrate) navigator.vibrate(40);
 }
 function closeDel() { document.getElementById('delModal').classList.remove('on'); }
 document.getElementById('delModal').addEventListener('click', e => { if (e.target === document.getElementById('delModal')) closeDel(); });
@@ -991,7 +1174,7 @@ if ('serviceWorker' in navigator) {
     // تحقق من الميزانية إذا كان مشتركاً مسبقاً
     if ('PushManager' in window) {
       const existing = await reg.pushManager.getSubscription();
-      if (existing) fetch('/api/check_budget_notify');
+      if (existing) fetch('/api/smart_notify');
     }
   });
 }
@@ -1068,13 +1251,59 @@ function toggleReport() {
   p.style.display = p.style.display === 'none' ? 'block' : 'none';
 }
 
+// ── AI INSIGHTS ──
+let aiLoaded = false;
+async function toggleAI() {
+  const p = document.getElementById('aiPanel');
+  const isHidden = p.style.display === 'none';
+  p.style.display = isHidden ? 'block' : 'none';
+  if (isHidden && !aiLoaded) await loadAIInsights();
+}
+
+async function loadAIInsights() {
+  const loader = document.getElementById('aiLoader');
+  const cards  = document.getElementById('aiCards');
+  loader.textContent = 'جاري التحليل...';
+  cards.innerHTML = '';
+  try {
+    const res  = await fetch('/api/ai_insights');
+    const data = await res.json();
+    loader.textContent = '';
+    aiLoaded = true;
+
+    // نصيحة AI
+    if (data.tip) {
+      document.getElementById('aiTipText').textContent = data.tip;
+      document.getElementById('aiTip').style.display = 'block';
+    }
+
+    // بطاقات الإحصاءات
+    const colors = ['#4f6ef7','#f43f5e','#f59e0b','#10b981','#8b5cf6','#06b6d4'];
+    (data.insights || []).forEach((ins, i) => {
+      const clr = colors[i % colors.length];
+      cards.insertAdjacentHTML('beforeend', `
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:18px;padding:18px;border-top:3px solid ${clr};">
+          <div style="font-size:1.6rem;margin-bottom:8px;">${ins.icon}</div>
+          <div style="font-size:.85rem;font-weight:800;color:var(--text);margin-bottom:6px;line-height:1.4;">${ins.title}</div>
+          <div style="font-size:.75rem;color:var(--muted);line-height:1.5;">${ins.detail}</div>
+        </div>`);
+    });
+
+    if (!data.insights?.length) {
+      cards.innerHTML = '<div style="color:var(--muted);font-size:.85rem;text-align:center;padding:20px;">أضف المزيد من المصاريف للحصول على تحليلات دقيقة</div>';
+    }
+  } catch(e) {
+    loader.textContent = 'تعذر التحليل';
+  }
+}
+
 // ── SETTINGS ──
 function openSettings() {
   document.getElementById('settingsModal').style.display = 'flex';
-  // تحديث حالة الوضع الليلي
-  const dark = document.body.classList.contains('dark');
-  document.getElementById('darkToggle').checked = dark;
-  updateToggleUI('dark', dark);
+  // الوضع الفاتح = light class موجودة
+  const isLight = document.body.classList.contains('light');
+  document.getElementById('darkToggle').checked = !isLight;
+  updateToggleUI('dark', !isLight);
   // تحديث حالة الإشعارات
   checkNotifStatus();
   // تحديث العملة
@@ -1098,16 +1327,25 @@ function updateToggleUI(type, on) {
   thumb.style.left  = on ? '3px'  : 'auto';
 }
 
-// Dark Mode
+// Dark/Light Mode — الداكن هو الافتراضي
 function toggleDark(on) {
-  document.body.classList.toggle('dark', on);
+  // on=true → داكن (إزالة light)، on=false → فاتح (إضافة light)
+  document.body.classList.toggle('light', !on);
   localStorage.setItem('darkMode', on ? '1' : '0');
   updateToggleUI('dark', on);
 }
 (function(){
-  if (localStorage.getItem('darkMode') === '1') {
-    document.body.classList.add('dark');
+  const saved = localStorage.getItem('darkMode');
+  if (saved === '0') {
+    document.body.classList.add('light');
+  } else if (saved === null && !window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.body.classList.add('light');
   }
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+    if (localStorage.getItem('darkMode') === null) {
+      document.body.classList.toggle('light', !e.matches);
+    }
+  });
 })();
 
 // Notifications
@@ -1199,6 +1437,74 @@ async function changePin(e) {
 // تاريخ اليوم تلقائياً
 const dateField = document.getElementById('expenseDate');
 if (dateField) dateField.value = new Date().toISOString().split('T')[0];
+
+// ── AUTO-LOCK (5 minutes) ──
+(function() {
+  const TIMEOUT = 5 * 60 * 1000;
+  let lockTimer = null;
+  let lockInput = '';
+
+  function resetTimer() {
+    clearTimeout(lockTimer);
+    lockTimer = setTimeout(triggerLock, TIMEOUT);
+  }
+
+  function triggerLock() {
+    lockInput = '';
+    updateDots();
+    document.getElementById('lockError').textContent = '';
+    const ov = document.getElementById('lockOverlay');
+    ov.style.display = 'flex';
+  }
+
+  function updateDots() {
+    document.querySelectorAll('.ldot').forEach((d, i) => {
+      d.classList.toggle('filled', i < lockInput.length);
+    });
+  }
+
+  window.lockKey = function(val) {
+    val = String(val);
+    if (val === '⌫') {
+      lockInput = lockInput.slice(0, -1);
+      updateDots();
+      return;
+    }
+    if (lockInput.length >= 4) return;
+    lockInput += val;
+    updateDots();
+    if (lockInput.length === 4) submitLockPin();
+  };
+
+  async function submitLockPin() {
+    const res = await fetch('/api/verify_pin', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({pin: lockInput})
+    });
+    if (res.ok) {
+      document.getElementById('lockOverlay').style.display = 'none';
+      resetTimer();
+    } else {
+      document.getElementById('lockError').textContent = '❌ رمز خاطئ، حاول مجدداً';
+      // اهتزاز عند الخطأ
+      if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+      // تأثير اهتزاز بصري
+      const dots = document.getElementById('lockDots');
+      dots.animate([
+        {transform:'translateX(-8px)'},{transform:'translateX(8px)'},
+        {transform:'translateX(-6px)'},{transform:'translateX(6px)'},
+        {transform:'translateX(0)'}
+      ], {duration: 350, easing: 'ease-out'});
+      lockInput = '';
+      setTimeout(updateDots, 350);
+    }
+  }
+
+  ['mousemove','click','keypress','touchstart','scroll'].forEach(e =>
+    document.addEventListener(e, resetTimer, {passive: true})
+  );
+  resetTimer();
+})();
 </script>
 </body>
 </html>
