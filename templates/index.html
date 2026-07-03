@@ -954,14 +954,15 @@ footer {
           const sliceAngles = [];
 
           function drawCenter(label, amount, color) {
-            const bg = getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() || '#fff';
+            const isLight = document.body.classList.contains('light');
+            const bg = isLight ? '#ffffff' : (getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() || '#111827');
             ctx.beginPath();
             ctx.arc(cx, cy, R - thickness/2 - 2, 0, 2*Math.PI);
             ctx.fillStyle = bg;
             ctx.fill();
 
-            const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#1a1d23';
-            const mutedColor = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#8a93a8';
+            const textColor  = isLight ? '#0f172a' : (getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#e2e8f0');
+            const mutedColor = isLight ? '#64748b' : (getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#64748b');
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.font = 'bold 26px Outfit, sans-serif';
