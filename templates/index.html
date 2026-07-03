@@ -950,28 +950,8 @@ footer {
           const R = 108, thickness = 16;
           const gap = (8 * Math.PI) / 180;
 
-          // حفظ زوايا كل شريحة للكشف عن النقر
           const sliceAngles = [];
-
-          function drawCenter(label, amount, color) {
-            const isLight = document.body.classList.contains('light');
-            const bgColor    = isLight ? '#ffffff' : '#111827';
-            const textColor  = isLight ? '#1e293b' : '#f1f5f9';
-            const mutedColor = isLight ? '#64748b' : '#94a3b8';
-            // fill center circle to erase previous text
-            ctx.beginPath();
-            ctx.arc(cx, cy, R - thickness / 2 - 3, 0, 2 * Math.PI);
-            ctx.fillStyle = bgColor;
-            ctx.fill();
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.font = 'bold 26px Outfit, sans-serif';
-            ctx.fillStyle = color || textColor;
-            ctx.fillText(amount, cx, cy - 10);
-            ctx.font = '600 12px Cairo, sans-serif';
-            ctx.fillStyle = mutedColor;
-            ctx.fillText(label, cx, cy + 14);
-          }
+          let centerState = { label: 'ر.ع  •  الإجمالي', amount: total.toFixed(3), color: null };
 
           function draw() {
             ctx.clearRect(0, 0, SIZE, SIZE);
@@ -983,7 +963,6 @@ footer {
             data.forEach((val, i) => {
               const slice = (val / total) * 2 * Math.PI;
               sliceAngles.push({ start, end: start + slice, index: i });
-              // رسم حتى الشرائح الصغيرة بحجم أدنى مرئي
               const minSlice = gap * 1.2;
               const drawSlice = Math.max(slice, minSlice);
               const innerGap = slice < gap * 2 ? drawSlice * 0.1 : gap;
@@ -994,20 +973,33 @@ footer {
               start += slice;
             });
 
-            drawCenter('ر.ع  •  الإجمالي', total.toFixed(3), null);
+            // رسم النص في المركز بدون أي دائرة خلفية
+            const isLight = document.body.classList.contains('light');
+            const textColor  = isLight ? '#1e293b' : '#f1f5f9';
+            const mutedColor = isLight ? '#64748b' : '#94a3b8';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = 'bold 26px Outfit, sans-serif';
+            ctx.fillStyle = centerState.color || textColor;
+            ctx.fillText(centerState.amount, cx, cy - 10);
+            ctx.font = '600 12px Cairo, sans-serif';
+            ctx.fillStyle = mutedColor;
+            ctx.fillText(centerState.label, cx, cy + 14);
           }
 
           document.fonts.load('bold 26px Outfit').then(draw);
 
-          // الكشف عن النقر
           canvas.addEventListener('click', function(e) {
             const rect = canvas.getBoundingClientRect();
             const mx = (e.clientX - rect.left) * (SIZE / rect.width);
             const my = (e.clientY - rect.top)  * (SIZE / rect.height);
             const dx = mx - cx, dy = my - cy;
             const dist = Math.sqrt(dx*dx + dy*dy);
-            draw(); // أعد رسم الكانفاس أولاً لتنظيف المركز
-            if (dist < R - thickness/2 - 2 || dist > R + thickness/2 + 4) return;
+            if (dist < R - thickness/2 - 2 || dist > R + thickness/2 + 4) {
+              centerState = { label: 'ر.ع  •  الإجمالي', amount: total.toFixed(3), color: null };
+              draw();
+              return;
+            }
             let angle = Math.atan2(dy, dx);
             if (angle < -Math.PI/2) angle += 2*Math.PI;
             let a = angle + Math.PI/2;
@@ -1018,7 +1010,8 @@ footer {
               if (a >= st && a <= en) {
                 const i = s.index;
                 const pct = (data[i]/total*100).toFixed(1);
-                drawCenter(labels[i] + '  ' + pct + '%', data[i].toFixed(3), colors[i % colors.length]);
+                centerState = { label: labels[i] + '  ' + pct + '%', amount: data[i].toFixed(3), color: colors[i % colors.length] };
+                draw();
                 break;
               }
             }
