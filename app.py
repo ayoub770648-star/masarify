@@ -9,12 +9,26 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'expense-only-secret-2024'
 
 # PostgreSQL on Railway, SQLite locally
+import socket as _socket
+
 db_url = os.environ.get('DATABASE_URL', '')
 if db_url.startswith('postgres://'):
     db_url = db_url.replace('postgres://', 'postgresql://', 1)
+
+# Force IPv4 for Railway internal hostname to avoid IPv6 failures
+_connect_args = {'connect_timeout': 10}
+if 'railway.internal' in db_url:
+    try:
+        _host = db_url.split('@')[1].split(':')[0]
+        _infos = _socket.getaddrinfo(_host, None, _socket.AF_INET)
+        if _infos:
+            _connect_args['hostaddr'] = _infos[0][4][0]
+    except Exception:
+        pass
+
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'sqlite:///expenses.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'connect_args': {'connect_timeout': 10}} if db_url else {}
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'connect_args': _connect_args} if db_url else {}
 
 db = SQLAlchemy(app)
 
