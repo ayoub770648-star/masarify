@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>الدخل – مصاريفي</title>
+<link rel="manifest" href="/static/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="مصاريفي">
+<meta name="theme-color" content="#0b0e1a">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+.num { font-family: 'Outfit', sans-serif; font-variant-numeric: tabular-nums; }
+:root {
+  --bg:       #0b0e1a;
+  --surface:  #111827;
+  --surface2: #1a2235;
+  --surface3: #212d42;
+  --border:   rgba(255,255,255,.07);
+  --border2:  rgba(255,255,255,.12);
+  --text:     #e2e8f0;
+  --muted:    #64748b;
+  --accent:   #22d3ee;
+  --green:    #34d399;
+  --green-dim: rgba(52,211,153,.12);
+  --red:      #f87171;
+  --red-dim:  rgba(248,113,113,.1);
+  --blue:     #818cf8;
+  --amber:    #fbbf24;
+  --radius:   22px;
+  --radius-sm: 16px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Cairo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(11,14,26,.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-icon { font-size: 1.6rem; }
+.brand-name {
+  font-weight: 900; font-size: 1.1rem;
+  background: linear-gradient(90deg,#34d399,#22d3ee);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.brand-sub { font-size: .72rem; color: var(--muted); }
+.btn-back {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); padding: 8px 16px; border-radius: 50px;
+  font-family: 'Cairo', sans-serif; font-size: .85rem; font-weight: 600;
+  cursor: pointer; text-decoration: none;
+}
+.month-bar {
+  background: rgba(17,24,39,.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  position: sticky; top: 60px; z-index: 90;
+}
+.month-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid var(--border2); background: var(--surface2);
+  color: var(--text); font-size: 1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.month-label { font-weight: 700; font-size: .95rem; min-width: 120px; text-align: center; }
+.content { max-width: 680px; margin: 0 auto; padding: 20px 16px; }
+
+/* SUMMARY CARDS */
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.sum-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px 12px;
+  text-align: center;
+}
+.sum-label { font-size: .72rem; color: var(--muted); margin-bottom: 6px; }
+.sum-val { font-size: 1.15rem; font-weight: 800; }
+
+/* ADD FORM */
+.add-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.add-card h3 { font-size: .95rem; font-weight: 700; margin-bottom: 16px; color: var(--green); }
+.form-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.form-group { flex: 1; min-width: 120px; }
+.form-group label { font-size: .75rem; color: var(--muted); display: block; margin-bottom: 6px; }
+.form-group input {
+  width: 100%; background: var(--surface2);
+  border: 1px solid var(--border2); border-radius: 12px;
+  color: var(--text); font-family: 'Cairo', sans-serif;
+  font-size: .9rem; padding: 10px 14px; outline: none;
+}
+.form-group input:focus { border-color: var(--green); }
+.btn-add {
+  width: 100%; margin-top: 14px;
+  background: linear-gradient(135deg, #34d399, #22d3ee);
+  border: none; border-radius: 14px;
+  color: #0b0e1a; font-family: 'Cairo', sans-serif;
+  font-size: .95rem; font-weight: 800; padding: 12px;
+  cursor: pointer;
+}
+
+/* INCOME LIST */
+.section-title { font-size: .85rem; color: var(--muted); font-weight: 700; margin-bottom: 12px; }
+.income-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.income-left { display: flex; align-items: center; gap: 12px; }
+.income-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: var(--green-dim); font-size: 1.2rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.income-source { font-weight: 700; font-size: .9rem; }
+.income-date { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+.income-amount { font-size: 1rem; font-weight: 800; color: var(--green); }
+.btn-del {
+  background: none; border: none; color: var(--muted);
+  font-size: 1rem; cursor: pointer; padding: 6px;
+  border-radius: 8px; transition: color .2s;
+}
+.btn-del:hover { color: var(--red); }
+.empty-state {
+  text-align: center; padding: 60px 20px; color: var(--muted);
+}
+.empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+.flash {
+  padding: 12px 16px; border-radius: 14px; margin-bottom: 16px;
+  font-size: .87rem; font-weight: 600;
+}
+.flash.success { background: var(--green-dim); color: var(--green); border: 1px solid rgba(52,211,153,.2); }
+.flash.error   { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(248,113,113,.2); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">💰</div>
+    <div>
+      <div class="brand-name">الدخل</div>
+      <div class="brand-sub">تتبع مصادر دخلك</div>
+    </div>
+  </div>
+  <a href="/" class="btn-back">← المصاريف</a>
+</header>
+
+<!-- MONTH BAR -->
+<div class="month-bar">
+  <a href="/income?month={{ prev_month }}&year={{ prev_year }}" class="month-btn">‹</a>
+  <div class="month-label">{{ month_name }} {{ year }}</div>
+  <a href="/income?month={{ next_month }}&year={{ next_year }}" class="month-btn">›</a>
+</div>
+
+<div class="content">
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash {{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <!-- SUMMARY -->
+  <div class="summary-grid">
+    <div class="sum-card">
+      <div class="sum-label">الدخل</div>
+      <div class="sum-val num" style="color:var(--green)">{{ "%.3f"|format(total_income) }}</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">المصاريف</div>
+      <div class="sum-val num" style="color:var(--red)">{{ "%.3f"|format(total_expense) }}</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-label">الصافي</div>
+      <div class="sum-val num" style="color:{% if balance >= 0 %}var(--green){% else %}var(--red){% endif %}">
+        {{ "%.3f"|format(balance) }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD INCOME FORM -->
+  <div class="add-card">
+    <h3>+ إضافة دخل</h3>
+    <form method="POST" action="/add_income">
+      <div class="form-row">
+        <div class="form-group">
+          <label>المبلغ (OMR)</label>
+          <input type="number" name="amount" step="0.001" min="0.001" placeholder="0.000" required>
+        </div>
+        <div class="form-group">
+          <label>المصدر</label>
+          <input type="text" name="source" placeholder="راتب، مكافأة..." required>
+        </div>
+        <div class="form-group">
+          <label>التاريخ</label>
+          <input type="date" name="date" value="{{ today }}">
+        </div>
+      </div>
+      <button class="btn-add" type="submit">إضافة ←</button>
+    </form>
+  </div>
+
+  <!-- INCOME LIST -->
+  <div class="section-title">سجلات الدخل – {{ month_name }} {{ year }}</div>
+
+  {% if incomes %}
+    {% for inc in incomes %}
+    <div class="income-item">
+      <div class="income-left">
+        <div class="income-icon">💵</div>
+        <div>
+          <div class="income-source">{{ inc.source }}</div>
+          <div class="income-date">{{ inc.date.strftime('%Y-%m-%d') }}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="income-amount num">{{ "%.3f"|format(inc.amount) }} OMR</div>
+        <a href="/delete_income/{{ inc.id }}" class="btn-del" onclick="return confirm('حذف هذا الدخل؟')">🗑</a>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <div class="icon">📭</div>
+      <div>لا يوجد دخل مسجل هذا الشهر</div>
+    </div>
+  {% endif %}
+
+</div>
+
+<script>
+// Set today's date as default for date input
+document.querySelector('input[name="date"]').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>

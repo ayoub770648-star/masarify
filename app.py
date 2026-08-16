@@ -333,6 +333,67 @@ def set_budget():
     return redirect(url_for('index', month=month, year=year))
 
 
+@app.route('/income')
+@login_required
+def income_page():
+    user_id = session['user_id']
+    today   = date.today()
+    month   = request.args.get('month', today.month, type=int)
+    year    = request.args.get('year',  today.year,  type=int)
+
+    incomes      = Income.query.filter_by(user_id=user_id, month=month, year=year).order_by(Income.date.desc()).all()
+    total_income = sum(i.amount for i in incomes)
+    all_expenses = Expense.query.filter_by(user_id=user_id, month=month, year=year).all()
+    total_expense = sum(e.amount for e in all_expenses)
+    balance      = total_income - total_expense
+
+    prev_month = month - 1 if month > 1 else 12
+    prev_year  = year if month > 1 else year - 1
+    next_month = month + 1 if month < 12 else 1
+    next_year  = year if month < 12 else year + 1
+
+    month_names = ['يناير','فبراير','مارس','أبريل','مايو','يونيو',
+                   'يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']
+
+    return render_template('income.html',
+        incomes=incomes, total_income=total_income,
+        total_expense=total_expense, balance=balance,
+        month=month, year=year,
+        month_name=month_names[month-1],
+        prev_month=prev_month, prev_year=prev_year,
+        next_month=next_month, next_year=next_year,
+    )
+
+
+@app.route('/add_income', methods=['POST'])
+@login_required
+def add_income():
+    user_id = session['user_id']
+    try:
+        amount  = float(request.form['amount'])
+        source  = request.form.get('source', '').strip() or 'دخل'
+        date_str = request.form.get('date', str(date.today()))
+        inc_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except Exception:
+        flash('بيانات غير صحيحة', 'error')
+        return redirect(url_for('income_page'))
+
+    db.session.add(Income(user_id=user_id, amount=amount, source=source,
+                          description=source, date=inc_date))
+    db.session.commit()
+    flash('تم إضافة الدخل', 'success')
+    return redirect(url_for('income_page'))
+
+
+@app.route('/delete_income/<int:income_id>')
+@login_required
+def delete_income(income_id):
+    inc = Income.query.filter_by(id=income_id, user_id=session['user_id']).first_or_404()
+    db.session.delete(inc)
+    db.session.commit()
+    return redirect(url_for('income_page'))
+
+
 @app.route('/export_excel')
 @login_required
 def export_excel():
