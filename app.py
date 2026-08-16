@@ -72,6 +72,23 @@ class Expense(db.Model):
             self.year  = self.date.year
 
 
+class Income(db.Model):
+    id          = db.Column(db.Integer, primary_key=True)
+    user_id     = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    amount      = db.Column(db.Float, nullable=False)
+    source      = db.Column(db.String(200))
+    description = db.Column(db.String(200))
+    date        = db.Column(db.Date, default=date.today)
+    month       = db.Column(db.Integer)
+    year        = db.Column(db.Integer)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if self.date:
+            self.month = self.date.month
+            self.year  = self.date.year
+
+
 class MerchantMemory(db.Model):
     id          = db.Column(db.Integer, primary_key=True)
     user_id     = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -630,17 +647,18 @@ def sms_webhook():
     if not message_body:
         return jsonify({'error': 'no message'}), 400
 
-    # فلتر — فقط رسائل الخصم
-    if 'تم خصم' not in message_body:
-        return jsonify({'ignored': 'not a debit message'}), 200
+    is_debit  = 'تم خصم' in message_body
+    is_credit = any(k in message_body for k in ['تم إيداع', 'تم اضافة', 'تم إضافة', 'تم استلام', 'تم قيد'])
+
+    if not is_debit and not is_credit:
+        return jsonify({'ignored': 'not a recognized bank message'}), 200
 
     # التحقق من المستخدم
     user = User.query.filter_by(name=username).first()
     if not user or not check_password_hash(user.pin_hash, str(pin)):
         return jsonify({'error': 'unauthorized'}), 401
 
-    # استخراج المبلغ من رسالة بنك مسقط
-    # صيغة بنك مسقط: "تم خصم 0.400 OMR" أو "OMR 12.500" أو "RO 5.000"
+    # استخراج المبلغ
     amount = None
     amt_match = _re.search(r'([\d,]+\.\d+)\s*(?:OMR|RO)|(?:OMR|RO)\s*([\d,]+\.\d+)', message_body, _re.IGNORECASE)
     if amt_match:
@@ -653,31 +671,25 @@ def sms_webhook():
     if not amount or amount <= 0:
         return jsonify({'error': 'could not parse amount', 'message': message_body}), 422
 
-    # استخراج اسم المتجر أولاً
-    desc_match = _re.search(r'في\s+(?:[\d\w]+-)?(.+?)\s+بتاريخ', message_body)
-    description = desc_match.group(1).strip() if desc_match else 'بنك مسقط - دفعة تلقائية'
-
-    # تصنيف ذكي بالذكاء الاصطناعي مع ذاكرة المتاجر
-    cat = ai_categorize(description, user_id=user.id)
-
-    expense = Expense(
-        user_id     = user.id,
-        amount      = amount,
-        category    = cat,
-        description = description,
-        date        = date.today()
-    )
-    db.session.add(expense)
-    db.session.commit()
-
-    return jsonify({
-        'success': True,
-        'added': {
-            'amount':      amount,
-            'category':    cat,
-            'description': description
-        }
-    }), 200
+    if is_debit:
+        desc_match  = _re.search(r'في\s+(?:[\d\w]+-)?(.+?)\s+بتاريخ', message_body)
+        description = desc_match.group(1).strip() if desc_match else 'بنك مسقط - دفعة تلقائية'
+        cat = ai_categorize(description, user_id=user.id)
+        db.session.add(Expense(
+            user_id=user.id, amount=amount, category=cat,
+            description=description, date=date.today()
+        ))
+        db.session.commit()
+        return jsonify({'success': True, 'type': 'expense', 'amount': amount, 'category': cat, 'description': description}), 200
+    else:
+        src_match = _re.search(r'من\s+(.+?)\s+(?:بتاريخ|في)', message_body)
+        source = src_match.group(1).strip() if src_match else 'إيداع بنكي'
+        db.session.add(Income(
+            user_id=user.id, amount=amount, source=source,
+            description=message_body[:200], date=date.today()
+        ))
+        db.session.commit()
+        return jsonify({'success': True, 'type': 'income', 'amount': amount, 'source': source}), 200
 
 
 @app.route('/api/ai_insights', methods=['GET'])
