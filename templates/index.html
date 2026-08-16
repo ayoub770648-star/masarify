@@ -15,135 +15,119 @@
 <style>
 .num { font-family: 'Outfit', sans-serif; font-variant-numeric: tabular-nums; }
 
-/* ── NEON CARDS THEME (Default Dark) ── */
+/* ── DARK PREMIUM (الوضع الليلي الافتراضي) ── */
 :root {
-  --bg:       #0b0e1a;
-  --surface:  #111827;
-  --surface2: #1a2235;
-  --surface3: #212d42;
-  --border:   rgba(255,255,255,.07);
-  --border2:  rgba(255,255,255,.12);
-  --text:     #e2e8f0;
-  --muted:    #64748b;
-  --accent:   #22d3ee;
-  --accent-dim: rgba(34,211,238,.12);
-  --green:    #34d399;
-  --green-dim: rgba(52,211,153,.12);
-  --red:      #f87171;
-  --red-dim:  rgba(248,113,113,.1);
-  --red-soft: rgba(248,113,113,.2);
-  --blue:     #818cf8;
-  --blue-dim: rgba(129,140,248,.1);
-  --purple:   #a78bfa;
-  --pink:     #f472b6;
-  --amber:    #fbbf24;
-  --radius:   22px;
+  --bg:        #0a0a0f;
+  --surface:   #111118;
+  --surface2:  #18181f;
+  --surface3:  #1e1e28;
+  --border:    rgba(255,255,255,.06);
+  --border2:   rgba(255,255,255,.1);
+  --text:      #f0f0f5;
+  --muted:     #6b6b80;
+  --accent:    #f59e0b;
+  --accent-dim: rgba(245,158,11,.12);
+  --green:     #34d399;
+  --green-dim: rgba(52,211,153,.1);
+  --red:       #f87171;
+  --red-dim:   rgba(248,113,113,.1);
+  --red-soft:  rgba(248,113,113,.18);
+  --blue:      #60a5fa;
+  --blue-dim:  rgba(96,165,250,.1);
+  --purple:    #a78bfa;
+  --pink:      #f472b6;
+  --amber:     #f59e0b;
+  --radius:    22px;
   --radius-sm: 16px;
-
-  /* نيون كارد ألوان الفئات */
-  --c0:#22d3ee; --c1:#f472b6; --c2:#fbbf24; --c3:#34d399;
-  --c4:#a78bfa; --c5:#38bdf8; --c6:#fb923c; --c7:#84cc16;
-  --c8:#e879f9; --c9:#818cf8;
+  --c0:#f59e0b; --c1:#f472b6; --c2:#34d399; --c3:#60a5fa;
+  --c4:#a78bfa; --c5:#fb923c; --c6:#e879f9; --c7:#84cc16;
+  --c8:#22d3ee; --c9:#818cf8;
 }
 
-/* LIGHT MODE (optional) */
+/* ── LIGHT MINIMAL (الوضع النهاري) ── */
 body.light {
-  --bg:        #eff6ff;
+  --bg:        #f8f8f6;
   --surface:   #ffffff;
-  --surface2:  #dbeafe;
-  --surface3:  #bfdbfe;
-  --border:    rgba(37,99,235,.1);
-  --border2:   rgba(37,99,235,.2);
-  --text:      #0f172a;
-  --muted:     #475569;
-  --accent:    #2563eb;
-  --accent-dim: rgba(37,99,235,.1);
-  --green:     #059669;
-  --green-dim: rgba(5,150,105,.1);
+  --surface2:  #f2f2ef;
+  --surface3:  #e8e8e4;
+  --border:    rgba(0,0,0,.07);
+  --border2:   rgba(0,0,0,.12);
+  --text:      #1a1a1a;
+  --muted:     #888880;
+  --accent:    #1a1a1a;
+  --accent-dim: rgba(0,0,0,.06);
+  --green:     #16a34a;
+  --green-dim: rgba(22,163,74,.08);
   --red:       #dc2626;
-  --red-dim:   rgba(220,38,38,.08);
-  --red-soft:  rgba(220,38,38,.18);
+  --red-dim:   rgba(220,38,38,.07);
+  --red-soft:  rgba(220,38,38,.15);
+  --blue:      #2563eb;
+  --blue-dim:  rgba(37,99,235,.08);
   --purple:    #7c3aed;
   --pink:      #db2777;
   --amber:     #d97706;
+  --c0:#d97706; --c1:#db2777; --c2:#16a34a; --c3:#2563eb;
+  --c4:#7c3aed; --c5:#ea580c; --c6:#be185d; --c7:#65a30d;
+  --c8:#0891b2; --c9:#4f46e5;
 }
 
 body.light header {
-  background: rgba(239,246,255,.95);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(37,99,235,.12);
+  background: rgba(248,248,246,.96);
+  border-bottom: 1px solid rgba(0,0,0,.08);
 }
 body.light .month-bar {
-  background: rgba(255,255,255,.9);
-  border-bottom: 1px solid rgba(37,99,235,.1);
+  background: rgba(255,255,255,.95);
+  border-bottom: 1px solid rgba(0,0,0,.06);
 }
 body.light .month-bar select,
 body.light .search-input {
   background: #fff;
-  border-color: rgba(37,99,235,.2);
-  color: #0f172a;
+  border-color: rgba(0,0,0,.14);
+  color: #1a1a1a;
 }
 body.light .btn-export {
-  background: rgba(37,99,235,.08);
-  border-color: rgba(37,99,235,.22);
-  color: #2563eb;
+  background: rgba(0,0,0,.04);
+  border-color: rgba(0,0,0,.14);
+  color: #1a1a1a;
 }
 body.light .btn-out {
-  background: rgba(220,38,38,.06);
-  border-color: rgba(220,38,38,.2);
+  background: rgba(220,38,38,.05);
+  border-color: rgba(220,38,38,.18);
   color: #dc2626;
 }
 body.light .user-chip {
-  background: #dbeafe;
-  border-color: #bfdbfe;
-  color: #1e40af;
+  background: #f2f2ef;
+  border-color: rgba(0,0,0,.1);
+  color: #1a1a1a;
 }
-body.light .dot-online { background: #059669; box-shadow: 0 0 6px #059669; }
+body.light .dot-online { background: #16a34a; box-shadow: none; }
 body.light .panel {
   background: #fff;
-  border-color: rgba(37,99,235,.14);
-  box-shadow: 0 2px 20px rgba(37,99,235,.08);
+  border-color: rgba(0,0,0,.08);
 }
-body.light .stat-card {
-  background: #fff;
-  border-color: rgba(37,99,235,.16);
-}
-body.light .stat-card:hover { box-shadow: 0 6px 24px rgba(37,99,235,.12); }
+body.light .stat-card { background: #fff !important; border-color: rgba(0,0,0,.08) !important; box-shadow: none !important; }
 body.light .fg input,
 body.light .fg select {
-  background: #f0f7ff;
-  border-color: rgba(37,99,235,.2);
-  color: #0f172a;
+  background: #f8f8f6;
+  border-color: rgba(0,0,0,.12);
+  color: #1a1a1a;
 }
 body.light .fg input:focus,
 body.light .fg select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+  border-color: #1a1a1a;
+  box-shadow: 0 0 0 3px rgba(0,0,0,.06);
 }
-body.light .tx {
-  background: #f0f7ff;
-  border-color: rgba(37,99,235,.1);
-}
-body.light .tx:hover { background: #dbeafe; border-color: rgba(37,99,235,.3); }
-body.light .neon-cat-row { background: #f0f7ff; border-color: rgba(37,99,235,.1); }
-body.light .neon-cat-row:hover { background: #dbeafe; }
-body.light .btn-add {
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
-  box-shadow: 0 4px 20px rgba(37,99,235,.28);
-  color: #fff;
-}
-body.light .modal { background: #fff; border-color: rgba(37,99,235,.15); }
-body.light footer { background: #fff; border-top-color: rgba(37,99,235,.1); }
-
-/* إزالة التدرج الداكن من البطاقات في الوضع الفاتح */
-body.light .stat-card { background: #fff !important; }
-body.light .stat-card:nth-child(1) { border-color: rgba(220,38,38,.25) !important;   box-shadow: inset 0 0 40px rgba(220,38,38,.04); }
-body.light .stat-card:nth-child(2) { border-color: rgba(217,119,6,.25) !important;   box-shadow: inset 0 0 40px rgba(217,119,6,.04); }
-body.light .stat-card:nth-child(3) { border-color: rgba(124,58,237,.25) !important;  box-shadow: inset 0 0 40px rgba(124,58,237,.04); }
+body.light .tx { background: #f8f8f6; border-color: rgba(0,0,0,.07); }
+body.light .tx:hover { background: #f2f2ef; border-color: rgba(0,0,0,.14); }
+body.light .neon-cat-row { background: #f8f8f6; border-color: rgba(0,0,0,.07); }
+body.light .neon-cat-row:hover { background: #f2f2ef; }
+body.light .btn-add { background: #1a1a1a; box-shadow: none; color: #fff; }
+body.light .modal { background: #fff; border-color: rgba(0,0,0,.1); }
+body.light footer { background: #fff; border-top-color: rgba(0,0,0,.07); }
 body.light .brand-name {
-  background: linear-gradient(90deg, #2563eb, #7c3aed);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: none !important;
+  -webkit-text-fill-color: #1a1a1a !important;
+  color: #1a1a1a;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -157,7 +141,7 @@ body {
 
 /* ── HEADER ── */
 header {
-  background: rgba(17,24,39,.9);
+  background: rgba(10,10,15,.92);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
   padding: 14px 24px;
@@ -167,12 +151,12 @@ header {
 .brand { display: flex; align-items: center; gap: 12px; }
 .brand-icon {
   width: 42px; height: 42px;
-  background: linear-gradient(135deg, #22d3ee, #818cf8);
+  background: #f59e0b;
   border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
   font-size: 1.2rem;
-  box-shadow: 0 0 20px rgba(34,211,238,.35);
 }
+body.light .brand-icon { background: #1a1a1a; }
 .brand-name { font-size: 1rem; font-weight: 900; color: var(--text); }
 .brand-sub  { font-size: .7rem; color: var(--muted); }
 .hdr-right { display: flex; align-items: center; gap: 10px; }
@@ -198,7 +182,7 @@ header {
 
 /* ── MONTH BAR ── */
 .month-bar {
-  background: rgba(17,24,39,.8);
+  background: rgba(10,10,15,.85);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   padding: 10px 24px;
@@ -218,8 +202,8 @@ header {
 .search-input::placeholder { color: var(--muted); }
 .btn-view {
   padding: 7px 20px;
-  background: linear-gradient(135deg, #22d3ee, #818cf8);
-  color: #0b0e1a; border: none; border-radius: 11px;
+  background: var(--accent);
+  color: #0a0a0f; border: none; border-radius: 11px;
   font-size: .82rem; font-weight: 900; cursor: pointer; font-family: inherit;
 }
 .btn-export {
@@ -331,8 +315,8 @@ header {
 .fg input::placeholder { color: var(--muted); }
 .btn-add {
   width: 100%; padding: 13px;
-  background: linear-gradient(135deg, #22d3ee, #818cf8);
-  color: #0b0e1a; border: none; border-radius: 14px;
+  background: #f59e0b;
+  color: #0a0a0f; border: none; border-radius: 14px;
   font-size: .92rem; font-weight: 900; cursor: pointer; font-family: inherit;
   margin-top: 8px; transition: opacity .2s, transform .15s;
   letter-spacing: .02em;
@@ -434,8 +418,8 @@ header {
 }
 .btn-save {
   padding: 10px 22px;
-  background: linear-gradient(135deg, #22d3ee, #818cf8);
-  color: #0b0e1a; border: none;
+  background: var(--accent);
+  color: #0a0a0f; border: none;
   border-radius: 11px; font-family: inherit; font-size: .85rem; font-weight: 700; cursor: pointer;
 }
 
@@ -491,14 +475,14 @@ footer {
   <div class="brand">
     <div class="brand-icon">💸</div>
     <div>
-      <div class="brand-name" style="background:linear-gradient(90deg,#22d3ee,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">مصاريفي</div>
+      <div class="brand-name">مصاريفي</div>
       <div class="brand-sub">راقب إنفاقك بذكاء</div>
     </div>
   </div>
   <div class="hdr-right">
     <div class="user-chip"><span class="dot-online"></span>{{ user_name }}</div>
     <button onclick="openSettings()" style="width:36px;height:36px;border-radius:50%;border:none;background:var(--surface2);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;">⚙️</button>
-    <a href="/income" style="display:flex;align-items:center;gap:6px;background:var(--green-dim);border:1px solid rgba(52,211,153,.25);color:var(--green);padding:8px 14px;border-radius:50px;font-size:.82rem;font-weight:700;text-decoration:none;">💰 الدخل</a>
+    <a href="/income" style="display:flex;align-items:center;gap:6px;background:var(--accent-dim);border:1px solid rgba(245,158,11,.25);color:var(--accent);padding:8px 14px;border-radius:50px;font-size:.82rem;font-weight:700;text-decoration:none;">💰 الدخل</a>
     <a href="/logout" class="btn-out">خروج</a>
   </div>
 </header>
