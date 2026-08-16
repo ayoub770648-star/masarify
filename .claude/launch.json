@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "expense-app",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["app.py"],
+      "port": 5051,
+      "autoPort": false,
+      "cwd": "/Users/mac/expense_only"
+    }
+  ]
+}

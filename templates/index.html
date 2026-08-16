@@ -794,11 +794,11 @@ footer {
             </div>
             <div class="fg">
               <label>الفئة</label>
-              <select name="category" required>
-                {% for key, label, icon in categories %}
-                  <option value="{{ key }}">{{ icon }} {{ label }}</option>
-                {% endfor %}
-              </select>
+              <input type="hidden" name="category" id="selectedCategory" required>
+              <button type="button" id="catPickerBtn" onclick="openCatPicker()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:.9rem;padding:10px 14px;text-align:right;cursor:pointer;display:flex;align-items:center;gap:8px;">
+                <span id="catPickerLabel" style="flex:1;color:var(--muted);">اختر الفئة...</span>
+                <span style="color:var(--muted);">▼</span>
+              </button>
             </div>
           </div>
           <div class="frow">
@@ -1049,11 +1049,11 @@ footer {
         </div>
         <div class="fg">
           <label>الفئة</label>
-          <select name="category" id="editCategory">
-            {% for key, label, icon in categories %}
-              <option value="{{ key }}">{{ icon }} {{ label }}</option>
-            {% endfor %}
-          </select>
+          <input type="hidden" name="category" id="editCategory">
+          <button type="button" id="editCatBtn" onclick="openCatPicker('edit')" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:.9rem;padding:10px 14px;text-align:right;cursor:pointer;display:flex;align-items:center;gap:8px;">
+            <span id="editCatLabel" style="flex:1;color:var(--muted);">اختر الفئة...</span>
+            <span style="color:var(--muted);">▼</span>
+          </button>
         </div>
       </div>
       <div class="frow">
@@ -1071,6 +1071,20 @@ footer {
         <button type="submit" class="btn-save">حفظ التعديل</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- CATEGORY PICKER MODAL -->
+<div id="catPickerModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
+  <div style="background:var(--surface);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <div id="catPickerTitle" style="font-weight:900;font-size:1rem;">اختر الفئة</div>
+      <button onclick="closeCatPicker()" style="background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;padding:4px;">✕</button>
+    </div>
+    <div style="padding:10px 16px;border-bottom:1px solid var(--border);">
+      <input id="catSearch" oninput="filterCats(this.value)" placeholder="🔍 بحث..." style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:.9rem;padding:9px 14px;outline:none;">
+    </div>
+    <div id="catPickerList" style="overflow-y:auto;flex:1;padding:8px 0;"></div>
   </div>
 </div>
 
@@ -1216,6 +1230,14 @@ function openEdit(id, amount, category, description, date) {
   document.getElementById('editForm').action = `/edit_expense/${id}`;
   document.getElementById('editAmount').value = parseFloat(amount).toFixed(3);
   document.getElementById('editCategory').value = category;
+  // show category label in picker button
+  let catEmoji = '📦';
+  CATS_TREE.forEach(cat => {
+    cat.subs.forEach(([name, emoji]) => { if (name === category) catEmoji = emoji; });
+  });
+  const lbl = document.getElementById('editCatLabel');
+  lbl.textContent = catEmoji + ' ' + (category || 'اختر الفئة...');
+  lbl.style.color = category ? 'var(--text)' : 'var(--muted)';
   document.getElementById('editDesc').value = description;
   document.getElementById('editDate').value = date;
   document.getElementById('editModal').classList.add('on');
@@ -1567,6 +1589,102 @@ if (dateField) dateField.value = new Date().toISOString().split('T')[0];
   );
   resetTimer();
 })();
+
+// ── CATEGORY PICKER ──
+const CATS_TREE = {{ categories_tree | tojson }};
+let _catTarget = 'add'; // 'add' or 'edit'
+let _expandedCat = null;
+
+function openCatPicker(target = 'add') {
+  _catTarget = target;
+  _expandedCat = null;
+  document.getElementById('catSearch').value = '';
+  renderCatList('');
+  const modal = document.getElementById('catPickerModal');
+  modal.style.display = 'flex';
+  setTimeout(() => document.getElementById('catSearch').focus(), 100);
+}
+
+function closeCatPicker() {
+  document.getElementById('catPickerModal').style.display = 'none';
+}
+
+function filterCats(q) { renderCatList(q.trim()); }
+
+function renderCatList(q) {
+  const list = document.getElementById('catPickerList');
+  if (q) {
+    // flat search mode
+    let html = '';
+    CATS_TREE.forEach(cat => {
+      cat.subs.forEach(([name, emoji]) => {
+        if (name.includes(q) || cat.name.includes(q)) {
+          html += `<div class="cat-sub-item" onclick="selectCat('${name}','${emoji}','${cat.name}','${cat.emoji}')" style="padding:11px 20px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid var(--border);">
+            <span>${emoji}</span>
+            <div>
+              <div style="font-weight:700;font-size:.9rem;">${name}</div>
+              <div style="font-size:.72rem;color:var(--muted);">${cat.name}</div>
+            </div>
+          </div>`;
+        }
+      });
+    });
+    list.innerHTML = html || '<div style="padding:40px;text-align:center;color:var(--muted);">لا نتائج</div>';
+  } else {
+    let html = '';
+    CATS_TREE.forEach((cat, idx) => {
+      const isOpen = _expandedCat === idx;
+      html += `<div>
+        <div onclick="toggleCat(${idx})" style="padding:13px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border-bottom:1px solid var(--border);${isOpen?'background:var(--surface2);':''}">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:1.3rem;">${cat.emoji}</span>
+            <span style="font-weight:700;font-size:.95rem;">${cat.name}</span>
+          </div>
+          <span style="color:var(--muted);font-size:.8rem;transform:${isOpen?'rotate(90deg)':'none'};transition:transform .2s;">‹</span>
+        </div>`;
+      if (isOpen) {
+        cat.subs.forEach(([name, emoji]) => {
+          html += `<div onclick="selectCat('${name}','${emoji}','${cat.name}','${cat.emoji}')" style="padding:10px 20px 10px 48px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid var(--border);background:var(--surface2);">
+            <span>${emoji}</span>
+            <span style="font-size:.88rem;font-weight:600;">${name}</span>
+          </div>`;
+        });
+      }
+      html += '</div>';
+    });
+    list.innerHTML = html;
+  }
+}
+
+function toggleCat(idx) {
+  _expandedCat = _expandedCat === idx ? null : idx;
+  renderCatList('');
+  // scroll to opened category
+  setTimeout(() => {
+    const items = document.querySelectorAll('#catPickerList > div');
+    if (items[idx]) items[idx].scrollIntoView({behavior:'smooth', block:'start'});
+  }, 50);
+}
+
+function selectCat(name, emoji, mainName, mainEmoji) {
+  if (_catTarget === 'add') {
+    document.getElementById('selectedCategory').value = name;
+    const btn = document.getElementById('catPickerBtn');
+    btn.querySelector('#catPickerLabel').textContent = emoji + ' ' + name;
+    btn.querySelector('#catPickerLabel').style.color = 'var(--text)';
+  } else {
+    document.getElementById('editCategory').value = name;
+    const btn = document.getElementById('editCatBtn');
+    btn.querySelector('#editCatLabel').textContent = emoji + ' ' + name;
+    btn.querySelector('#editCatLabel').style.color = 'var(--text)';
+  }
+  closeCatPicker();
+}
+
+// close on backdrop click
+document.getElementById('catPickerModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCatPicker();
+});
 </script>
 </body>
 </html>
