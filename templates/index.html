@@ -481,9 +481,10 @@ footer {
   </div>
   <div class="hdr-right">
     <div class="user-chip"><span class="dot-online"></span>{{ user_name }}</div>
+    <button id="langBtn" onclick="toggleLang()" style="width:36px;height:36px;border-radius:50%;border:1px solid var(--border2);background:var(--surface2);cursor:pointer;font-size:.8rem;font-weight:800;color:var(--accent);display:flex;align-items:center;justify-content:center;">EN</button>
     <button onclick="openSettings()" style="width:36px;height:36px;border-radius:50%;border:none;background:var(--surface2);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;">⚙️</button>
-    <a href="/income" style="display:flex;align-items:center;gap:6px;background:var(--accent-dim);border:1px solid rgba(245,158,11,.25);color:var(--accent);padding:8px 14px;border-radius:50px;font-size:.82rem;font-weight:700;text-decoration:none;">💰 الدخل</a>
-    <a href="/logout" class="btn-out">خروج</a>
+    <a href="/income" data-i18n="incomeLink" style="display:flex;align-items:center;gap:6px;background:var(--accent-dim);border:1px solid rgba(245,158,11,.25);color:var(--accent);padding:8px 14px;border-radius:50px;font-size:.82rem;font-weight:700;text-decoration:none;">💰 الدخل</a>
+    <a href="/logout" class="btn-out" data-i18n="logout">خروج</a>
   </div>
 </header>
 
@@ -789,11 +790,11 @@ footer {
         <form method="POST" action="/add_expense" id="expenseForm">
           <div class="frow">
             <div class="fg">
-              <label>المبلغ (ر.ع)</label>
+              <label data-i18n="amount">المبلغ (ر.ع)</label>
               <input type="number" name="amount" step="0.001" min="0.001" placeholder="0.000" required>
             </div>
             <div class="fg">
-              <label>الفئة</label>
+              <label data-i18n="category">الفئة</label>
               <input type="hidden" name="category" id="selectedCategory" required>
               <button type="button" id="catPickerBtn" onclick="openCatPicker()" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:.9rem;padding:10px 14px;text-align:right;cursor:pointer;display:flex;align-items:center;gap:8px;">
                 <span id="catPickerLabel" style="flex:1;color:var(--muted);">اختر الفئة...</span>
@@ -803,15 +804,15 @@ footer {
           </div>
           <div class="frow">
             <div class="fg">
-              <label>التاريخ</label>
+              <label data-i18n="date">التاريخ</label>
               <input type="date" name="date" id="expenseDate" required>
             </div>
             <div class="fg">
-              <label>ملاحظة</label>
-              <input type="text" name="description" placeholder="اختياري...">
+              <label data-i18n="note">ملاحظة</label>
+              <input type="text" name="description" data-i18n-ph="optional" placeholder="اختياري...">
             </div>
           </div>
-          <button type="submit" class="btn-add">+ تسجيل المصروف</button>
+          <button type="submit" class="btn-add" data-i18n="addExpense">+ تسجيل المصروف</button>
         </form>
 
         <div class="divider"></div>
@@ -1058,17 +1059,17 @@ footer {
       </div>
       <div class="frow">
         <div class="fg">
-          <label>التاريخ</label>
+          <label data-i18n="date">التاريخ</label>
           <input type="date" name="date" id="editDate" required>
         </div>
         <div class="fg">
-          <label>ملاحظة</label>
-          <input type="text" name="description" id="editDesc" placeholder="اختياري...">
+          <label data-i18n="note">ملاحظة</label>
+          <input type="text" name="description" id="editDesc" data-i18n-ph="optional" placeholder="اختياري...">
         </div>
       </div>
       <div class="modal-btns">
-        <button type="button" class="btn-cancel" onclick="closeEdit()">إلغاء</button>
-        <button type="submit" class="btn-save">حفظ التعديل</button>
+        <button type="button" class="btn-cancel" onclick="closeEdit()" data-i18n="cancel">إلغاء</button>
+        <button type="submit" class="btn-save" data-i18n="save">حفظ التعديل</button>
       </div>
     </form>
   </div>
@@ -1590,9 +1591,77 @@ if (dateField) dateField.value = new Date().toISOString().split('T')[0];
   resetTimer();
 })();
 
+// ── LANGUAGE SYSTEM ──
+const T = {
+  ar: {
+    dir:'rtl', appName:'مصاريفي', addExpense:'+ تسجيل المصروف',
+    amount:'المبلغ', category:'الفئة', date:'التاريخ', note:'ملاحظة',
+    optional:'اختياري...', pickCat:'اختر الفئة...', search:'🔍 بحث...',
+    noResults:'لا نتائج', editTitle:'تعديل المصروف', save:'حفظ التعديل',
+    cancel:'إلغاء', total:'الإجمالي', income:'الدخل', expenses:'المصاريف',
+    balance:'الصافي', monthExpenses:'مصروفات الشهر', topCat:'أعلى فئة',
+    byCategory:'توزيع الإنفاق حسب الفئة', allExpenses:'جميع المصروفات',
+    deleteConfirm:'حذف هذا المصروف؟', addNote:'أضف ملاحظة...',
+    noExpenses:'لا يوجد مصروفات لهذا الشهر', noResults2:'لا نتائج لـ',
+    settings:'الإعدادات', logout:'خروج', budget:'الميزانية',
+    budgetMonth:'ميزانية الشهر', remaining:'المتبقي', spent:'المنفق',
+    incomeLink:'💰 الدخل',
+  },
+  en: {
+    dir:'ltr', appName:'Masarify', addExpense:'+ Add Expense',
+    amount:'Amount', category:'Category', date:'Date', note:'Note',
+    optional:'Optional...', pickCat:'Select category...', search:'🔍 Search...',
+    noResults:'No results', editTitle:'Edit Expense', save:'Save Changes',
+    cancel:'Cancel', total:'Total', income:'Income', expenses:'Expenses',
+    balance:'Balance', monthExpenses:'Monthly Expenses', topCat:'Top Category',
+    byCategory:'Spending by Category', allExpenses:'All Expenses',
+    deleteConfirm:'Delete this expense?', addNote:'Add note...',
+    noExpenses:'No expenses this month', noResults2:'No results for',
+    settings:'Settings', logout:'Sign Out', budget:'Budget',
+    budgetMonth:'Monthly Budget', remaining:'Remaining', spent:'Spent',
+    incomeLink:'💰 Income',
+  }
+};
+
+let _lang = localStorage.getItem('lang') || 'ar';
+
+function applyLang(lang) {
+  _lang = lang;
+  localStorage.setItem('lang', lang);
+  const t = T[lang];
+  document.documentElement.lang = lang;
+  document.documentElement.dir = t.dir;
+  document.body.dir = t.dir;
+  // toggle lang btn
+  const btn = document.getElementById('langBtn');
+  if (btn) btn.textContent = lang === 'ar' ? 'EN' : 'ع';
+  // apply data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (t[key] !== undefined) el.textContent = t[key];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const key = el.dataset.i18nPh;
+    if (t[key] !== undefined) el.placeholder = t[key];
+  });
+  // update cat picker placeholder
+  const lbl = document.getElementById('catPickerLabel');
+  if (lbl && lbl.style.color !== 'var(--text)') lbl.textContent = t.pickCat;
+  const lbl2 = document.getElementById('editCatLabel');
+  if (lbl2 && lbl2.style.color !== 'var(--text)') lbl2.textContent = t.pickCat;
+  const cs = document.getElementById('catSearch');
+  if (cs) cs.placeholder = t.search;
+  // re-render cat list if open
+  if (document.getElementById('catPickerModal').style.display === 'flex') renderCatList('');
+}
+
+function toggleLang() {
+  applyLang(_lang === 'ar' ? 'en' : 'ar');
+}
+
 // ── CATEGORY PICKER ──
 const CATS_TREE = {{ categories_tree | tojson }};
-let _catTarget = 'add'; // 'add' or 'edit'
+let _catTarget = 'add';
 let _expandedCat = null;
 
 function openCatPicker(target = 'add') {
@@ -1600,8 +1669,7 @@ function openCatPicker(target = 'add') {
   _expandedCat = null;
   document.getElementById('catSearch').value = '';
   renderCatList('');
-  const modal = document.getElementById('catPickerModal');
-  modal.style.display = 'flex';
+  document.getElementById('catPickerModal').style.display = 'flex';
   setTimeout(() => document.getElementById('catSearch').focus(), 100);
 }
 
@@ -1611,40 +1679,49 @@ function closeCatPicker() {
 
 function filterCats(q) { renderCatList(q.trim()); }
 
+function catSubName(sub) {
+  // sub = [ar_name, en_name, emoji] or [ar_name, emoji] (legacy)
+  if (sub.length === 3) return _lang === 'ar' ? sub[0] : sub[1];
+  return sub[0];
+}
+function catSubEmoji(sub) { return sub.length === 3 ? sub[2] : sub[1]; }
+function catMainName(cat) { return _lang === 'ar' ? cat.name : (cat.name_en || cat.name); }
+
 function renderCatList(q) {
   const list = document.getElementById('catPickerList');
   if (q) {
-    // flat search mode
     let html = '';
     CATS_TREE.forEach(cat => {
-      cat.subs.forEach(([name, emoji]) => {
-        if (name.includes(q) || cat.name.includes(q)) {
-          html += `<div class="cat-sub-item" onclick="selectCat('${name}','${emoji}','${cat.name}','${cat.emoji}')" style="padding:11px 20px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid var(--border);">
+      cat.subs.forEach(sub => {
+        const name = catSubName(sub), emoji = catSubEmoji(sub), mn = catMainName(cat);
+        if (name.toLowerCase().includes(q.toLowerCase()) || mn.toLowerCase().includes(q.toLowerCase()) || sub[0].includes(q)) {
+          html += `<div onclick="selectCat('${sub[0]}','${emoji}','${mn}')" style="padding:11px 20px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid var(--border);">
             <span>${emoji}</span>
             <div>
               <div style="font-weight:700;font-size:.9rem;">${name}</div>
-              <div style="font-size:.72rem;color:var(--muted);">${cat.name}</div>
+              <div style="font-size:.72rem;color:var(--muted);">${mn}</div>
             </div>
           </div>`;
         }
       });
     });
-    list.innerHTML = html || '<div style="padding:40px;text-align:center;color:var(--muted);">لا نتائج</div>';
+    list.innerHTML = html || `<div style="padding:40px;text-align:center;color:var(--muted);">${T[_lang].noResults}</div>`;
   } else {
     let html = '';
     CATS_TREE.forEach((cat, idx) => {
-      const isOpen = _expandedCat === idx;
+      const isOpen = _expandedCat === idx, mn = catMainName(cat);
       html += `<div>
         <div onclick="toggleCat(${idx})" style="padding:13px 20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border-bottom:1px solid var(--border);${isOpen?'background:var(--surface2);':''}">
           <div style="display:flex;align-items:center;gap:10px;">
             <span style="font-size:1.3rem;">${cat.emoji}</span>
-            <span style="font-weight:700;font-size:.95rem;">${cat.name}</span>
+            <span style="font-weight:700;font-size:.95rem;">${mn}</span>
           </div>
           <span style="color:var(--muted);font-size:.8rem;transform:${isOpen?'rotate(90deg)':'none'};transition:transform .2s;">‹</span>
         </div>`;
       if (isOpen) {
-        cat.subs.forEach(([name, emoji]) => {
-          html += `<div onclick="selectCat('${name}','${emoji}','${cat.name}','${cat.emoji}')" style="padding:10px 20px 10px 48px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid var(--border);background:var(--surface2);">
+        cat.subs.forEach(sub => {
+          const name = catSubName(sub), emoji = catSubEmoji(sub);
+          html += `<div onclick="selectCat('${sub[0]}','${emoji}','${mn}')" style="padding:10px 20px 10px 48px;display:flex;align-items:center;gap:10px;cursor:pointer;border-bottom:1px solid var(--border);background:var(--surface2);">
             <span>${emoji}</span>
             <span style="font-size:.88rem;font-weight:600;">${name}</span>
           </div>`;
@@ -1659,32 +1736,39 @@ function renderCatList(q) {
 function toggleCat(idx) {
   _expandedCat = _expandedCat === idx ? null : idx;
   renderCatList('');
-  // scroll to opened category
   setTimeout(() => {
     const items = document.querySelectorAll('#catPickerList > div');
     if (items[idx]) items[idx].scrollIntoView({behavior:'smooth', block:'start'});
   }, 50);
 }
 
-function selectCat(name, emoji, mainName, mainEmoji) {
+function selectCat(arName, emoji, mainName) {
+  const displayName = _lang === 'ar' ? arName : (() => {
+    for (const cat of CATS_TREE) {
+      for (const sub of cat.subs) { if (sub[0] === arName) return catSubName(sub); }
+    }
+    return arName;
+  })();
   if (_catTarget === 'add') {
-    document.getElementById('selectedCategory').value = name;
-    const btn = document.getElementById('catPickerBtn');
-    btn.querySelector('#catPickerLabel').textContent = emoji + ' ' + name;
-    btn.querySelector('#catPickerLabel').style.color = 'var(--text)';
+    document.getElementById('selectedCategory').value = arName;
+    const lbl = document.getElementById('catPickerLabel');
+    lbl.textContent = emoji + ' ' + displayName;
+    lbl.style.color = 'var(--text)';
   } else {
-    document.getElementById('editCategory').value = name;
-    const btn = document.getElementById('editCatBtn');
-    btn.querySelector('#editCatLabel').textContent = emoji + ' ' + name;
-    btn.querySelector('#editCatLabel').style.color = 'var(--text)';
+    document.getElementById('editCategory').value = arName;
+    const lbl = document.getElementById('editCatLabel');
+    lbl.textContent = emoji + ' ' + displayName;
+    lbl.style.color = 'var(--text)';
   }
   closeCatPicker();
 }
 
-// close on backdrop click
 document.getElementById('catPickerModal').addEventListener('click', function(e) {
   if (e.target === this) closeCatPicker();
 });
+
+// apply language on load
+applyLang(_lang);
 </script>
 </body>
 </html>
