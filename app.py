@@ -163,13 +163,15 @@ CATEGORIES_TREE = [
 ]
 
 # flat list for backward-compat lookups
-CATEGORIES = [(s[0], s[0], cat['emoji']) for cat in CATEGORIES_TREE for s in cat['subs']]
+CATEGORIES = [(s[0], s[0], s[-1]) for cat in CATEGORIES_TREE for s in cat['subs']]
 
 def get_cat_emoji(name):
     for cat in CATEGORIES_TREE:
-        for sub, em in cat['subs']:
-            if sub == name:
-                return em
+        for sub in cat['subs']:
+            ar_name = sub[0]
+            emoji   = sub[-1]   # last element is always the emoji
+            if ar_name == name:
+                return emoji
         if cat['name'] == name:
             return cat['emoji']
     return '📦'
