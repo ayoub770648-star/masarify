@@ -106,81 +106,175 @@ TEMPLATES = {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ title }} | توزيع الشحنات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  body{font-family:Tahoma,Arial,sans-serif;background:#f4f6fa;margin:0;color:#222}
-  nav{background:#1f3a5f;padding:12px 20px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
-  nav a,nav span{color:#fff;text-decoration:none;font-weight:bold}
-  .wrap{padding:20px;max-width:1100px;margin:auto}
-  .card{background:#fff;border-radius:10px;padding:16px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow-x:auto}
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
-  .kpi{background:#fff;border-radius:10px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-  .kpi b{display:block;font-size:24px;margin-top:6px}
-  form.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;align-items:end}
-  input,select,button{padding:9px;border:1px solid #ccc;border-radius:6px;font-size:15px;width:100%;box-sizing:border-box}
-  button{background:#1f3a5f;color:#fff;border:0;cursor:pointer}
-  .btn-link{background:#2e8b57;color:#fff;padding:9px 14px;border-radius:6px;text-decoration:none;display:inline-block}
-  table{width:100%;border-collapse:collapse;font-size:14px}
-  th,td{padding:8px;border-bottom:1px solid #eee;text-align:right;vertical-align:middle}
-  th{background:#f0f3f8}
-  .small-btn{width:auto;padding:5px 10px;font-size:13px;margin:2px}
-  .green{background:#2e8b57}.red{background:#c0392b}.gray{background:#7f8c8d}
-  .flash{background:#fff3cd;padding:10px;border-radius:6px;margin-bottom:12px}
-  .badge{padding:3px 8px;border-radius:10px;font-size:12px;color:#fff;white-space:nowrap}
-  .b-بانتظار{background:#f0ad4e}.b-استلمها{background:#337ab7}.b-تم{background:#2e8b57}.b-ملغي{background:#999}
-  .gov{background:#eef3fb;font-weight:bold}
-  .qty{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.qty input{width:90px}.qty button{width:auto}
-  .big{font-size:18px;font-weight:bold}
-  .warn{background:#fdecea;color:#a12;padding:10px;border-radius:6px;font-weight:bold}
-  .ok{background:#e8f7ee;color:#0a6;padding:10px;border-radius:6px}
+  :root{
+    --bg:#f4f6fb; --surface:#fff; --ink:#0f172a; --muted:#64748b; --line:#e6eaf2;
+    --brand:#4338ca; --brand-soft:#eef2ff; --side:#0b1224; --side-ink:#a5b0c8;
+    --ok:#059669; --ok-soft:#ecfdf5; --warn:#d97706; --warn-soft:#fffbeb;
+    --info:#2563eb; --info-soft:#eff6ff; --bad:#dc2626; --bad-soft:#fef2f2;
+    --radius:14px; --shadow:0 1px 2px rgba(15,23,42,.04),0 4px 16px rgba(15,23,42,.06);
+  }
+  *{box-sizing:border-box}
+  body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);margin:0;color:var(--ink);font-size:15px}
+  a{color:var(--brand)}
+  /* التخطيط */
+  .layout{display:flex;min-height:100vh}
+  .side{width:250px;background:var(--side);color:#fff;padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+  .logo{display:flex;align-items:center;gap:10px;padding:0 10px 22px;font-weight:700;font-size:17px}
+  .logo-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#06b6d4);display:grid;place-items:center}
+  .side a{display:flex;align-items:center;gap:12px;color:var(--side-ink);text-decoration:none;padding:11px 12px;border-radius:10px;margin-bottom:4px;font-weight:500}
+  .side a:hover{background:rgba(255,255,255,.06);color:#fff}
+  .side a.active{background:rgba(99,102,241,.18);color:#fff}
+  .side svg{width:19px;height:19px;flex:none}
+  .side .bottom{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:14px}
+  .user{display:flex;align-items:center;gap:10px;padding:8px 12px;color:#fff;font-weight:600}
+  .avatar{width:32px;height:32px;border-radius:50%;background:#1e293b;display:grid;place-items:center;font-size:14px}
+  .main{flex:1;min-width:0;padding:28px 32px}
+  .page-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px;gap:12px;flex-wrap:wrap}
+  .page-head h1{margin:0;font-size:24px;font-weight:700}
+  .page-head p{margin:4px 0 0;color:var(--muted)}
+  /* البطاقات */
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:20px;box-shadow:var(--shadow);overflow-x:auto}
+  .card h3{margin:0 0 16px;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .card h4{margin:18px 0 8px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:20px}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);color:var(--muted);font-weight:500;position:relative;overflow:hidden}
+  .kpi b{display:block;font-size:30px;margin-top:6px;color:var(--ink);font-weight:700}
+  .kpi::before{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:4px;background:var(--brand)}
+  .kpi.k-ok::before{background:var(--ok)}.kpi.k-warn::before{background:var(--warn)}.kpi.k-info::before{background:var(--info)}
+  /* النماذج */
+  form.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;align-items:end}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:500}
+  input,select,button{font-family:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:15px;width:100%;background:#fff;color:var(--ink)}
+  input:focus,select:focus{outline:none;border-color:#818cf8;box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+  button{background:var(--brand);color:#fff;border:0;cursor:pointer;font-weight:600;transition:filter .15s}
+  button:hover{filter:brightness(1.08)}
+  .btn-link{background:var(--ok);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;display:inline-block}
+  /* الجداول */
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
+  th{background:#f8fafc;color:var(--muted);font-weight:600;font-size:13px;padding:11px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:12px;border-bottom:1px solid var(--line);text-align:right;vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  tbody tr:hover td,table tr:hover td{background:#fafbff}
+  .gov td{background:#f8fafc !important;font-weight:700}
+  .small-btn{width:auto;padding:7px 12px;font-size:13px;margin:2px;border-radius:8px}
+  .green{background:var(--ok)}.red{background:var(--bad)}.gray{background:#475569}
+  .flash{background:var(--brand-soft);color:#3730a3;border:1px solid #c7d2fe;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-weight:500}
+  .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+  .b-بانتظار{background:var(--warn-soft);color:var(--warn)}.b-استلمها{background:var(--info-soft);color:var(--info)}
+  .b-تم{background:var(--ok-soft);color:var(--ok)}.b-ملغي{background:#f1f5f9;color:#64748b}
+  .qty{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.qty input{width:100px}.qty button{width:auto}
+  .qty label{margin:0}
+  .big{font-size:17px;font-weight:700}
+  .muted{color:var(--muted)}
+  .num{font-variant-numeric:tabular-nums;font-weight:700}
+  .warn{background:var(--bad-soft);color:var(--bad);padding:12px;border-radius:10px;font-weight:600}
+  .ok{background:var(--ok-soft);color:var(--ok);padding:12px;border-radius:10px;font-weight:600}
+  .time{display:inline-flex;align-items:center;gap:6px;background:var(--warn-soft);color:#92400e;padding:5px 10px;border-radius:8px;font-weight:600;white-space:nowrap}
+  .empty{color:var(--muted);text-align:center;padding:24px}
+  /* صفحة الدخول */
+  .auth{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+  .auth-hero{background:linear-gradient(150deg,#0b1224 0%,#1e1b4b 60%,#0e7490 140%);color:#fff;padding:56px;display:flex;flex-direction:column;justify-content:center}
+  .auth-hero h1{font-size:34px;margin:18px 0 10px}
+  .auth-hero p{color:#c7d2fe;font-size:17px;line-height:1.8;max-width:420px}
+  .auth-forms{display:flex;flex-direction:column;justify-content:center;padding:40px;gap:18px;max-width:480px;width:100%;margin:auto}
+  @media (max-width:900px){
+    .layout{flex-direction:column}
+    .side{width:100%;height:auto;position:static;flex-direction:row;align-items:center;overflow-x:auto;padding:10px;gap:4px}
+    .logo{padding:0 6px}.logo span{display:none}
+    .side a{margin:0;white-space:nowrap;padding:9px 10px}
+    .side a span{font-size:14px}
+    .side .bottom{margin:0;border:0;padding:0;display:flex}
+    .user{display:none}
+    .main{padding:16px}
+    .auth{grid-template-columns:1fr}.auth-hero{padding:28px}.auth-hero h1{font-size:24px}
+  }
 </style>
 </head>
 <body>
-<nav>
-  {% if session.get('role') == 'admin' %}
-    <a href="{{ url_for('shipments') }}">الشحنات</a>
-    <a href="{{ url_for('claims') }}">حجوزات المندوبين</a>
-    <a href="{{ url_for('drivers') }}">المندوبين</a>
-    <a href="{{ url_for('export_excel') }}">تصدير Excel</a>
-    <a href="{{ url_for('logout') }}" style="margin-right:auto">خروج</a>
-  {% elif session.get('role') == 'driver' %}
-    <span>👤 {{ session.get('driver') }}</span>
-    <a href="{{ url_for('d_home') }}">حجز شحنات</a>
-    <a href="{{ url_for('d_mine') }}">حجوزاتي</a>
-    <a href="{{ url_for('logout') }}" style="margin-right:auto">خروج</a>
-  {% else %}
-    <span>نظام توزيع الشحنات</span>
-  {% endif %}
-</nav>
-<div class="wrap">
-  {% for m in get_flashed_messages() %}<div class="flash">{{ m }}</div>{% endfor %}
-  {% block content %}{% endblock %}
+{% set ep = request.endpoint %}
+{% macro icon(name) -%}
+  {%- if name == 'box' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+  {%- elif name == 'cal' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>
+  {%- elif name == 'users' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/><path d="M17 11a3 3 0 100-6M22 21c0-3-2-5-5-5.5"/></svg>
+  {%- elif name == 'file' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6M9 15l2 2 4-4"/></svg>
+  {%- elif name == 'out' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l-5-5 5-5M5 12h12"/></svg>
+  {%- elif name == 'truck' -%}<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M1 4h14v12H1zM15 9h4l4 4v3h-8"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+  {%- endif -%}
+{%- endmacro %}
+{% if session.get('role') %}
+<div class="layout">
+  <aside class="side">
+    <div class="logo"><div class="logo-mark">{{ icon('truck') }}</div><span>توزيع الشحنات</span></div>
+    {% if session.get('role') == 'admin' %}
+      <a href="{{ url_for('shipments') }}" class="{{ 'active' if ep == 'shipments' }}">{{ icon('box') }}<span>الشحنات</span></a>
+      <a href="{{ url_for('claims') }}" class="{{ 'active' if ep == 'claims' }}">{{ icon('cal') }}<span>حجوزات المندوبين</span></a>
+      <a href="{{ url_for('drivers') }}" class="{{ 'active' if ep == 'drivers' }}">{{ icon('users') }}<span>المندوبين</span></a>
+      <a href="{{ url_for('export_excel') }}">{{ icon('file') }}<span>تصدير Excel</span></a>
+      <div class="bottom">
+        <div class="user"><div class="avatar">م</div>المدير</div>
+        <a href="{{ url_for('logout') }}">{{ icon('out') }}<span>خروج</span></a>
+      </div>
+    {% else %}
+      <a href="{{ url_for('d_home') }}" class="{{ 'active' if ep == 'd_home' }}">{{ icon('box') }}<span>حجز شحنات</span></a>
+      <a href="{{ url_for('d_mine') }}" class="{{ 'active' if ep == 'd_mine' }}">{{ icon('cal') }}<span>حجوزاتي</span></a>
+      <div class="bottom">
+        <div class="user"><div class="avatar">{{ session.get('driver', '')[:1] }}</div>{{ session.get('driver') }}</div>
+        <a href="{{ url_for('logout') }}">{{ icon('out') }}<span>خروج</span></a>
+      </div>
+    {% endif %}
+  </aside>
+  <main class="main">
+    <div class="page-head"><div><h1>{{ title }}</h1>{% if subtitle %}<p>{{ subtitle }}</p>{% endif %}</div></div>
+    {% for m in get_flashed_messages() %}<div class="flash">{{ m }}</div>{% endfor %}
+    {% block content %}{% endblock %}
+  </main>
 </div>
+{% else %}
+<div class="auth">
+  <div class="auth-hero">
+    <div class="logo-mark" style="width:54px;height:54px;border-radius:14px">{{ icon('truck') }}</div>
+    <h1>نظام توزيع الشحنات</h1>
+    <p>إدارة الشحنات في جميع محافظات وولايات السلطنة، وحجوزات المندوبين ومواعيد الاستلام في مكان واحد.</p>
+  </div>
+  <div class="auth-forms">
+    {% for m in get_flashed_messages() %}<div class="flash">{{ m }}</div>{% endfor %}
+    {% block auth %}{% endblock %}
+  </div>
+</div>
+{% endif %}
 </body>
 </html>
 """,
 
     "login.html": """
 {% extends "base.html" %}
-{% block content %}
-<div class="card" style="max-width:380px;margin:40px auto">
+{% block auth %}
+<div class="card">
   <h3>دخول المندوب</h3>
   <form method="post" action="{{ url_for('d_login') }}">
+    <label>الاسم</label>
     <select name="name" required>
       <option value="">— اختر اسمك —</option>
       {% for d in driver_names %}<option>{{ d }}</option>{% endfor %}
     </select>
     <br><br>
-    <input type="password" name="pin" inputmode="numeric" placeholder="رمز PIN" required>
+    <label>رمز PIN</label>
+    <input type="password" name="pin" inputmode="numeric" placeholder="••••" required>
     <br><br>
     <button type="submit">دخول</button>
   </form>
 </div>
-<div class="card" style="max-width:380px;margin:20px auto">
-  <h3>دخول المدير</h3>
+<div class="card">
+  <h3>دخول الإدارة</h3>
   <form method="post" action="{{ url_for('login') }}">
-    <input type="password" name="password" placeholder="كلمة المرور" required>
+    <label>كلمة المرور</label>
+    <input type="password" name="password" required>
     <br><br>
-    <button type="submit" class="gray">دخول المدير</button>
+    <button type="submit" class="gray">دخول الإدارة</button>
   </form>
 </div>
 {% endblock %}
@@ -215,20 +309,45 @@ TEMPLATES = {
 
 <div class="kpis">
   <div class="kpi">متاحة للحجز<b>{{ totals[AVAILABLE] }}</b></div>
-  <div class="kpi">محجوزة للمندوبين<b>{{ totals[CLAIMED] }}</b></div>
-  <div class="kpi">تم توصيلها<b>{{ totals[DELIVERED] }}</b></div>
+  <div class="kpi k-warn">بانتظار الاستلام<b>{{ totals[WAITING] }}</b></div>
+  <div class="kpi k-info">مع المندوبين<b>{{ totals[PICKED] }}</b></div>
+  <div class="kpi k-ok">تم توصيلها<b>{{ totals[DELIVERED] }}</b></div>
+</div>
+
+<div class="card">
+  <h3>🕒 مواعيد الاستلام القادمة</h3>
+  <table>
+    <tr><th>موعد الاستلام</th><th>المندوب</th><th>الهاتف</th><th>المحافظة / الولاية</th><th>العدد</th><th></th></tr>
+    {% for c in upcoming %}
+    <tr>
+      <td><span class="time">{{ c.pickup_time }}</span></td>
+      <td class="big">{{ c.driver }}</td>
+      <td><a href="tel:{{ c.phone }}">{{ c.phone }}</a></td>
+      <td>{{ c.governorate }} / {{ c.wilaya }}</td>
+      <td class="num">{{ c.qty }}{% if c.forced %} <small title="أُجبر على أخذ الباقي">⚠️</small>{% endif %}</td>
+      <td>
+        <form method="post" action="{{ url_for('claim_picked', cid=c.id) }}" style="display:inline"
+              onsubmit='return confirm({{ ("تأكيد أن " ~ c.driver ~ " استلم " ~ c.qty ~ " شحنة؟")|tojson }})'>
+          <button class="small-btn green">✓ تأكيد الاستلام</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="empty">لا يوجد مندوب بانتظار الاستلام</td></tr>
+    {% endfor %}
+  </table>
 </div>
 
 <div class="card">
   <h3>الشحنات حسب المحافظة والولاية</h3>
   <table>
-    <tr><th>المحافظة / الولاية</th><th>متاحة</th><th>محجوزة</th><th>تم التوصيل</th><th>إنقاص المتاح</th></tr>
+    <tr><th>المحافظة / الولاية</th><th>متاحة</th><th>بانتظار الاستلام</th><th>مع المندوبين</th><th>تم التوصيل</th><th>إنقاص المتاح</th></tr>
     {% for g in summary %}
-      <tr class="gov"><td>{{ g.name }}</td><td>{{ g[AVAILABLE] }}</td><td>{{ g[CLAIMED] }}</td><td>{{ g[DELIVERED] }}</td><td></td></tr>
+      <tr class="gov"><td>{{ g.name }}</td><td>{{ g[AVAILABLE] }}</td><td>{{ g[WAITING] }}</td><td>{{ g[PICKED] }}</td><td>{{ g[DELIVERED] }}</td><td></td></tr>
       {% for w in g.wilayat %}
       <tr>
         <td>&nbsp;&nbsp;&nbsp;{{ w.name }}</td>
-        <td class="big">{{ w[AVAILABLE] }}</td><td>{{ w[CLAIMED] }}</td><td>{{ w[DELIVERED] }}</td>
+        <td class="big">{{ w[AVAILABLE] }}</td><td>{{ w[WAITING] }}</td><td>{{ w[PICKED] }}</td><td>{{ w[DELIVERED] }}</td>
         <td>
           {% if w[AVAILABLE] %}
           <form method="post" action="{{ url_for('remove_shipments') }}" class="qty"
@@ -243,7 +362,7 @@ TEMPLATES = {
       </tr>
       {% endfor %}
     {% else %}
-      <tr><td colspan="5">لا توجد شحنات بعد</td></tr>
+      <tr><td colspan="6" class="empty">لا توجد شحنات بعد</td></tr>
     {% endfor %}
   </table>
 </div>
@@ -254,9 +373,9 @@ TEMPLATES = {
 {% extends "base.html" %}
 {% block content %}
 <div class="kpis">
-  <div class="kpi">حجوزات بانتظار الاستلام<b>{{ waiting_count }}</b></div>
-  <div class="kpi">شحنات بانتظار الاستلام<b>{{ waiting_qty }}</b></div>
-  <div class="kpi">مع المندوبين الآن<b>{{ picked_qty }}</b></div>
+  <div class="kpi k-warn">حجوزات بانتظار الاستلام<b>{{ waiting_count }}</b></div>
+  <div class="kpi k-warn">شحنات بانتظار الاستلام<b>{{ waiting_qty }}</b></div>
+  <div class="kpi k-info">مع المندوبين الآن<b>{{ picked_qty }}</b></div>
 </div>
 
 <div class="card">
@@ -288,13 +407,14 @@ TEMPLATES = {
       <td>{{ c.governorate or '' }}</td>
       <td>{{ c.wilaya }}</td>
       <td class="big">{{ c.qty }}{% if c.forced %} <small title="أُجبر على أخذ الباقي">⚠️</small>{% endif %}</td>
-      <td class="big">{{ c.pickup_time }}</td>
-      <td>{{ c.created_at }}</td>
+      <td><span class="time">{{ c.pickup_time }}</span></td>
+      <td class="muted">{{ c.created_at }}</td>
       <td><span class="badge b-{{ c.status.split()[0] }}">{{ c.status }}</span></td>
       <td>
         {% if c.status == WAITING %}
-        <form method="post" action="{{ url_for('claim_picked', cid=c.id) }}" style="display:inline">
-          <button class="small-btn green">سلّمته الشحنات</button>
+        <form method="post" action="{{ url_for('claim_picked', cid=c.id) }}" style="display:inline"
+              onsubmit='return confirm({{ ("تأكيد أن " ~ c.driver ~ " استلم " ~ c.qty ~ " شحنة؟")|tojson }})'>
+          <button class="small-btn green">✓ تأكيد الاستلام</button>
         </form>
         {% endif %}
         {% if c.status in (WAITING, PICKED) %}
@@ -456,7 +576,7 @@ TEMPLATES = {
       <td>{{ c.governorate or '' }}</td>
       <td class="big">{{ c.wilaya }}</td>
       <td class="big">{{ c.qty }}</td>
-      <td>{{ c.pickup_time }}</td>
+      <td><span class="time">{{ c.pickup_time }}</span></td>
       <td><span class="badge b-{{ c.status.split()[0] }}">{{ c.status }}</span></td>
       <td>
         {% if c.status == PICKED %}
@@ -616,22 +736,30 @@ def index():
 # ----------------------------------------------------------------------
 @app.route("/shipments")
 def shipments():
-    df = db_df("SELECT governorate, wilaya, status, COUNT(*) AS n FROM shipments "
-               "GROUP BY governorate, wilaya, status")
-    totals = {s: int(df.loc[df["status"] == s, "n"].sum()) for s in (AVAILABLE, CLAIMED, DELIVERED)}
+    # الشحنة المحجوزة تأخذ حالة حجزها: بانتظار الاستلام أو مع المندوب
+    df = db_df(
+        """SELECT s.governorate, s.wilaya,
+                  CASE WHEN s.status = ? THEN COALESCE(c.status, ?) ELSE s.status END AS status,
+                  COUNT(*) AS n
+           FROM shipments s LEFT JOIN claims c ON c.id = s.claim_id
+           GROUP BY 1, 2, 3""", (CLAIMED, WAITING))
+    columns = (AVAILABLE, WAITING, PICKED, DELIVERED)
+    totals = {s: int(df.loc[df["status"] == s, "n"].sum()) for s in columns}
     summary = []
     for gov in sorted(df["governorate"].unique(), key=gov_order):
         gdf = df[df["governorate"] == gov]
         g = {"name": gov, "wilayat": []}
-        for s in (AVAILABLE, CLAIMED, DELIVERED):
+        for s in columns:
             g[s] = int(gdf.loc[gdf["status"] == s, "n"].sum())
         for wil in sorted(gdf["wilaya"].unique()):
             wdf = gdf[gdf["wilaya"] == wil]
             g["wilayat"].append({"name": wil, **{s: int(wdf.loc[wdf["status"] == s, "n"].sum())
-                                                 for s in (AVAILABLE, CLAIMED, DELIVERED)}})
+                                                 for s in columns}})
         summary.append(g)
-    return render_template("shipments.html", title="الشحنات", oman=OMAN,
-                           totals=totals, summary=summary, max_bulk=MAX_BULK)
+    upcoming = db_df("SELECT * FROM claims WHERE status = ? ORDER BY pickup_time", (WAITING,)).to_dict("records")
+    return render_template("shipments.html", title="الشحنات",
+                           subtitle="أضف الشحنات لكل محافظة وولاية وتابع مواعيد استلام المندوبين",
+                           oman=OMAN, totals=totals, summary=summary, upcoming=upcoming, max_bulk=MAX_BULK)
 
 
 @app.route("/shipments/add", methods=["POST"])
@@ -697,7 +825,8 @@ def claims():
                  (*params, WAITING, PICKED)).to_dict("records")
     stats = db_df("SELECT status, COUNT(*) AS n, COALESCE(SUM(qty), 0) AS q FROM claims GROUP BY status")
     stat = {r.status: (int(r.n), int(r.q)) for r in stats.itertuples()}
-    return render_template("claims.html", title="حجوزات المندوبين", rows=rows,
+    return render_template("claims.html", title="حجوزات المندوبين",
+                           subtitle="من حجز، وكم، ومن أي ولاية، ومتى سيأتي للاستلام", rows=rows,
                            statuses=CLAIM_STATUSES, f_status=f_status, min_left=get_min_left(),
                            waiting_count=stat.get(WAITING, (0, 0))[0],
                            waiting_qty=stat.get(WAITING, (0, 0))[1],
@@ -754,7 +883,7 @@ def drivers():
            GROUP BY d.id ORDER BY d.name""", (CLAIMED, DELIVERED)).to_dict("records")
     for r in rows:
         r["claimed"], r["delivered"] = int(r["claimed"]), int(r["delivered"])
-    return render_template("drivers.html", title="المندوبين", rows=rows)
+    return render_template("drivers.html", title="المندوبين", subtitle="أضف المندوبين وأعطِ كل واحد رمز PIN للدخول", rows=rows)
 
 
 @app.route("/drivers/add", methods=["POST"])
@@ -823,7 +952,7 @@ def available_map():
 @app.route("/driver")
 def d_home():
     phone = db_df("SELECT phone FROM drivers WHERE name = ?", (session["driver"],))["phone"][0] or ""
-    return render_template("d_home.html", title="حجز شحنات", avail=available_map(),
+    return render_template("d_home.html", title="حجز شحنات", subtitle="اختر الولاية وعدد الشحنات وموعد الاستلام", avail=available_map(),
                            min_left=get_min_left(), phone=phone,
                            now_local=datetime.now(TZ).strftime("%Y-%m-%dT%H:%M"))
 
@@ -888,7 +1017,7 @@ def d_claim():
 def d_mine():
     claims_list = db_df("SELECT * FROM claims WHERE driver = ? AND status <> ? ORDER BY id DESC LIMIT 50",
                         (session["driver"], CANCELLED)).to_dict("records")
-    return render_template("d_mine.html", title="حجوزاتي", claims=claims_list)
+    return render_template("d_mine.html", title="حجوزاتي", subtitle="حجوزاتك ومواعيد استلامها", claims=claims_list)
 
 
 @app.route("/driver/claims/<int:cid>/cancel", methods=["POST"])
