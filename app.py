@@ -25,6 +25,13 @@ AVAILABLE = "متاح"
 CLAIMED = "مستلم"
 DELIVERED = "تم التوصيل"
 ORDER_STATUSES = [AVAILABLE, CLAIMED, DELIVERED]
+# حالات حجز المندوب
+WAITING = "بانتظار الاستلام"
+PICKED = "استلمها المندوب"
+CLAIM_DONE = "تم التوصيل"
+CANCELLED = "ملغي"
+CLAIM_STATUSES = [WAITING, PICKED, CLAIM_DONE, CANCELLED]
+DEFAULT_MIN_LEFT = 10
 EXPENSE_TYPES = ["بترول", "أكل", "صيانة", "أخرى"]
 UNSPECIFIED = "غير محدد"
 MAX_BULK = 500
@@ -64,7 +71,24 @@ CREATE TABLE IF NOT EXISTS orders (
     notes TEXT,
     status TEXT NOT NULL DEFAULT 'متاح',
     claimed_at TEXT,
-    delivered_at TEXT
+    delivered_at TEXT,
+    claim_id INTEGER
+);
+CREATE TABLE IF NOT EXISTS claims (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    driver TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    governorate TEXT,
+    wilaya TEXT NOT NULL,
+    qty INTEGER NOT NULL,
+    pickup_time TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    status TEXT NOT NULL,
+    forced INTEGER NOT NULL DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT
 );
 CREATE TABLE IF NOT EXISTS expenses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,7 +102,8 @@ CREATE TABLE IF NOT EXISTS expenses (
 CREATE TABLE IF NOT EXISTS drivers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
-    pin_hash TEXT
+    pin_hash TEXT,
+    phone TEXT
 );
 """
 
@@ -88,6 +113,11 @@ ORDER_COLUMNS_AR = {
     "fee": "سعر التوصيل", "payment_status": "حالة الدفع", "order_date": "التاريخ",
     "notes": "ملاحظات / العنوان", "status": "حالة الطلب",
     "claimed_at": "وقت الاستلام", "delivered_at": "وقت التوصيل",
+}
+CLAIM_COLUMNS_AR = {
+    "id": "رقم الحجز", "driver": "المندوب", "phone": "الهاتف", "governorate": "المحافظة",
+    "wilaya": "الولاية", "qty": "العدد", "pickup_time": "موعد الاستلام",
+    "created_at": "وقت الحجز", "status": "الحالة", "forced": "أُجبر على الباقي",
 }
 EXPENSE_COLUMNS_AR = {
     "id": "رقم", "driver": "السيارة/المندوب", "expense_date": "التاريخ",
@@ -135,6 +165,9 @@ TEMPLATES = {
   .big{font-size:20px;font-weight:bold}
   details summary{cursor:pointer;color:#1f3a5f}
   .tabs a{display:inline-block;margin-left:10px}
+  .warn{background:#fdecea;color:#a12;padding:10px;border-radius:6px;font-weight:bold}
+  .ok{background:#e8f7ee;color:#0a6;padding:10px;border-radius:6px}
+  .b-بانتظار{background:#f0ad4e}.b-استلمها{background:#337ab7}.b-ملغي{background:#999}
 </style>
 </head>
 <body>
@@ -142,14 +175,15 @@ TEMPLATES = {
   {% if session.get('role') == 'admin' %}
     <a href="{{ url_for('dashboard') }}">لوحة التحكم</a>
     <a href="{{ url_for('orders') }}">الطلبيات</a>
+    <a href="{{ url_for('claims') }}">حجوزات المندوبين</a>
     <a href="{{ url_for('expenses') }}">المصروفات</a>
     <a href="{{ url_for('drivers') }}">المندوبين</a>
     <a href="{{ url_for('export_excel') }}">تصدير Excel</a>
     <a href="{{ url_for('logout') }}" style="margin-right:auto">خروج</a>
   {% elif session.get('role') == 'driver' %}
     <span>👤 {{ session.get('driver') }}</span>
-    <a href="{{ url_for('d_home') }}">الطلبيات المتاحة</a>
-    <a href="{{ url_for('d_mine') }}">طلبياتي</a>
+    <a href="{{ url_for('d_home') }}">استلام طلبيات</a>
+    <a href="{{ url_for('d_mine') }}">حجوزاتي</a>
     <a href="{{ url_for('logout') }}" style="margin-right:auto">خروج</a>
   {% else %}
     <span>نظام توزيع الطلبيات</span>
@@ -320,49 +354,81 @@ TEMPLATES = {
     "d_home.html": """
 {% extends "base.html" %}
 {% block content %}
-<div class="kpis">
-  <div class="kpi">طلبيات متاحة الآن<b>{{ total_available }}</b></div>
-  <div class="kpi">معي حالياً<b>{{ mine_count }}</b></div>
-  <div class="kpi">وصّلتها اليوم<b>{{ delivered_today }}</b></div>
+<div class="card">
+  <h3>📦 استلام طلبيات</h3>
+  {% if avail %}
+  <form method="post" action="{{ url_for('d_claim') }}" class="grid" id="claimForm">
+    <div><label>المحافظة</label>
+      <select name="governorate" id="gov" required onchange="fillWil()">
+        <option value="">— اختر —</option>
+        {% for g in avail %}<option value="{{ g }}">{{ g }} ({{ avail[g].values()|sum }})</option>{% endfor %}
+      </select></div>
+    <div><label>الولاية</label>
+      <select name="wilaya" id="wil" required onchange="check()"><option value="">— اختر المحافظة أولاً —</option></select></div>
+    <div><label>كم طلبية تستلم؟</label>
+      <input name="qty" id="qty" type="number" min="1" required oninput="check()"></div>
+    <div><label>متى تجي تستلم؟</label>
+      <input name="pickup_time" type="datetime-local" min="{{ now_local }}" required></div>
+    <div><label>رقم هاتفك</label>
+      <input name="phone" value="{{ phone }}" inputmode="tel" required></div>
+    <button type="submit" class="green">تأكيد الاستلام</button>
+  </form>
+  <div id="msg" style="margin-top:10px"></div>
+  <p style="color:#666">ملاحظة: إذا بقي في الولاية أقل من {{ min_left }} طلبيات بعد استلامك، يجب أن تستلم الباقي كله.</p>
+  <script>
+    const AVAIL = {{ avail|tojson }}, MIN_LEFT = {{ min_left }};
+    function fillWil(g) {
+      const gov = document.getElementById('gov');
+      if (g) gov.value = g;
+      const ws = AVAIL[gov.value] || {};
+      document.getElementById('wil').innerHTML = '<option value="">— اختر —</option>' +
+        Object.keys(ws).map(w => '<option value="' + w + '">' + w + ' (' + ws[w] + ')</option>').join('');
+      check();
+    }
+    function pick(g, w) {
+      fillWil(g);
+      document.getElementById('wil').value = w;
+      check();
+      document.getElementById('qty').focus();
+      window.scrollTo(0, 0);
+    }
+    function check() {
+      const g = document.getElementById('gov').value, w = document.getElementById('wil').value;
+      const qtyEl = document.getElementById('qty'), msg = document.getElementById('msg');
+      const avail = (AVAIL[g] || {})[w] || 0, q = parseInt(qtyEl.value) || 0;
+      qtyEl.max = avail || '';
+      if (!avail) { msg.innerHTML = ''; return; }
+      const left = avail - q;
+      if (q > avail) {
+        msg.innerHTML = '<div class="warn">المتاح في ' + w + ' فقط ' + avail + '</div>';
+      } else if (q > 0 && left > 0 && left < MIN_LEFT) {
+        msg.innerHTML = '<div class="warn">سيبقى ' + left + ' فقط — يجب أن تستلم الكل: ' + avail + ' طلبية</div>';
+        qtyEl.value = avail;
+      } else if (q > 0) {
+        msg.innerHTML = '<div class="ok">ستستلم ' + q + ' من ' + w + '، ويبقى ' + left + '</div>';
+      } else {
+        msg.innerHTML = '<div class="ok">المتاح في ' + w + ': ' + avail + '</div>';
+      }
+    }
+  </script>
+  {% else %}
+    <p class="big">لا توجد طلبيات متاحة حالياً 👍</p>
+  {% endif %}
 </div>
 
 <div class="card">
-  <h3>الطلبيات المتاحة — اختر كم تستلم ومن وين</h3>
-  {% for g in groups %}
-    <h4 style="margin-bottom:6px">📍 محافظة {{ g.name }} ({{ g.total }})</h4>
-    <table>
-      <tr><th>الولاية</th><th>المتاح</th><th>كم تستلم؟</th></tr>
-      {% for w in g.wilayat %}
+  <h3>المتاح الآن حسب المحافظة والولاية</h3>
+  <table>
+    <tr><th>المحافظة</th><th>الولاية</th><th>العدد المتاح</th><th></th></tr>
+    {% for g, ws in avail.items() %}
+      {% for w, n in ws.items() %}
       <tr>
-        <td>
-          <span class="big">{{ w.name }}</span>
-          <details><summary>عرض التفاصيل</summary>
-            <table>
-              {% for o in w.orders %}
-              <tr>
-                <td>#{{ o.id }}</td><td>{{ o.notes or '' }}</td><td>{{ '%.3f'|format(o.fee) }} ر.ع</td>
-                <td><form method="post" action="{{ url_for('d_claim_one', oid=o.id) }}">
-                  <button class="small-btn green">استلم هذا</button></form></td>
-              </tr>
-              {% endfor %}
-            </table>
-          </details>
-        </td>
-        <td class="big">{{ w.count }}</td>
-        <td>
-          <form method="post" action="{{ url_for('d_claim') }}" class="qty">
-            <input type="hidden" name="governorate" value="{{ g.name }}">
-            <input type="hidden" name="wilaya" value="{{ w.name }}">
-            <input name="qty" type="number" min="1" max="{{ w.count }}" value="{{ w.count }}" required>
-            <button class="green">استلم</button>
-          </form>
-        </td>
+        <td>{{ g }}</td><td class="big">{{ w }}</td><td class="big">{{ n }}</td>
+        <td><button class="small-btn green" onclick="pick({{ g|tojson }}, {{ w|tojson }})">اختر</button></td>
       </tr>
       {% endfor %}
-    </table>
-  {% else %}
-    <p>لا توجد طلبيات متاحة حالياً 👍</p>
-  {% endfor %}
+    {% endfor %}
+  </table>
 </div>
 {% endblock %}
 """,
@@ -371,41 +437,110 @@ TEMPLATES = {
 {% extends "base.html" %}
 {% block content %}
 <div class="card">
-  <h3>طلبياتي ({{ rows|length }})</h3>
+  <h3>حجوزاتي</h3>
   <table>
-    <tr><th>#</th><th>المحافظة</th><th>الولاية</th><th>العنوان</th><th>الزبون</th><th>السعر</th><th></th></tr>
-    {% for r in rows %}
+    <tr><th>#</th><th>المحافظة</th><th>الولاية</th><th>العدد</th><th>موعد الاستلام</th><th>الحالة</th><th></th></tr>
+    {% for c in claims %}
     <tr>
-      <td>{{ r.id }}</td>
-      <td>{{ r.governorate or '' }}</td>
-      <td class="big">{{ r.wilaya }}</td>
-      <td>{{ r.notes or '' }}</td>
-      <td>{% if r.customer_phone %}<a href="tel:{{ r.customer_phone }}">{{ r.customer_phone }}</a>{% endif %}</td>
-      <td>{{ '%.3f'|format(r.fee) }}</td>
+      <td>{{ c.id }}</td>
+      <td>{{ c.governorate or '' }}</td>
+      <td class="big">{{ c.wilaya }}</td>
+      <td class="big">{{ c.qty }}</td>
+      <td>{{ c.pickup_time }}</td>
+      <td><span class="badge b-{{ c.status.split()[0] }}">{{ c.status }}</span></td>
       <td>
-        <form method="post" action="{{ url_for('d_deliver', oid=r.id) }}" style="display:inline">
-          <button class="small-btn green">✓ تم التوصيل</button>
+        {% if c.status == PICKED %}
+        <form method="post" action="{{ url_for('d_claim_done', cid=c.id) }}" style="display:inline"
+              onsubmit="return confirm('تأكيد توصيل كل طلبيات هذا الحجز؟')">
+          <button class="small-btn green">✓ وصّلت الكل</button>
         </form>
-        <form method="post" action="{{ url_for('d_release', oid=r.id) }}" style="display:inline"
-              onsubmit="return confirm('إرجاع الطلب ليصبح متاحاً لغيرك؟')">
-          <button class="small-btn gray">إرجاع</button>
+        {% endif %}
+        {% if c.status == WAITING %}
+        <form method="post" action="{{ url_for('d_claim_cancel', cid=c.id) }}" style="display:inline"
+              onsubmit="return confirm('إلغاء الحجز وإرجاع الطلبيات؟')">
+          <button class="small-btn gray">إلغاء الحجز</button>
         </form>
+        {% endif %}
       </td>
     </tr>
+    {% if c.orders %}
+    <tr><td></td><td colspan="6">
+      <details><summary>تفاصيل الطلبيات ({{ c.orders|length }})</summary>
+        <table>
+          {% for o in c.orders %}
+          <tr><td>#{{ o.id }}</td><td>{{ o.notes or '' }}</td>
+              <td>{% if o.customer_phone %}<a href="tel:{{ o.customer_phone }}">{{ o.customer_phone }}</a>{% endif %}</td>
+              <td>{{ o.status }}</td></tr>
+          {% endfor %}
+        </table>
+      </details>
+    </td></tr>
+    {% endif %}
     {% else %}
-    <tr><td colspan="7">ليس معك طلبيات حالياً — <a href="{{ url_for('d_home') }}">استلم من هنا</a></td></tr>
+    <tr><td colspan="7">ليس عندك حجوزات — <a href="{{ url_for('d_home') }}">استلم من هنا</a></td></tr>
     {% endfor %}
   </table>
 </div>
+{% endblock %}
+""",
+
+    "claims.html": """
+{% extends "base.html" %}
+{% block content %}
+<div class="kpis">
+  <div class="kpi">حجوزات بانتظار الاستلام<b>{{ waiting_count }}</b></div>
+  <div class="kpi">طلبيات بانتظار الاستلام<b>{{ waiting_qty }}</b></div>
+  <div class="kpi">مع المندوبين الآن<b>{{ picked_qty }}</b></div>
+</div>
 
 <div class="card">
-  <h3>آخر ما وصّلته</h3>
+  <form method="post" action="{{ url_for('set_min_left') }}" class="qty">
+    <label>إجبار المندوب على استلام الباقي إذا بقي أقل من</label>
+    <input name="min_left" type="number" min="0" value="{{ min_left }}" required>
+    <span>طلبيات في الولاية</span>
+    <button class="small-btn">حفظ</button>
+  </form>
+</div>
+
+<div class="card">
+  <h3>حجوزات المندوبين</h3>
+  <form method="get" class="qty" style="margin-bottom:10px">
+    <select name="status" style="width:auto">
+      <option value="">كل الحالات</option>
+      {% for s in statuses %}<option {% if s == f_status %}selected{% endif %}>{{ s }}</option>{% endfor %}
+    </select>
+    <button class="small-btn">تصفية</button>
+  </form>
   <table>
-    <tr><th>#</th><th>الولاية</th><th>العنوان</th><th>وقت التوصيل</th></tr>
-    {% for r in done %}
-    <tr><td>{{ r.id }}</td><td>{{ r.wilaya }}</td><td>{{ r.notes or '' }}</td><td>{{ r.delivered_at }}</td></tr>
+    <tr><th>#</th><th>المندوب</th><th>الهاتف</th><th>المحافظة</th><th>الولاية</th><th>العدد</th>
+        <th>موعد الاستلام</th><th>وقت الحجز</th><th>الحالة</th><th>إجراءات</th></tr>
+    {% for c in rows %}
+    <tr>
+      <td>{{ c.id }}</td>
+      <td class="big">{{ c.driver }}</td>
+      <td><a href="tel:{{ c.phone }}">{{ c.phone }}</a></td>
+      <td>{{ c.governorate or '' }}</td>
+      <td>{{ c.wilaya }}</td>
+      <td class="big">{{ c.qty }}{% if c.forced %} <small title="أُجبر على استلام الباقي">⚠️</small>{% endif %}</td>
+      <td class="big">{{ c.pickup_time }}</td>
+      <td>{{ c.created_at }}</td>
+      <td><span class="badge b-{{ c.status.split()[0] }}">{{ c.status }}</span></td>
+      <td>
+        {% if c.status == WAITING %}
+        <form method="post" action="{{ url_for('claim_picked', cid=c.id) }}" style="display:inline">
+          <button class="small-btn green">سلّمته الطلبيات</button>
+        </form>
+        {% endif %}
+        {% if c.status in (WAITING, PICKED) %}
+        <form method="post" action="{{ url_for('claim_cancel', cid=c.id) }}" style="display:inline"
+              onsubmit="return confirm('إلغاء الحجز وإرجاع الطلبيات للمتاح؟')">
+          <button class="small-btn red">إلغاء</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
     {% else %}
-    <tr><td colspan="4">لا يوجد</td></tr>
+    <tr><td colspan="10">لا توجد حجوزات</td></tr>
     {% endfor %}
   </table>
 </div>
@@ -478,6 +613,7 @@ TEMPLATES = {
   <h3>إضافة مندوب</h3>
   <form method="post" action="{{ url_for('add_driver') }}" class="grid">
     <input name="name" placeholder="اسم المندوب أو رقم السيارة" required>
+    <input name="phone" inputmode="tel" placeholder="رقم الهاتف" required>
     <input name="pin" inputmode="numeric" pattern="[0-9]{4,8}" placeholder="رمز PIN للدخول (4 أرقام أو أكثر)" required>
     <button type="submit">إضافة</button>
   </form>
@@ -487,11 +623,12 @@ TEMPLATES = {
 <div class="card">
   <h3>قائمة المندوبين</h3>
   <table>
-    <tr><th>#</th><th>الاسم</th><th>مستلمة حالياً</th><th>تم التوصيل</th><th>تغيير PIN</th><th>إجراءات</th></tr>
+    <tr><th>#</th><th>الاسم</th><th>الهاتف</th><th>مستلمة حالياً</th><th>تم التوصيل</th><th>تغيير PIN</th><th>إجراءات</th></tr>
     {% for r in rows %}
     <tr>
       <td>{{ r.id }}</td>
       <td>{{ r.name }}{% if not r.pin_hash %} <span class="badge b-متاح">بدون PIN</span>{% endif %}</td>
+      <td>{% if r.phone %}<a href="tel:{{ r.phone }}">{{ r.phone }}</a>{% endif %}</td>
       <td>{{ r.claimed }}</td>
       <td>{{ r.delivered }}</td>
       <td>
@@ -508,7 +645,7 @@ TEMPLATES = {
       </td>
     </tr>
     {% else %}
-    <tr><td colspan="6">لا يوجد مندوبون بعد</td></tr>
+    <tr><td colspan="7">لا يوجد مندوبون بعد</td></tr>
     {% endfor %}
   </table>
 </div>
@@ -597,7 +734,8 @@ TEMPLATES = {
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "change-this-secret-key")
 app.jinja_loader = DictLoader(TEMPLATES)
-app.jinja_env.globals.update(AVAILABLE=AVAILABLE, CLAIMED=CLAIMED, DELIVERED=DELIVERED)
+app.jinja_env.globals.update(AVAILABLE=AVAILABLE, CLAIMED=CLAIMED, DELIVERED=DELIVERED,
+                             WAITING=WAITING, PICKED=PICKED)
 
 
 def _columns(conn, table):
@@ -611,9 +749,10 @@ def init_db():
 
     # ترقية قاعدة بيانات النسخة السابقة
     cols = _columns(conn, "orders")
-    for col in ("governorate", "claimed_at", "delivered_at"):
+    for col, typ in (("governorate", "TEXT"), ("claimed_at", "TEXT"),
+                     ("delivered_at", "TEXT"), ("claim_id", "INTEGER")):
         if col not in cols:
-            conn.execute(f"ALTER TABLE orders ADD COLUMN {col} TEXT")
+            conn.execute(f"ALTER TABLE orders ADD COLUMN {col} {typ}")
     if "status" not in cols:
         conn.execute(f"ALTER TABLE orders ADD COLUMN status TEXT NOT NULL DEFAULT '{AVAILABLE}'")
         # الطلبات القديمة كانت مسجلة باسم المندوب مباشرة
@@ -621,8 +760,10 @@ def init_db():
     for wilaya, gov in WILAYA_TO_GOV.items():
         conn.execute("UPDATE orders SET governorate = ? WHERE governorate IS NULL AND wilaya = ?",
                      (gov, wilaya))
-    if "pin_hash" not in _columns(conn, "drivers"):
-        conn.execute("ALTER TABLE drivers ADD COLUMN pin_hash TEXT")
+    driver_cols = _columns(conn, "drivers")
+    for col in ("pin_hash", "phone"):
+        if col not in driver_cols:
+            conn.execute(f"ALTER TABLE drivers ADD COLUMN {col} TEXT")
 
     # نقل أسماء المندوبين المكتوبة سابقاً إلى القائمة الثابتة
     conn.execute(
@@ -660,6 +801,12 @@ def db_df(sql, params=()):
         return pd.read_sql_query(sql, conn, params=params)
     finally:
         conn.close()
+
+
+def get_min_left():
+    """إذا بقي في الولاية أقل من هذا العدد يُجبَر المندوب على استلام الباقي."""
+    row = db_df("SELECT value FROM settings WHERE key = 'min_left'")
+    return int(row["value"][0]) if not row.empty else DEFAULT_MIN_LEFT
 
 
 def driver_names():
@@ -872,8 +1019,11 @@ def toggle_payment(oid):
 
 @app.route("/orders/<int:oid>/unassign", methods=["POST"])
 def unassign_order(oid):
-    db_exec("UPDATE orders SET driver = '', status = ?, claimed_at = NULL WHERE id = ? AND status = ?",
-            (AVAILABLE, oid, CLAIMED))
+    # إنقاص عدد الحجز المرتبط بالطلبية قبل فكّها عنه
+    db_exec("UPDATE claims SET qty = qty - 1 WHERE id = (SELECT claim_id FROM orders WHERE id = ? AND status = ?)",
+            (oid, CLAIMED))
+    db_exec("UPDATE orders SET driver = '', status = ?, claimed_at = NULL, claim_id = NULL "
+            "WHERE id = ? AND status = ?", (AVAILABLE, oid, CLAIMED))
     flash("رجعت الطلبية متاحة للمندوبين")
     return redirect(request.referrer or url_for("orders"))
 
@@ -888,30 +1038,40 @@ def delete_order(oid):
 # ----------------------------------------------------------------------
 # 2) صفحات المندوب
 # ----------------------------------------------------------------------
+def available_map():
+    """{المحافظة: {الولاية: عدد الطلبيات المتاحة}} مرتبة حسب المحافظات."""
+    df = db_df("SELECT governorate, wilaya, COUNT(*) AS n FROM orders WHERE status = ? "
+               "GROUP BY governorate, wilaya ORDER BY n DESC", (AVAILABLE,))
+    df["governorate"] = df["governorate"].fillna(UNSPECIFIED)
+    result = {}
+    for gov in sorted(df["governorate"].unique(), key=lambda g: list(OMAN).index(g) if g in OMAN else 99):
+        gdf = df[df["governorate"] == gov]
+        result[gov] = {r.wilaya: int(r.n) for r in gdf.itertuples()}
+    return result
+
+
+def release_claim(conn, cid):
+    """يرجع طلبيات الحجز التي لم توصَّل إلى المتاح."""
+    conn.execute("UPDATE orders SET driver = '', status = ?, claimed_at = NULL, claim_id = NULL "
+                 "WHERE claim_id = ? AND status = ?", (AVAILABLE, cid, CLAIMED))
+    conn.execute("UPDATE claims SET status = ? WHERE id = ?", (CANCELLED, cid))
+
+
 @app.route("/driver")
 def d_home():
-    me = session["driver"]
-    avail = db_df("SELECT id, governorate, wilaya, notes, fee FROM orders WHERE status = ? ORDER BY id",
-                  (AVAILABLE,))
-    avail["governorate"] = avail["governorate"].fillna(UNSPECIFIED)
-    groups = []
-    for gov in sorted(avail["governorate"].unique(), key=lambda g: list(OMAN).index(g) if g in OMAN else 99):
-        gdf = avail[avail["governorate"] == gov]
-        wilayat = []
-        for wil, wdf in gdf.groupby("wilaya"):
-            wilayat.append({"name": wil, "count": len(wdf), "orders": wdf.to_dict("records")})
-        wilayat.sort(key=lambda w: -w["count"])
-        groups.append({"name": gov, "total": len(gdf), "wilayat": wilayat})
-
-    mine = db_df("SELECT COUNT(*) AS n FROM orders WHERE driver = ? AND status = ?", (me, CLAIMED))["n"][0]
-    today = db_df("SELECT COUNT(*) AS n FROM orders WHERE driver = ? AND status = ? AND delivered_at LIKE ?",
-                  (me, DELIVERED, today_oman().isoformat() + "%"))["n"][0]
-    return render_template("d_home.html", title="الطلبيات المتاحة", groups=groups,
-                           total_available=len(avail), mine_count=int(mine), delivered_today=int(today))
+    phone = db_df("SELECT phone FROM drivers WHERE name = ?", (session["driver"],))["phone"][0] or ""
+    return render_template("d_home.html", title="استلام طلبيات", avail=available_map(),
+                           min_left=get_min_left(), phone=phone,
+                           now_local=datetime.now(TZ).strftime("%Y-%m-%dT%H:%M"))
 
 
 @app.route("/driver/claim", methods=["POST"])
 def d_claim():
+    me = session["driver"]
+    gov = request.form.get("governorate", "")
+    wilaya = request.form.get("wilaya", "")
+    phone = request.form.get("phone", "").strip()
+    pickup = request.form.get("pickup_time", "").strip().replace("T", " ")
     try:
         qty = int(request.form.get("qty", "0"))
         if qty < 1:
@@ -919,56 +1079,142 @@ def d_claim():
     except ValueError:
         flash("اكتب عدداً صحيحاً")
         return redirect(url_for("d_home"))
-    gov = request.form.get("governorate", "")
-    wilaya = request.form.get("wilaya", "")
+    if not phone or not pickup:
+        flash("اكتب رقم هاتفك وموعد الاستلام")
+        return redirect(url_for("d_home"))
+
     gov_clause = "governorate IS NULL" if gov == UNSPECIFIED else "governorate = ?"
     gov_params = () if gov == UNSPECIFIED else (gov,)
-    # تحديث واحد ذرّي حتى لا يستلم مندوبان نفس الطلبية
-    taken = db_exec(
-        f"""UPDATE orders SET driver = ?, status = ?, claimed_at = ?
-            WHERE id IN (SELECT id FROM orders WHERE status = ? AND wilaya = ? AND {gov_clause}
-                         ORDER BY id LIMIT ?)""",
-        (session["driver"], CLAIMED, now_oman(), AVAILABLE, wilaya, *gov_params, qty),
-    )
-    if taken:
-        flash(f"✅ استلمت {taken} طلبية في {wilaya}" + (" (المتاح كان أقل مما طلبت)" if taken < qty else ""))
-        return redirect(url_for("d_mine"))
-    flash("لم تعد هناك طلبيات متاحة في هذه الولاية")
-    return redirect(url_for("d_home"))
+    min_left = get_min_left()
 
+    conn = sqlite3.connect(DB_PATH, isolation_level=None)
+    try:
+        # قفل الكتابة حتى لا يحجز مندوبان نفس الطلبيات في نفس اللحظة
+        conn.execute("BEGIN IMMEDIATE")
+        avail = conn.execute(f"SELECT COUNT(*) FROM orders WHERE status = ? AND wilaya = ? AND {gov_clause}",
+                             (AVAILABLE, wilaya, *gov_params)).fetchone()[0]
+        if avail == 0:
+            conn.execute("ROLLBACK")
+            flash("لم تعد هناك طلبيات متاحة في هذه الولاية")
+            return redirect(url_for("d_home"))
+        qty = min(qty, avail)
+        forced = 0 < avail - qty < min_left
+        if forced:
+            qty = avail
+        cid = conn.execute(
+            """INSERT INTO claims (driver, phone, governorate, wilaya, qty, pickup_time, created_at, status, forced)
+               VALUES (?,?,?,?,?,?,?,?,?)""",
+            (me, phone, None if gov == UNSPECIFIED else gov, wilaya, qty, pickup, now_oman(), WAITING, int(forced)),
+        ).lastrowid
+        conn.execute(
+            f"""UPDATE orders SET driver = ?, status = ?, claimed_at = ?, claim_id = ?
+                WHERE id IN (SELECT id FROM orders WHERE status = ? AND wilaya = ? AND {gov_clause}
+                             ORDER BY id LIMIT ?)""",
+            (me, CLAIMED, now_oman(), cid, AVAILABLE, wilaya, *gov_params, qty),
+        )
+        conn.execute("UPDATE drivers SET phone = ? WHERE name = ?", (phone, me))
+        conn.execute("COMMIT")
+    finally:
+        conn.close()
 
-@app.route("/driver/claim/<int:oid>", methods=["POST"])
-def d_claim_one(oid):
-    taken = db_exec("UPDATE orders SET driver = ?, status = ?, claimed_at = ? WHERE id = ? AND status = ?",
-                    (session["driver"], CLAIMED, now_oman(), oid, AVAILABLE))
-    flash("✅ استلمت الطلبية" if taken else "هذه الطلبية استلمها مندوب آخر")
-    return redirect(url_for("d_home"))
+    msg = f"✅ تم حجز {qty} طلبية في {wilaya} — موعد الاستلام {pickup}"
+    if forced:
+        msg += f" (أُضيف الباقي لأنه أقل من {min_left})"
+    flash(msg)
+    return redirect(url_for("d_mine"))
 
 
 @app.route("/driver/mine")
 def d_mine():
     me = session["driver"]
-    rows = db_df("SELECT * FROM orders WHERE driver = ? AND status = ? ORDER BY governorate, wilaya, id",
-                 (me, CLAIMED)).to_dict("records")
-    done = db_df("SELECT * FROM orders WHERE driver = ? AND status = ? ORDER BY delivered_at DESC LIMIT 30",
-                 (me, DELIVERED)).to_dict("records")
-    return render_template("d_mine.html", title="طلبياتي", rows=rows, done=done)
+    claims_list = db_df("SELECT * FROM claims WHERE driver = ? AND status <> ? ORDER BY id DESC LIMIT 50",
+                        (me, CANCELLED)).to_dict("records")
+    for c in claims_list:
+        c["orders"] = db_df("SELECT id, notes, customer_phone, status FROM orders WHERE claim_id = ? ORDER BY id",
+                            (c["id"],)).to_dict("records")
+    return render_template("d_mine.html", title="حجوزاتي", claims=claims_list)
 
 
-@app.route("/driver/<int:oid>/deliver", methods=["POST"])
-def d_deliver(oid):
-    db_exec("UPDATE orders SET status = ?, delivered_at = ? WHERE id = ? AND driver = ? AND status = ?",
-            (DELIVERED, now_oman(), oid, session["driver"], CLAIMED))
-    flash("✅ تم تسجيل التوصيل")
+@app.route("/driver/claims/<int:cid>/cancel", methods=["POST"])
+def d_claim_cancel(cid):
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        if conn.execute("SELECT 1 FROM claims WHERE id = ? AND driver = ? AND status = ?",
+                        (cid, session["driver"], WAITING)).fetchone():
+            release_claim(conn, cid)
+            conn.commit()
+            flash("تم إلغاء الحجز ورجعت الطلبيات متاحة")
+    finally:
+        conn.close()
     return redirect(url_for("d_mine"))
 
 
-@app.route("/driver/<int:oid>/release", methods=["POST"])
-def d_release(oid):
-    db_exec("UPDATE orders SET driver = '', status = ?, claimed_at = NULL WHERE id = ? AND driver = ? AND status = ?",
-            (AVAILABLE, oid, session["driver"], CLAIMED))
-    flash("رجعت الطلبية متاحة")
+@app.route("/driver/claims/<int:cid>/done", methods=["POST"])
+def d_claim_done(cid):
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        if conn.execute("SELECT 1 FROM claims WHERE id = ? AND driver = ? AND status = ?",
+                        (cid, session["driver"], PICKED)).fetchone():
+            conn.execute("UPDATE orders SET status = ?, delivered_at = ? WHERE claim_id = ? AND status = ?",
+                         (DELIVERED, now_oman(), cid, CLAIMED))
+            conn.execute("UPDATE claims SET status = ? WHERE id = ?", (CLAIM_DONE, cid))
+            conn.commit()
+            flash("✅ تم تسجيل التوصيل")
+    finally:
+        conn.close()
     return redirect(url_for("d_mine"))
+
+
+# ----------------------------------------------------------------------
+# حجوزات المندوبين (المدير)
+# ----------------------------------------------------------------------
+@app.route("/claims")
+def claims():
+    f_status = request.args.get("status", "")
+    where, params = ("WHERE status = ?", (f_status,)) if f_status else ("", ())
+    rows = db_df(f"SELECT * FROM claims {where} ORDER BY "
+                 f"CASE status WHEN ? THEN 0 WHEN ? THEN 1 ELSE 2 END, pickup_time LIMIT 300",
+                 (*params, WAITING, PICKED)).to_dict("records")
+    stats = db_df("SELECT status, COUNT(*) AS n, COALESCE(SUM(qty), 0) AS q FROM claims GROUP BY status")
+    stat = {r.status: (int(r.n), int(r.q)) for r in stats.itertuples()}
+    return render_template("claims.html", title="حجوزات المندوبين", rows=rows,
+                           statuses=CLAIM_STATUSES, f_status=f_status, min_left=get_min_left(),
+                           waiting_count=stat.get(WAITING, (0, 0))[0],
+                           waiting_qty=stat.get(WAITING, (0, 0))[1],
+                           picked_qty=stat.get(PICKED, (0, 0))[1])
+
+
+@app.route("/claims/<int:cid>/picked", methods=["POST"])
+def claim_picked(cid):
+    db_exec("UPDATE claims SET status = ? WHERE id = ? AND status = ?", (PICKED, cid, WAITING))
+    flash("تم تسجيل تسليم الطلبيات للمندوب")
+    return redirect(request.referrer or url_for("claims"))
+
+
+@app.route("/claims/<int:cid>/cancel", methods=["POST"])
+def claim_cancel(cid):
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        release_claim(conn, cid)
+        conn.commit()
+    finally:
+        conn.close()
+    flash("تم إلغاء الحجز ورجعت الطلبيات متاحة")
+    return redirect(request.referrer or url_for("claims"))
+
+
+@app.route("/settings/min-left", methods=["POST"])
+def set_min_left():
+    try:
+        value = int(request.form.get("min_left", ""))
+        if value < 0:
+            raise ValueError
+    except ValueError:
+        flash("اكتب رقماً صحيحاً")
+        return redirect(url_for("claims"))
+    db_exec("INSERT OR REPLACE INTO settings (key, value) VALUES ('min_left', ?)", (str(value),))
+    flash(f"تم الحفظ: إذا بقي أقل من {value} يُجبَر المندوب على استلام الباقي")
+    return redirect(url_for("claims"))
 
 
 # ----------------------------------------------------------------------
@@ -1034,7 +1280,7 @@ def valid_pin(pin):
 @app.route("/drivers")
 def drivers():
     rows = db_df(
-        """SELECT d.id, d.name, d.pin_hash,
+        """SELECT d.id, d.name, d.pin_hash, d.phone,
                   COALESCE(SUM(o.status = ?), 0) AS claimed,
                   COALESCE(SUM(o.status = ?), 0) AS delivered
            FROM drivers d LEFT JOIN orders o ON o.driver = d.name
@@ -1047,15 +1293,19 @@ def drivers():
 @app.route("/drivers/add", methods=["POST"])
 def add_driver():
     name = request.form.get("name", "").strip()
+    phone = request.form.get("phone", "").strip()
     pin = request.form.get("pin", "").strip()
     if not name or name == UNSPECIFIED:
         flash("اكتب اسم المندوب")
+    elif not phone:
+        flash("اكتب رقم هاتف المندوب")
     elif not valid_pin(pin):
         flash("رمز PIN يجب أن يكون من 4 إلى 8 أرقام")
     elif name in driver_names():
         flash("هذا الاسم موجود مسبقاً")
     else:
-        db_exec("INSERT INTO drivers (name, pin_hash) VALUES (?, ?)", (name, generate_password_hash(pin)))
+        db_exec("INSERT INTO drivers (name, pin_hash, phone) VALUES (?, ?, ?)",
+                (name, generate_password_hash(pin), phone))
         flash(f"تمت إضافة {name} — يدخل باسمه ورمز PIN")
     return redirect(url_for("drivers"))
 
@@ -1076,8 +1326,10 @@ def delete_driver(did):
     row = db_df("SELECT name FROM drivers WHERE id = ?", (did,))
     if not row.empty:
         # الطلبيات التي لم توصَّل ترجع متاحة لغيره
-        db_exec("UPDATE orders SET driver = '', status = ?, claimed_at = NULL WHERE driver = ? AND status = ?",
-                (AVAILABLE, row["name"][0], CLAIMED))
+        db_exec("UPDATE orders SET driver = '', status = ?, claimed_at = NULL, claim_id = NULL "
+                "WHERE driver = ? AND status = ?", (AVAILABLE, row["name"][0], CLAIMED))
+        db_exec("UPDATE claims SET status = ? WHERE driver = ? AND status IN (?, ?)",
+                (CANCELLED, row["name"][0], WAITING, PICKED))
         db_exec("DELETE FROM drivers WHERE id = ?", (did,))
         flash("تم حذف المندوب")
     return redirect(url_for("drivers"))
@@ -1196,6 +1448,8 @@ def export_excel():
         wil_out.to_excel(writer, sheet_name="حسب الولاية", index=False)
         orders_out.to_excel(writer, sheet_name="الطلبات", index=False)
         expenses_out.to_excel(writer, sheet_name="المصروفات", index=False)
+        db_df("SELECT * FROM claims ORDER BY id").rename(columns=CLAIM_COLUMNS_AR).to_excel(
+            writer, sheet_name="حجوزات المندوبين", index=False)
     buf.seek(0)
 
     return send_file(
