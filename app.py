@@ -118,8 +118,10 @@ EN = {
     "مواعيد استلام اليوم والمتأخرون": "Today's pickups and late drivers",
     "مواعيد اليوم": "Today's pickups", "تم استلامها": "Picked up", "متأخرون": "Late",
     "⚠️ متأخرون عن موعد الاستلام": "⚠️ Late for pickup", "🕒 مواعيد استلام اليوم": "🕒 Today's pickups",
-    "📅 المواعيد القادمة": "📅 Upcoming pickups", "لا توجد مواعيد اليوم": "No pickups today",
-    "لا توجد مواعيد قادمة": "No upcoming pickups", "✓ تأكيد الاستلام": "✓ Confirm pickup",
+    "📅 المواعيد القادمة": "📅 Upcoming pickups", "لا يوجد أحد بانتظار الاستلام اليوم": "No one waiting for pickup today",
+    "لا توجد مواعيد قادمة": "No upcoming pickups",
+    "بانتظار الاستلام اليوم": "Awaiting pickup today", "تم استلامها اليوم": "Picked up today",
+    "✅ تم استلامها اليوم": "✅ Picked up today", "لم يستلم أحد اليوم بعد": "No pickups yet today", "✓ تأكيد الاستلام": "✓ Confirm pickup",
     "تأكيد أن {d} استلم {n} شحنة؟": "Confirm {d} picked up {n} shipments?",
     "إلغاء الحجز وإرجاع الشحنات للمتاح؟": "Cancel booking and return shipments?",
     "المتاح في {g}": "Available in {g}", "لا توجد شحنات متاحة": "No available shipments",
@@ -632,10 +634,10 @@ TEMPLATES = {
 {% from "macros.html" import claims_table with context %}
 {% block content %}
 <div class="kpis">
-  <div class="kpi">{{ t('مواعيد اليوم') }}<b>{{ k.today }}</b></div>
-  <div class="kpi k-warn">{{ t('بانتظار الاستلام') }}<b>{{ k.waiting }}</b></div>
-  <div class="kpi k-ok">{{ t('تم استلامها') }}<b>{{ k.picked }}</b></div>
+  <div class="kpi k-warn">{{ t('بانتظار الاستلام اليوم') }}<b>{{ k.waiting }}</b></div>
+  <div class="kpi">{{ t('شحنات بانتظار الاستلام') }}<b>{{ k.waiting_qty }}</b></div>
   <div class="kpi k-bad">{{ t('متأخرون') }}<b>{{ k.late }}</b></div>
+  <div class="kpi k-ok">{{ t('تم استلامها اليوم') }}<b>{{ k.picked }}</b></div>
 </div>
 
 {% if late %}
@@ -647,12 +649,17 @@ TEMPLATES = {
 
 <div class="card">
   <h3>{{ t('🕒 مواعيد استلام اليوم') }}</h3>
-  {{ claims_table(today_rows, pick_ep, cancel_ep, 'لا توجد مواعيد اليوم', show_gov) }}
+  {{ claims_table(today_rows, pick_ep, cancel_ep, 'لا يوجد أحد بانتظار الاستلام اليوم', show_gov) }}
 </div>
 
 <div class="card">
   <h3>{{ t('📅 المواعيد القادمة') }}</h3>
   {{ claims_table(upcoming, pick_ep, cancel_ep, 'لا توجد مواعيد قادمة', show_gov) }}
+</div>
+
+<div class="card">
+  <h3>{{ t('✅ تم استلامها اليوم') }}</h3>
+  {{ claims_table(picked_today, pick_ep, cancel_ep, 'لم يستلم أحد اليوم بعد', show_gov) }}
 </div>
 
 {% if avail is not none %}
@@ -1330,17 +1337,21 @@ def day_board(gov=None):
     tomorrow = (datetime.now(TZ) + timedelta(days=1)).strftime("%Y-%m-%d")
     sql, p = claims_query(gov, "status = ? AND pickup_time < ?", (WAITING, now_oman()))
     late = decorate(db_df(sql + " ORDER BY pickup_time", p).to_dict("records"))
-    sql, p = claims_query(gov, "status <> ? AND pickup_time LIKE ?", (CANCELLED, today_oman() + "%"))
+    # مواعيد اليوم: فقط من لم يستلم بعد ولم يتأخر (المتأخرون في قسمهم)
+    sql, p = claims_query(gov, "status = ? AND pickup_time LIKE ? AND pickup_time >= ?",
+                          (WAITING, today_oman() + "%", now_oman()))
     today_rows = decorate(db_df(sql + " ORDER BY pickup_time", p).to_dict("records"))
+    sql, p = claims_query(gov, "status IN (?, ?) AND picked_at LIKE ?", (PICKED, CLAIM_DONE, today_oman() + "%"))
+    picked_today = decorate(db_df(sql + " ORDER BY picked_at DESC", p).to_dict("records"))
     sql, p = claims_query(gov, "status = ? AND pickup_time >= ?", (WAITING, tomorrow))
     upcoming = decorate(db_df(sql + " ORDER BY pickup_time LIMIT 100", p).to_dict("records"))
     k = {
-        "today": len(today_rows),
-        "waiting": sum(1 for c in today_rows if c["status"] == WAITING),
-        "picked": sum(1 for c in today_rows if c["status"] in (PICKED, CLAIM_DONE)),
+        "waiting": len(today_rows),
+        "waiting_qty": sum(c["qty"] for c in today_rows),
+        "picked": len(picked_today),
         "late": len(late),
     }
-    return {"late": late, "today_rows": today_rows, "upcoming": upcoming, "k": k}
+    return {"late": late, "today_rows": today_rows, "picked_today": picked_today, "upcoming": upcoming, "k": k}
 
 
 def mark_picked(cid, by, gov=None):
