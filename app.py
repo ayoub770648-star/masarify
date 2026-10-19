@@ -122,8 +122,7 @@ EN = {
     "لا توجد مواعيد قادمة": "No upcoming pickups",
     "بانتظار الاستلام اليوم": "Awaiting pickup today", "تم استلامها اليوم": "Picked up today",
     "✅ تم استلامها اليوم": "✅ Picked up today", "لم يستلم أحد اليوم بعد": "No pickups yet today",
-    "المواعيد القادمة": "Upcoming", "عرض القائمة ←": "View list →", "✕ إغلاق": "✕ Close",
-    "← عرض الكل": "← Show all", "{n} شحنة": "{n} shipments", "لا يوجد متأخرون 👍": "No one is late 👍",
+    "المواعيد القادمة": "Upcoming", "اضغط على أي بطاقة لعرض قائمتها": "Tap any card to see its list", "{n} شحنة": "{n} shipments", "لا يوجد متأخرون 👍": "No one is late 👍",
     "وقت الاستلام الفعلي": "Picked up at", "أكّد الاستلام": "Confirmed by", "✓ تأكيد الاستلام": "✓ Confirm pickup",
     "تأكيد أن {d} استلم {n} شحنة؟": "Confirm {d} picked up {n} shipments?",
     "إلغاء الحجز وإرجاع الشحنات للمتاح؟": "Cancel booking and return shipments?",
@@ -341,7 +340,7 @@ TEMPLATES = {
   a.kpi:hover{border-color:#cbd5e1;box-shadow:0 2px 8px rgba(15,23,42,.06)}
   a.kpi.on{border:2px solid var(--navy-dark);padding:15px 17px}
   a.kpi small{display:block;margin-top:2px}
-  a.kpi .open{display:block;margin-top:10px;font-size:12.5px;color:var(--blue);font-weight:600}
+  a.kpi.k-bad.has{border-color:#fecdd3;background:var(--bad-soft)}
   .kpi.k-warn b{color:var(--orange-dark)}.kpi.k-info b{color:var(--blue)}.kpi.k-ok b{color:var(--ok)}.kpi.k-bad b{color:var(--bad)}
   /* النماذج */
   form.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;align-items:end}
@@ -454,7 +453,7 @@ TEMPLATES = {
   </div>
 {%- endmacro %}
 {% macro navlink(endpoint, ic, label, count=0, chip='', cls='', view=None) -%}
-  {%- set is_on = ep == endpoint and request.args.get('view', 'all') == (view or 'all') -%}
+  {%- set is_on = ep == endpoint and (request.args.get('view') == view if view else request.args.get('view') != 'late') -%}
   <a href="{{ url_for(endpoint, view=view) if view else url_for(endpoint) }}" class="{{ cls }} {{ 'active' if is_on }}">{{ icon(ic) }}<span>{{ t(label) }}</span>
     {%- if count %}<span class="chip {{ chip }}">{{ count }}</span>{% endif %}</a>
 {%- endmacro %}
@@ -648,52 +647,51 @@ TEMPLATES = {
 {% extends "base.html" %}
 {% from "macros.html" import claims_table with context %}
 {% macro kpi(key, label, value, cls, sub='') -%}
-  <a href="{{ url_for(request.endpoint, view='all' if view == key else key) }}"
+  <a href="{{ url_for(request.endpoint, view='none' if view == key else key) }}"
      class="kpi {{ cls }} {{ 'on' if view == key }}">{{ t(label) }}<b>{{ value }}</b>
-    {%- if sub %}<small class="muted">{{ sub }}</small>{% endif -%}
-    <span class="open">{{ t('✕ إغلاق') if view == key else t('عرض القائمة ←') }}</span></a>
+    {%- if sub %}<small class="muted">{{ sub }}</small>{% endif -%}</a>
 {%- endmacro %}
 {% block content %}
 <div class="kpis">
   {{ kpi('waiting', 'بانتظار الاستلام اليوم', k.waiting, 'k-warn', t('{n} شحنة').format(n=k.waiting_qty)) }}
-  {{ kpi('late', 'متأخرون', k.late, 'k-bad') }}
+  {{ kpi('late', 'متأخرون', k.late, 'k-bad has' if k.late else 'k-bad') }}
   {{ kpi('picked', 'تم استلامها اليوم', k.picked, 'k-ok', t('{n} شحنة').format(n=k.picked_qty)) }}
   {{ kpi('upcoming', 'المواعيد القادمة', k.upcoming, 'k-info') }}
 </div>
 
-{% if view != 'all' %}
-<p><a class="btn-link btn-ghost" href="{{ url_for(request.endpoint) }}">{{ t('← عرض الكل') }}</a></p>
+{% if view == 'none' %}
+<p class="muted" style="text-align:center">{{ t('اضغط على أي بطاقة لعرض قائمتها') }}</p>
 {% endif %}
 
-{% if view == 'late' or (view == 'all' and late) %}
+{% if view == 'late' %}
 <div class="card alert">
   <h3>{{ t('⚠️ متأخرون عن موعد الاستلام') }} ({{ late|length }})</h3>
   {{ claims_table(late, pick_ep, cancel_ep, 'لا يوجد متأخرون 👍', show_gov) }}
 </div>
 {% endif %}
 
-{% if view in ('all', 'waiting') %}
+{% if view == 'waiting' %}
 <div class="card">
   <h3>{{ t('🕒 مواعيد استلام اليوم') }} ({{ today_rows|length }})</h3>
   {{ claims_table(today_rows, pick_ep, cancel_ep, 'لا يوجد أحد بانتظار الاستلام اليوم', show_gov) }}
 </div>
 {% endif %}
 
-{% if view in ('all', 'upcoming') %}
+{% if view == 'upcoming' %}
 <div class="card">
   <h3>{{ t('📅 المواعيد القادمة') }} ({{ upcoming|length }})</h3>
   {{ claims_table(upcoming, pick_ep, cancel_ep, 'لا توجد مواعيد قادمة', show_gov) }}
 </div>
 {% endif %}
 
-{% if view in ('all', 'picked') %}
+{% if view == 'picked' %}
 <div class="card">
   <h3>{{ t('✅ تم استلامها اليوم') }} ({{ picked_today|length }})</h3>
   {{ claims_table(picked_today, pick_ep, cancel_ep, 'لم يستلم أحد اليوم بعد', show_gov, picked=True) }}
 </div>
 {% endif %}
 
-{% if avail is not none and view == 'all' %}
+{% if avail is not none and view == 'none' %}
 <div class="card">
   <h3>{{ t('المتاح في {g}').format(g=place(gov)) }}</h3>
   <table>
@@ -1180,8 +1178,10 @@ def common_context():
     role = session.get("role")
     if role in ("admin", "supervisor"):
         gov_sql, params = ("AND governorate = ?", (session.get("gov"),)) if role == "supervisor" else ("", ())
-        ctx["nav_today"] = int(db_df(f"SELECT COUNT(*) AS n FROM claims WHERE status = ? AND pickup_time LIKE ? {gov_sql}",
-                                     (WAITING, today_oman() + "%", *params))["n"][0])
+        # بانتظار الاستلام اليوم ولم يتأخر (المتأخرون لهم عدّادهم الأحمر)
+        ctx["nav_today"] = int(db_df(f"SELECT COUNT(*) AS n FROM claims WHERE status = ? AND pickup_time LIKE ? "
+                                     f"AND pickup_time >= ? {gov_sql}",
+                                     (WAITING, today_oman() + "%", now_oman(), *params))["n"][0])
         ctx["nav_late"] = int(db_df(f"SELECT COUNT(*) AS n FROM claims WHERE status = ? AND pickup_time < ? {gov_sql}",
                                     (WAITING, now_oman(), *params))["n"][0])
         ctx["nav_available"] = int(db_df("SELECT COUNT(*) AS n FROM shipments WHERE status = ?",
@@ -1363,7 +1363,7 @@ def claims_query(gov, condition, params):
     return sql, params
 
 
-TODAY_VIEWS = ("all", "waiting", "late", "picked", "upcoming")
+TODAY_VIEWS = ("none", "waiting", "late", "picked", "upcoming")
 
 
 def by_label(by):
@@ -1399,9 +1399,9 @@ def day_board(gov=None):
         "late": len(late),
         "upcoming": len(upcoming),
     }
-    view = request.args.get("view", "all")
+    view = request.args.get("view", "none")
     return {"late": late, "today_rows": today_rows, "picked_today": picked_today, "upcoming": upcoming, "k": k,
-            "view": view if view in TODAY_VIEWS else "all"}
+            "view": view if view in TODAY_VIEWS else "none"}
 
 
 def mark_picked(cid, by, gov=None):
@@ -1774,14 +1774,14 @@ def s_picked(cid):
     gov = session["gov"]
     if mark_picked(cid, f"مشرف {gov}", gov):
         flash(tr("تم تسجيل تسليم الشحنات للمندوب"))
-    return redirect(url_for("s_home"))
+    return redirect(request.referrer or url_for("s_home"))
 
 
 @app.route("/supervisor/claims/<int:cid>/cancel", methods=["POST"])
 def s_cancel(cid):
     if cancel_claim(cid, session["gov"]):
         flash(tr("تم إلغاء الحجز ورجعت الشحنات متاحة"))
-    return redirect(url_for("s_home"))
+    return redirect(request.referrer or url_for("s_home"))
 
 
 # ----------------------------------------------------------------------
