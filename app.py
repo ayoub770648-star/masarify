@@ -914,13 +914,13 @@ TEMPLATES = {
     const AVAIL = {{ avail|tojson }}, MIN_LEFT = {{ min_left }}, PLACE = {{ place_map|tojson }};
     const T = {{ js_text|tojson }};
     const fmt = (s, o) => s.replace(/\\{(\\w+)\\}/g, (_, k) => o[k]);
-    const name = w => PLACE[w] || w;
+    const placeName = w => PLACE[w] || w;
     function fillWil(g) {
       const gov = document.getElementById('gov');
       if (g) gov.value = g;
       const ws = AVAIL[gov.value] || {};
       document.getElementById('wil').innerHTML = '<option value="">' + T.pick + '</option>' +
-        Object.keys(ws).map(w => '<option value="' + w + '">' + name(w) + ' (' + ws[w] + ')</option>').join('');
+        Object.keys(ws).map(w => '<option value="' + w + '">' + placeName(w) + ' (' + ws[w] + ')</option>').join('');
       check();
     }
     function pick(g, w) {
@@ -936,7 +936,7 @@ TEMPLATES = {
       const avail = (AVAIL[g] || {})[w] || 0, q = parseInt(qtyEl.value) || 0;
       qtyEl.max = avail || '';
       if (!avail) { msg.innerHTML = ''; return; }
-      const left = avail - q, o = {w: name(w), n: avail, q: q, l: left};
+      const left = avail - q, o = {w: placeName(w), n: avail, q: q, l: left};
       if (q > avail) {
         msg.innerHTML = '<div class="warn">' + fmt(T.only, o) + '</div>';
       } else if (q > 0 && left > 0 && left < MIN_LEFT) {
@@ -963,7 +963,7 @@ TEMPLATES = {
       {% for w, n in ws.items() %}
       <tr>
         <td>{{ place(g) }}</td><td class="big">{{ place(w) }}</td><td class="num">{{ n }}</td>
-        <td><button class="small-btn green" onclick="pick({{ g|tojson }}, {{ w|tojson }})">{{ t('اختر') }}</button></td>
+        <td><button type="button" class="small-btn green" onclick='pick({{ g|tojson }}, {{ w|tojson }})'>{{ t('اختر') }}</button></td>
       </tr>
       {% endfor %}
     {% endfor %}
