@@ -403,70 +403,65 @@ TEMPLATES = {
   .s2{width:44px;height:44px;border-radius:50%;bottom:30%;left:22%}
   .plus{position:absolute;color:#fff;font-size:44px;font-weight:300}
   .arc{position:absolute;bottom:-120px;left:-10%;right:-10%;height:260px;border-radius:50%;background:rgba(255,255,255,.18)}
-  /* ===== مظهر ثلاثي الأبعاد ===== */
-  body{background:radial-gradient(1200px 600px at 100% -10%,#e0e7ff 0%,transparent 60%),
-                  radial-gradient(900px 500px at -10% 110%,#ffedd5 0%,transparent 55%),#f4f6fb;background-attachment:fixed}
-  .card{background:linear-gradient(180deg,#ffffff 0%,#fbfcff 100%);border:1px solid rgba(226,232,240,.9);
-        box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(15,23,42,.05),0 10px 24px -8px rgba(15,23,42,.14),0 24px 48px -28px rgba(30,58,138,.30)}
-  .kpis{perspective:900px}
-  .kpi{position:relative;overflow:hidden;background:linear-gradient(160deg,#ffffff 0%,#f6f8fc 100%);
-       border:1px solid rgba(226,232,240,.95);border-bottom:5px solid var(--edge,#cbd5e1);border-radius:16px;
-       box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(15,23,42,.06),0 14px 28px -10px rgba(15,23,42,.22),0 30px 50px -30px var(--glow,rgba(30,58,138,.35));
-       transform-style:preserve-3d;transition:transform .25s ease,box-shadow .25s ease}
-  .kpi::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-              background:linear-gradient(120deg,rgba(255,255,255,.65) 0%,rgba(255,255,255,0) 38%)}
-  .kpi b{font-size:34px;text-shadow:0 2px 0 rgba(255,255,255,.9),0 6px 14px rgba(15,23,42,.12)}
-  .kpi.k-warn{--edge:#fb923c;--glow:rgba(234,88,12,.45)}
-  .kpi.k-bad{--edge:#fb7185;--glow:rgba(225,29,72,.45)}
-  .kpi.k-ok{--edge:#4ade80;--glow:rgba(22,163,74,.45)}
-  .kpi.k-info{--edge:#60a5fa;--glow:rgba(37,99,235,.45)}
-  a.kpi:hover{transform:translateY(-6px) rotateX(6deg);border-color:rgba(203,213,225,.95);
-              box-shadow:inset 0 1px 0 #fff,0 4px 8px rgba(15,23,42,.08),0 24px 40px -12px rgba(15,23,42,.28),0 40px 60px -30px var(--glow,rgba(30,58,138,.45))}
-  a.kpi.on{transform:translateY(3px);border:2px solid var(--navy-dark);border-bottom-width:2px;padding:16px 18px;
-           background:linear-gradient(160deg,#eef2f7 0%,#ffffff 100%);
-           box-shadow:inset 0 4px 12px rgba(15,23,42,.18),inset 0 -2px 0 #fff,0 2px 4px rgba(15,23,42,.06)}
-  a.kpi.k-bad.has{background:linear-gradient(160deg,#fff1f2 0%,#ffe4e6 100%);animation:pulse 2.2s ease-in-out infinite}
-  @keyframes pulse{50%{box-shadow:inset 0 1px 0 #fff,0 2px 4px rgba(15,23,42,.06),0 14px 34px -6px rgba(225,29,72,.45)}}
-  .kpi-ic{position:absolute;top:16px;inset-inline-end:16px;width:46px;height:46px;border-radius:14px;display:grid;place-items:center;
-          background:radial-gradient(circle at 30% 18%,rgba(255,255,255,.55),transparent 50%),linear-gradient(145deg,var(--c1,#818cf8),var(--c2,#4338ca));
-          box-shadow:inset 0 -4px 8px rgba(0,0,0,.18),inset 0 3px 6px rgba(255,255,255,.45),0 8px 16px -4px var(--glow,rgba(67,56,202,.5));
-          transform:translateZ(30px)}
-  a.kpi{padding-inline-end:76px}
-  a.kpi.on{padding-inline-end:77px}
-  .kpi-ic svg{width:22px;height:22px;stroke:#fff;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25))}
-  .kpi.k-warn .kpi-ic{--c1:#fdba74;--c2:#ea580c}.kpi.k-bad .kpi-ic{--c1:#fda4af;--c2:#e11d48}
-  .kpi.k-ok .kpi-ic{--c1:#86efac;--c2:#16a34a}.kpi.k-info .kpi-ic{--c1:#93c5fd;--c2:#2563eb}
-  /* الأزرار */
-  button,.btn-link{box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 3px 0 rgba(15,23,42,.28),0 8px 16px -6px rgba(15,23,42,.35);
-                   transition:transform .1s ease,box-shadow .1s ease,filter .15s}
-  button:hover,.btn-link:hover{transform:translateY(-1px)}
-  button:active,.btn-link:active{transform:translateY(3px);box-shadow:inset 0 2px 4px rgba(0,0,0,.2),0 0 0 rgba(15,23,42,0)}
-  .btn-ghost,.seg button,.quick button,.langs a{box-shadow:inset 0 1px 0 #fff,0 2px 0 #e2e8f0,0 4px 10px -6px rgba(15,23,42,.25)}
+  /* ===== مظهر ثلاثي الأبعاد (خفيف) ===== */
+  body{background:radial-gradient(1100px 520px at 100% -10%,#eef2ff 0%,transparent 60%),
+                  radial-gradient(800px 420px at -10% 110%,#fff7ed 0%,transparent 55%),#f6f7fb;background-attachment:fixed}
+  .card{background:#fff;border:1px solid #e9edf3;
+        box-shadow:0 1px 2px rgba(15,23,42,.04),0 8px 20px -12px rgba(15,23,42,.14)}
+  .kpis{perspective:1000px}
+  .kpi{position:relative;overflow:hidden;background:linear-gradient(165deg,#ffffff 0%,#f8fafc 100%);
+       border:1px solid #e9edf3;border-bottom:3px solid var(--edge,#cbd5e1);border-radius:16px;
+       box-shadow:0 1px 2px rgba(15,23,42,.05),0 10px 22px -14px rgba(15,23,42,.22),0 16px 30px -24px var(--glow,rgba(30,58,138,.25))}
+  .kpi b{font-size:32px;text-shadow:0 1px 0 #fff}
+  .kpi.k-warn{--edge:#fdba74;--glow:rgba(234,88,12,.25);--tint:#fff7ed}
+  .kpi.k-bad{--edge:#fda4af;--glow:rgba(225,29,72,.25);--tint:#fff1f2}
+  .kpi.k-ok{--edge:#86efac;--glow:rgba(22,163,74,.25);--tint:#f0fdf4}
+  .kpi.k-info{--edge:#93c5fd;--glow:rgba(37,99,235,.25);--tint:#eff6ff}
+  a.kpi{padding-inline-end:72px}
+  a.kpi.on{background:var(--tint,#f1f5f9);border-color:var(--edge,#cbd5e1);
+           box-shadow:inset 0 2px 6px rgba(15,23,42,.08),0 0 0 3px color-mix(in srgb,var(--edge,#cbd5e1) 35%,transparent)}
+  a.kpi.k-bad.has:not(.on){background:linear-gradient(165deg,#fffafb 0%,#fff1f2 100%);animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{50%{box-shadow:0 1px 2px rgba(15,23,42,.05),0 10px 26px -10px rgba(225,29,72,.35)}}
+  .kpi-ic{position:absolute;top:16px;inset-inline-end:16px;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;
+          background:linear-gradient(145deg,var(--c1,#c7d2fe),var(--c2,#6366f1));
+          box-shadow:inset 0 -3px 6px rgba(0,0,0,.10),inset 0 2px 4px rgba(255,255,255,.45),0 6px 12px -6px var(--glow,rgba(67,56,202,.4))}
+  .kpi-ic svg{width:20px;height:20px;stroke:#fff}
+  .kpi.k-warn .kpi-ic{--c1:#fed7aa;--c2:#f97316}.kpi.k-bad .kpi-ic{--c1:#fecdd3;--c2:#f43f5e}
+  .kpi.k-ok .kpi-ic{--c1:#bbf7d0;--c2:#22c55e}.kpi.k-info .kpi-ic{--c1:#bfdbfe;--c2:#3b82f6}
+  /* كل ما يُضغط: يرتفع قليلاً عند المرور وينضغط عند الضغط */
+  a.kpi,button,.btn-link,.side a,.tabs a,.langs a,.auth-lang a,a.small-btn{transition:transform .15s ease,box-shadow .15s ease,background .15s ease,filter .15s}
+  a.kpi:hover{transform:translateY(-3px) rotateX(3deg);box-shadow:0 2px 4px rgba(15,23,42,.06),0 16px 28px -14px rgba(15,23,42,.28),0 20px 34px -22px var(--glow,rgba(30,58,138,.3))}
+  a.kpi.on:hover{transform:none}
+  a.kpi:active{transform:translateY(2px) scale(.985);box-shadow:inset 0 2px 6px rgba(15,23,42,.1)}
+  button,.btn-link,a.small-btn{box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 2px 0 rgba(15,23,42,.18),0 6px 12px -8px rgba(15,23,42,.35)}
+  button:hover,.btn-link:hover,a.small-btn:hover{transform:translateY(-1px)}
+  button:active,.btn-link:active,a.small-btn:active{transform:translateY(2px);box-shadow:inset 0 2px 4px rgba(0,0,0,.18)}
+  .side a:hover,.tabs a:hover{transform:translateY(-1px);box-shadow:0 4px 10px -6px rgba(15,23,42,.25)}
+  .side a:active,.tabs a:active,.langs a:active,.auth-lang a:active{transform:translateY(1px) scale(.98);box-shadow:inset 0 2px 4px rgba(15,23,42,.12)}
+  .tabs a{box-shadow:0 1px 0 #e2e8f0}
+  .btn-ghost,.seg button,.quick button,.langs a,.auth-lang a{box-shadow:inset 0 1px 0 #fff,0 2px 0 #e5e9f0,0 4px 8px -6px rgba(15,23,42,.2)}
   .seg button:not(.on){box-shadow:none}
-  .green{background:linear-gradient(180deg,#22c55e,#16a34a)}.red{background:linear-gradient(180deg,#f43f5e,#e11d48)}
-  .wa{background:linear-gradient(180deg,#34e07a,#22c55e)}
-  button:not(.small-btn):not(.green):not(.red):not(.gray):not(.wa):not(.btn-dark){background:linear-gradient(180deg,#3b82f6,#2563eb)}
-  .btn-dark{background:linear-gradient(180deg,#1e293b,#0f172a)}
-  /* الشارات والمواعيد */
-  .badge,.time{box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 2px 4px -1px rgba(15,23,42,.12)}
-  /* الجداول */
-  th{background:linear-gradient(180deg,#f8fafc,#eef2f7);box-shadow:inset 0 -1px 0 #e2e8f0}
-  .gov td{background:linear-gradient(180deg,#f8fafc,#f1f5f9) !important}
-  /* القائمة الجانبية */
-  .side{background:linear-gradient(180deg,#ffffff,#fafbff);box-shadow:-8px 0 30px -18px rgba(15,23,42,.25)}
-  [dir=ltr] .side{box-shadow:8px 0 30px -18px rgba(15,23,42,.25)}
-  .side a.active{background:linear-gradient(180deg,#f0f5ff,#e4ecff);
-                 box-shadow:inset -3px 0 0 var(--orange),inset 0 1px 0 #fff,0 4px 10px -4px rgba(30,58,138,.25)}
-  [dir=ltr] .side a.active{box-shadow:inset 3px 0 0 var(--orange),inset 0 1px 0 #fff,0 4px 10px -4px rgba(30,58,138,.25)}
-  .brand-mark{background:linear-gradient(145deg,#2f4fb3,#1e3a8a);box-shadow:inset 0 2px 4px rgba(255,255,255,.3),0 6px 14px -4px rgba(30,58,138,.6)}
-  .chip{box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 1px 3px rgba(15,23,42,.15)}
-  .topbar{background:rgba(255,255,255,.85);backdrop-filter:blur(8px);box-shadow:0 6px 20px -14px rgba(15,23,42,.35)}
-  .flash{box-shadow:inset 0 1px 0 #fff,0 6px 16px -10px rgba(30,58,138,.4)}
+  .green{background:linear-gradient(180deg,#34d399,#16a34a)}.red{background:linear-gradient(180deg,#fb7185,#e11d48)}
+  .wa{background:linear-gradient(180deg,#4ade80,#22c55e)}
+  button:not(.small-btn):not(.green):not(.red):not(.gray):not(.wa):not(.btn-dark){background:linear-gradient(180deg,#4f8df7,#2563eb)}
+  .btn-dark{background:linear-gradient(180deg,#334155,#0f172a)}
+  .badge,.time{box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 1px 2px rgba(15,23,42,.08)}
+  th{background:linear-gradient(180deg,#f9fafb,#f1f5f9)}
+  .gov td{background:#f8fafc !important}
+  .side{background:#fff;box-shadow:-6px 0 24px -20px rgba(15,23,42,.3)}
+  [dir=ltr] .side{box-shadow:6px 0 24px -20px rgba(15,23,42,.3)}
+  .side a.active{background:linear-gradient(180deg,#f3f6ff,#e9efff);
+                 box-shadow:inset -3px 0 0 var(--orange),0 3px 8px -5px rgba(30,58,138,.3)}
+  [dir=ltr] .side a.active{box-shadow:inset 3px 0 0 var(--orange),0 3px 8px -5px rgba(30,58,138,.3)}
+  .brand-mark{background:linear-gradient(145deg,#2f4fb3,#1e3a8a);box-shadow:inset 0 2px 3px rgba(255,255,255,.25),0 4px 10px -4px rgba(30,58,138,.5)}
+  .chip{box-shadow:0 1px 2px rgba(15,23,42,.1)}
+  .topbar{background:rgba(255,255,255,.88);backdrop-filter:blur(8px);box-shadow:0 4px 16px -14px rgba(15,23,42,.35)}
+  .flash{box-shadow:0 4px 12px -10px rgba(30,58,138,.4)}
   @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
   @media (max-width:900px){
     .layout{flex-direction:column}
-    a.kpi,a.kpi.on{padding-inline-end:14px;padding-top:62px}
-    .kpi-ic{width:38px;height:38px;border-radius:12px;top:14px;inset-inline-end:auto;inset-inline-start:14px}
+    a.kpi,a.kpi.on{padding-inline-end:14px;padding-top:60px}
+    .kpi-ic{width:36px;height:36px;border-radius:11px;top:14px;inset-inline-end:auto;inset-inline-start:14px}
     .kpi-ic svg{width:19px;height:19px}
     .side{width:100%;height:auto;position:static;flex-direction:row;align-items:center;overflow-x:auto;padding:8px;gap:4px;border:0;border-bottom:1px solid var(--line)}
     .brand{border:0;padding:0 6px;margin:0}.brand-text,.menu-label{display:none}
@@ -595,6 +590,21 @@ TEMPLATES = {
 """,
 
     "macros.html": """
+{% set ICONS = {
+  'clock': '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  'bell': '<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/>',
+  'check': '<path d="M20 6L9 17l-5-5"/>',
+  'cal': '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/>',
+  'box': '<path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/>',
+  'truck': '<path d="M1 4h14v12H1zM15 9h4l4 4v3h-8"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>'} %}
+
+{% macro kpi(href, label, value, cls='', sub='', ic='box', on=False) -%}
+  <a href="{{ href }}" class="kpi {{ cls }} {{ 'on' if on }}">
+    <span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">{{ ICONS[ic]|safe }}</svg></span>
+    {{ t(label) }}<b>{{ value }}</b>
+    {%- if sub %}<small class="muted">{{ sub }}</small>{% endif -%}
+  </a>
+{%- endmacro %}
 {% macro status_badge(c) -%}
   {%- if c.status == WAITING and c.is_late -%}
     <span class="badge b-late">{{ t('متأخر') }}</span>
@@ -709,24 +719,16 @@ TEMPLATES = {
     "today.html": """
 {% extends "base.html" %}
 {% from "macros.html" import claims_table with context %}
-{% set ICONS = {
-  'waiting': '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-  'late': '<path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/>',
-  'picked': '<path d="M20 6L9 17l-5-5"/>',
-  'upcoming': '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/>'} %}
-{% macro kpi(key, label, value, cls, sub='') -%}
-  <a href="{{ url_for(request.endpoint, view='none' if view == key else key) }}"
-     class="kpi {{ cls }} {{ 'on' if view == key }}">
-    <span class="kpi-ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">{{ ICONS[key]|safe }}</svg></span>
-    {{ t(label) }}<b>{{ value }}</b>
-    {%- if sub %}<small class="muted">{{ sub }}</small>{% endif -%}</a>
+{% from "macros.html" import kpi with context %}
+{% macro card(key, label, value, cls, ic, sub='') -%}
+  {{ kpi(url_for(request.endpoint, view='none' if view == key else key), label, value, cls, sub, ic, view == key) }}
 {%- endmacro %}
 {% block content %}
 <div class="kpis">
-  {{ kpi('waiting', 'بانتظار الاستلام اليوم', k.waiting, 'k-warn', t('{n} شحنة').format(n=k.waiting_qty)) }}
-  {{ kpi('late', 'متأخرون', k.late, 'k-bad has' if k.late else 'k-bad') }}
-  {{ kpi('picked', 'تم استلامها اليوم', k.picked, 'k-ok', t('{n} شحنة').format(n=k.picked_qty)) }}
-  {{ kpi('upcoming', 'المواعيد القادمة', k.upcoming, 'k-info') }}
+  {{ card('waiting', 'بانتظار الاستلام اليوم', k.waiting, 'k-warn', 'clock', t('{n} شحنة').format(n=k.waiting_qty)) }}
+  {{ card('late', 'متأخرون', k.late, 'k-bad has' if k.late else 'k-bad', 'bell') }}
+  {{ card('picked', 'تم استلامها اليوم', k.picked, 'k-ok', 'check', t('{n} شحنة').format(n=k.picked_qty)) }}
+  {{ card('upcoming', 'المواعيد القادمة', k.upcoming, 'k-info', 'cal') }}
 </div>
 
 {% if view == 'none' %}
@@ -779,6 +781,7 @@ TEMPLATES = {
 
     "shipments.html": """
 {% extends "base.html" %}
+{% from "macros.html" import kpi with context %}
 {% block content %}
 <div class="card">
   <h3>{{ t('➕ إضافة شحنات') }}</h3>
@@ -805,13 +808,13 @@ TEMPLATES = {
 </div>
 
 <div class="kpis">
-  <div class="kpi">{{ t('متاحة للحجز') }}<b>{{ totals[AVAILABLE] }}</b></div>
-  <div class="kpi k-warn">{{ t('بانتظار الاستلام') }}<b>{{ totals[WAITING] }}</b></div>
-  <div class="kpi k-info">{{ t('مع المندوبين') }}<b>{{ totals[PICKED] }}</b></div>
-  <div class="kpi k-ok">{{ t('تم توصيلها') }}<b>{{ totals[DELIVERED] }}</b></div>
+  {{ kpi('#places', 'متاحة للحجز', totals[AVAILABLE], '', '', 'box') }}
+  {{ kpi(url_for('claims', status=WAITING), 'بانتظار الاستلام', totals[WAITING], 'k-warn', '', 'clock') }}
+  {{ kpi(url_for('claims', status=PICKED), 'مع المندوبين', totals[PICKED], 'k-info', '', 'truck') }}
+  {{ kpi(url_for('claims', status=DELIVERED), 'تم توصيلها', totals[DELIVERED], 'k-ok', '', 'check') }}
 </div>
 
-<div class="card">
+<div class="card" id="places">
   <h3>{{ t('الشحنات حسب المحافظة والولاية') }}</h3>
   <table>
     <tr><th>{{ t('المحافظة / الولاية') }}</th><th>{{ t('متاحة') }}</th><th>{{ t('بانتظار الاستلام') }}</th>
@@ -871,12 +874,13 @@ TEMPLATES = {
 
     "claims.html": """
 {% extends "base.html" %}
-{% from "macros.html" import claims_table with context %}
+{% from "macros.html" import claims_table, kpi with context %}
 {% block content %}
+{% macro sfilter(st) -%}{{ url_for('claims', status='' if f.status == st else st, q=f.q, gov=f.gov, date=f.date) }}{%- endmacro %}
 <div class="kpis">
-  <div class="kpi k-warn">{{ t('حجوزات بانتظار الاستلام') }}<b>{{ waiting_count }}</b></div>
-  <div class="kpi k-warn">{{ t('شحنات بانتظار الاستلام') }}<b>{{ waiting_qty }}</b></div>
-  <div class="kpi k-info">{{ t('مع المندوبين الآن') }}<b>{{ picked_qty }}</b></div>
+  {{ kpi(sfilter(WAITING), 'حجوزات بانتظار الاستلام', waiting_count, 'k-warn', t('{n} شحنة').format(n=waiting_qty), 'clock', f.status == WAITING) }}
+  {{ kpi(sfilter(PICKED), 'مع المندوبين الآن', picked_count, 'k-info', t('{n} شحنة').format(n=picked_qty), 'truck', f.status == PICKED) }}
+  {{ kpi(sfilter(DELIVERED), 'تم التوصيل', done_count, 'k-ok', t('{n} شحنة').format(n=done_qty), 'check', f.status == DELIVERED) }}
 </div>
 
 <div class="card">
@@ -1729,7 +1733,10 @@ def claims():
                            oman=OMAN, min_left=get_min_left(),
                            waiting_count=stat.get(WAITING, (0, 0))[0],
                            waiting_qty=stat.get(WAITING, (0, 0))[1],
-                           picked_qty=stat.get(PICKED, (0, 0))[1])
+                           picked_count=stat.get(PICKED, (0, 0))[0],
+                           picked_qty=stat.get(PICKED, (0, 0))[1],
+                           done_count=stat.get(CLAIM_DONE, (0, 0))[0],
+                           done_qty=stat.get(CLAIM_DONE, (0, 0))[1])
 
 
 @app.route("/claims/<int:cid>/picked", methods=["POST"])
