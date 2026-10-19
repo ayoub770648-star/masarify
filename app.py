@@ -736,9 +736,16 @@ def _columns(conn, table):
     return {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
 
 
+def connect(**kwargs):
+    # الانتظار حتى 15 ثانية إذا كانت قاعدة البيانات مشغولة بدل إظهار خطأ
+    return sqlite3.connect(DB_PATH, timeout=15, **kwargs)
+
+
 def init_db():
     os.makedirs(DATA_DIR, exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
+    # وضع WAL: القراءة لا تنتظر الكتابة، فيتحمل عدة مستخدمين في نفس الوقت
+    conn.execute("PRAGMA journal_mode=WAL")
     conn.executescript(SCHEMA)
     # ترقية جدول المندوبين من النسخ السابقة
     if "notified_at" not in _columns(conn, "claims"):
@@ -753,7 +760,7 @@ def init_db():
 
 def db_exec(sql, params=()):
     """ينفّذ أمراً ويعيد عدد الصفوف المتأثرة."""
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
     try:
         cur = conn.execute(sql, params)
         conn.commit()
@@ -763,7 +770,7 @@ def db_exec(sql, params=()):
 
 
 def db_df(sql, params=()):
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
     try:
         return pd.read_sql_query(sql, conn, params=params)
     finally:
@@ -910,7 +917,7 @@ def add_shipments():
         flash("اختر المحافظة والولاية")
         return redirect(url_for("shipments"))
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
     try:
         conn.executemany("INSERT INTO shipments (governorate, wilaya, status, created_at) VALUES (?,?,?,?)",
                          [(gov, wilaya, AVAILABLE, now_oman())] * count)
@@ -976,7 +983,7 @@ def claim_picked(cid):
 
 @app.route("/claims/<int:cid>/cancel", methods=["POST"])
 def claim_cancel(cid):
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
     try:
         release_claim(conn, cid)
         conn.commit()
@@ -1114,7 +1121,7 @@ def set_pin(did):
 
 @app.route("/drivers/<int:did>/delete", methods=["POST"])
 def delete_driver(did):
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
     try:
         row = conn.execute("SELECT name FROM drivers WHERE id = ?", (did,)).fetchone()
         if row:
@@ -1171,7 +1178,7 @@ def d_claim():
         return redirect(url_for("d_home"))
 
     min_left = get_min_left()
-    conn = sqlite3.connect(DB_PATH, isolation_level=None)
+    conn = connect(isolation_level=None)
     try:
         # قفل الكتابة حتى لا يحجز مندوبان نفس الشحنات في نفس اللحظة
         conn.execute("BEGIN IMMEDIATE")
@@ -1241,7 +1248,7 @@ def d_notify(cid):
 
 @app.route("/driver/claims/<int:cid>/cancel", methods=["POST"])
 def d_claim_cancel(cid):
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
     try:
         if conn.execute("SELECT 1 FROM claims WHERE id = ? AND driver = ? AND status = ?",
                         (cid, session["driver"], WAITING)).fetchone():
@@ -1255,7 +1262,7 @@ def d_claim_cancel(cid):
 
 @app.route("/driver/claims/<int:cid>/done", methods=["POST"])
 def d_claim_done(cid):
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect()
     try:
         if conn.execute("SELECT 1 FROM claims WHERE id = ? AND driver = ? AND status = ?",
                         (cid, session["driver"], PICKED)).fetchone():
