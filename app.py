@@ -8,6 +8,7 @@ import pandas as pd
 from flask import (Flask, flash, redirect, render_template, request,
                    send_file, session, url_for)
 from jinja2 import DictLoader
+from werkzeug.security import check_password_hash, generate_password_hash
 
 # ----------------------------------------------------------------------
 # الإعدادات
@@ -20,25 +21,50 @@ TZ = ZoneInfo("Asia/Muscat")
 
 PAID = "تم التحصيل"
 PENDING = "معلق"
+AVAILABLE = "متاح"
+CLAIMED = "مستلم"
+DELIVERED = "تم التوصيل"
+ORDER_STATUSES = [AVAILABLE, CLAIMED, DELIVERED]
 EXPENSE_TYPES = ["بترول", "أكل", "صيانة", "أخرى"]
 UNSPECIFIED = "غير محدد"
-WILAYAT = [
-    "مسقط", "مطرح", "السيب", "بوشر", "العامرات", "قريات", "صحار", "صور",
-    "نزوى", "صلالة", "البريمي", "إبراء", "عبري", "بركاء", "شناص", "صحم",
-    "الرستاق", "سمائل", "إزكي", "بهلا", "ضنك", "محوت", "مرمول", "الحمراء",
-]
+MAX_BULK = 500
+
+# محافظات وولايات سلطنة عُمان
+OMAN = {
+    "مسقط": ["مسقط", "مطرح", "بوشر", "السيب", "العامرات", "قريات"],
+    "ظفار": ["صلالة", "طاقة", "مرباط", "رخيوت", "ثمريت", "ضلكوت", "المزيونة",
+             "مقشن", "شليم وجزر الحلانيات", "سدح"],
+    "مسندم": ["خصب", "دبا", "بخا", "مدحاء"],
+    "البريمي": ["البريمي", "محضة", "السنينة"],
+    "الداخلية": ["نزوى", "بهلا", "منح", "الحمراء", "أدم", "إزكي", "سمائل",
+                 "بدبد", "الجبل الأخضر"],
+    "شمال الباطنة": ["صحار", "شناص", "لوى", "صحم", "الخابورة", "السويق"],
+    "جنوب الباطنة": ["الرستاق", "العوابي", "نخل", "وادي المعاول", "بركاء", "المصنعة"],
+    "جنوب الشرقية": ["صور", "الكامل والوافي", "جعلان بني بو حسن",
+                     "جعلان بني بو علي", "مصيرة"],
+    "شمال الشرقية": ["إبراء", "المضيبي", "بدية", "القابل", "وادي بني خالد",
+                     "دماء والطائيين"],
+    "الظاهرة": ["عبري", "ينقل", "ضنك"],
+    "الوسطى": ["هيما", "محوت", "الدقم", "الجازر"],
+}
+WILAYAT = [w for ws in OMAN.values() for w in ws]
+WILAYA_TO_GOV = {w: g for g, ws in OMAN.items() for w in ws}
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     order_ref TEXT,
     customer_phone TEXT,
+    governorate TEXT,
     wilaya TEXT NOT NULL,
-    driver TEXT NOT NULL,
+    driver TEXT NOT NULL DEFAULT '',
     fee REAL NOT NULL,
     payment_status TEXT NOT NULL,
     order_date TEXT NOT NULL,
-    notes TEXT
+    notes TEXT,
+    status TEXT NOT NULL DEFAULT 'متاح',
+    claimed_at TEXT,
+    delivered_at TEXT
 );
 CREATE TABLE IF NOT EXISTS expenses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,14 +77,17 @@ CREATE TABLE IF NOT EXISTS expenses (
 );
 CREATE TABLE IF NOT EXISTS drivers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE,
+    pin_hash TEXT
 );
 """
 
 ORDER_COLUMNS_AR = {
     "id": "رقم", "order_ref": "رقم الطلب", "customer_phone": "هاتف الزبون",
-    "wilaya": "الولاية", "driver": "المندوب", "fee": "سعر التوصيل",
-    "payment_status": "حالة الدفع", "order_date": "التاريخ", "notes": "ملاحظات",
+    "governorate": "المحافظة", "wilaya": "الولاية", "driver": "المندوب",
+    "fee": "سعر التوصيل", "payment_status": "حالة الدفع", "order_date": "التاريخ",
+    "notes": "ملاحظات / العنوان", "status": "حالة الطلب",
+    "claimed_at": "وقت الاستلام", "delivered_at": "وقت التوصيل",
 }
 EXPENSE_COLUMNS_AR = {
     "id": "رقم", "driver": "السيارة/المندوب", "expense_date": "التاريخ",
@@ -81,10 +110,10 @@ TEMPLATES = {
 <style>
   body{font-family:Tahoma,Arial,sans-serif;background:#f4f6fa;margin:0;color:#222}
   nav{background:#1f3a5f;padding:12px 20px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
-  nav a{color:#fff;text-decoration:none;font-weight:bold}
+  nav a,nav span{color:#fff;text-decoration:none;font-weight:bold}
   .wrap{padding:20px;max-width:1200px;margin:auto}
-  .card{background:#fff;border-radius:10px;padding:16px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:20px}
+  .card{background:#fff;border-radius:10px;padding:16px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow-x:auto}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:20px}
   .kpi{background:#fff;border-radius:10px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.08)}
   .kpi b{display:block;font-size:22px;margin-top:6px}
   form.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;align-items:end}
@@ -92,23 +121,38 @@ TEMPLATES = {
   button{background:#1f3a5f;color:#fff;border:0;cursor:pointer}
   .btn-link{background:#2e8b57;color:#fff;padding:9px 14px;border-radius:6px;text-decoration:none;display:inline-block}
   table{width:100%;border-collapse:collapse;font-size:14px}
-  th,td{padding:8px;border-bottom:1px solid #eee;text-align:right}
+  th,td{padding:8px;border-bottom:1px solid #eee;text-align:right;vertical-align:middle}
   th{background:#f0f3f8}
   .pos{color:#0a7d32}.neg{color:#c0392b}
-  .small-btn{width:auto;padding:4px 10px;font-size:13px;margin:0 2px}
+  .small-btn{width:auto;padding:5px 10px;font-size:13px;margin:2px}
+  .green{background:#2e8b57}.red{background:#c0392b}.gray{background:#7f8c8d}
   .flash{background:#fff3cd;padding:10px;border-radius:6px;margin-bottom:12px}
   .top{background:#e8f7ee}
+  .badge{padding:3px 8px;border-radius:10px;font-size:12px;color:#fff;white-space:nowrap}
+  .b-متاح{background:#f0ad4e}.b-مستلم{background:#337ab7}.b-تم{background:#2e8b57}
+  .gov{background:#eef3fb;font-weight:bold}
+  .qty{display:flex;gap:6px;align-items:center}.qty input{width:80px}.qty button{width:auto}
+  .big{font-size:20px;font-weight:bold}
+  details summary{cursor:pointer;color:#1f3a5f}
+  .tabs a{display:inline-block;margin-left:10px}
 </style>
 </head>
 <body>
 <nav>
-  {% if session.get('ok') %}
+  {% if session.get('role') == 'admin' %}
     <a href="{{ url_for('dashboard') }}">لوحة التحكم</a>
-    <a href="{{ url_for('orders') }}">الطلبات الواردة</a>
+    <a href="{{ url_for('orders') }}">الطلبيات</a>
     <a href="{{ url_for('expenses') }}">المصروفات</a>
     <a href="{{ url_for('drivers') }}">المندوبين</a>
     <a href="{{ url_for('export_excel') }}">تصدير Excel</a>
     <a href="{{ url_for('logout') }}" style="margin-right:auto">خروج</a>
+  {% elif session.get('role') == 'driver' %}
+    <span>👤 {{ session.get('driver') }}</span>
+    <a href="{{ url_for('d_home') }}">الطلبيات المتاحة</a>
+    <a href="{{ url_for('d_mine') }}">طلبياتي</a>
+    <a href="{{ url_for('logout') }}" style="margin-right:auto">خروج</a>
+  {% else %}
+    <span>نظام توزيع الطلبيات</span>
   {% endif %}
 </nav>
 <div class="wrap">
@@ -122,65 +166,246 @@ TEMPLATES = {
     "login.html": """
 {% extends "base.html" %}
 {% block content %}
-<div class="card" style="max-width:360px;margin:60px auto">
-  <h3>تسجيل الدخول</h3>
-  <form method="post">
-    <input type="password" name="password" placeholder="كلمة المرور" required>
+<div class="card" style="max-width:380px;margin:40px auto">
+  <h3>دخول المندوب</h3>
+  <form method="post" action="{{ url_for('d_login') }}">
+    <select name="name" required>
+      <option value="">— اختر اسمك —</option>
+      {% for d in driver_names %}<option>{{ d }}</option>{% endfor %}
+    </select>
+    <br><br>
+    <input type="password" name="pin" inputmode="numeric" placeholder="رمز PIN" required>
     <br><br>
     <button type="submit">دخول</button>
   </form>
 </div>
+<div class="card" style="max-width:380px;margin:20px auto">
+  <h3>دخول المدير</h3>
+  <form method="post" action="{{ url_for('login') }}">
+    <input type="password" name="password" placeholder="كلمة المرور" required>
+    <br><br>
+    <button type="submit" class="gray">دخول المدير</button>
+  </form>
+</div>
 {% endblock %}
+""",
+
+    "gov_select.html": """
+    <select name="governorate" id="gov" required onchange="fillWilayat()">
+      <option value="">— المحافظة —</option>
+      {% for g in oman %}<option>{{ g }}</option>{% endfor %}
+    </select>
+    <select name="wilaya" id="wil" required><option value="">— الولاية —</option></select>
+    <script>
+      const OMAN = {{ oman|tojson }};
+      function fillWilayat() {
+        const w = document.getElementById('wil');
+        const list = OMAN[document.getElementById('gov').value] || [];
+        w.innerHTML = '<option value="">— الولاية —</option>' +
+          list.map(x => '<option>' + x + '</option>').join('');
+      }
+    </script>
 """,
 
     "orders.html": """
 {% extends "base.html" %}
 {% block content %}
 <div class="card">
-  <h3>إدخال طلب جديد</h3>
+  <h3>تسجيل طلبيات جديدة</h3>
   <form method="post" action="{{ url_for('add_order') }}" class="grid">
+    {% include "gov_select.html" %}
+    <div><label>عدد الطلبيات</label>
+      <input name="count" type="number" min="1" max="{{ max_bulk }}" value="1" required></div>
+    <input name="fee" type="number" step="0.001" min="0" placeholder="سعر التوصيل للطلب (ر.ع)" required>
+    <input name="notes" placeholder="العنوان / المكان بالتفصيل">
+    <input name="customer_phone" placeholder="هاتف الزبون (اختياري)">
     <input name="order_ref" placeholder="رقم الطلب (اختياري)">
-    <input name="customer_phone" placeholder="هاتف الزبون" required>
-    <input name="wilaya" list="wilayat" placeholder="الولاية / الوجهة" required>
-    <datalist id="wilayat">{% for w in wilayat %}<option value="{{ w }}">{% endfor %}</datalist>
-    {% include "driver_select.html" %}
-    <input name="fee" type="number" step="0.001" min="0" placeholder="سعر التوصيل (ر.ع)" required>
     <select name="payment_status">
-      <option>تم التحصيل</option>
       <option>معلق</option>
+      <option>تم التحصيل</option>
     </select>
     <input name="order_date" type="date" value="{{ today }}" required>
-    <input name="notes" placeholder="ملاحظات">
-    <button type="submit">حفظ الطلب</button>
+    <select name="driver">
+      <option value="">— متاحة لكل المندوبين —</option>
+      {% for d in driver_names %}<option>{{ d }}</option>{% endfor %}
+    </select>
+    <button type="submit">حفظ</button>
   </form>
 </div>
 
+<div class="kpis">
+  <div class="kpi">متاحة للاستلام<b>{{ totals[AVAILABLE] }}</b></div>
+  <div class="kpi">مستلمة مع المندوبين<b>{{ totals[CLAIMED] }}</b></div>
+  <div class="kpi">تم توصيلها<b>{{ totals[DELIVERED] }}</b></div>
+</div>
+
 <div class="card">
-  <h3>آخر الطلبات</h3>
+  <h3>التوزيع حسب المحافظة والولاية</h3>
   <table>
-    <tr><th>#</th><th>التاريخ</th><th>الزبون</th><th>الولاية</th><th>المندوب</th>
-        <th>السعر</th><th>الحالة</th><th>إجراءات</th></tr>
+    <tr><th>المحافظة / الولاية</th><th>متاحة</th><th>مستلمة</th><th>تم التوصيل</th></tr>
+    {% for g in summary %}
+      <tr class="gov"><td>{{ g.name }}</td><td>{{ g[AVAILABLE] }}</td><td>{{ g[CLAIMED] }}</td><td>{{ g[DELIVERED] }}</td></tr>
+      {% for w in g.wilayat %}
+      <tr><td>&nbsp;&nbsp;&nbsp;{{ w.name }}</td><td>{{ w[AVAILABLE] }}</td><td>{{ w[CLAIMED] }}</td><td>{{ w[DELIVERED] }}</td></tr>
+      {% endfor %}
+    {% else %}
+      <tr><td colspan="4">لا توجد طلبيات بعد</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="card">
+  <h3>حسب المندوب</h3>
+  <table>
+    <tr><th>المندوب</th><th>مستلمة حالياً</th><th>تم التوصيل</th><th>الولايات</th></tr>
+    {% for d in by_driver %}
+    <tr><td>{{ d.driver }}</td><td>{{ d.claimed }}</td><td>{{ d.delivered }}</td><td>{{ d.wilayat }}</td></tr>
+    {% else %}
+    <tr><td colspan="4">لم يستلم أي مندوب طلبيات بعد</td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="card">
+  <h3>قائمة الطلبيات</h3>
+  <form method="get" class="grid" style="margin-bottom:12px">
+    <select name="status">
+      <option value="">كل الحالات</option>
+      {% for s in statuses %}<option {% if s == f_status %}selected{% endif %}>{{ s }}</option>{% endfor %}
+    </select>
+    <select name="gov">
+      <option value="">كل المحافظات</option>
+      {% for g in oman %}<option {% if g == f_gov %}selected{% endif %}>{{ g }}</option>{% endfor %}
+    </select>
+    <button type="submit">تصفية</button>
+  </form>
+  <table>
+    <tr><th>#</th><th>التاريخ</th><th>المحافظة</th><th>الولاية</th><th>العنوان</th><th>الزبون</th>
+        <th>السعر</th><th>الحالة</th><th>المندوب</th><th>الدفع</th><th>إجراءات</th></tr>
     {% for r in rows %}
     <tr>
       <td>{{ r.id }}</td>
       <td>{{ r.order_date }}</td>
-      <td>{{ r.customer_phone }}</td>
+      <td>{{ r.governorate or '' }}</td>
       <td>{{ r.wilaya }}</td>
-      <td>{{ r.driver }}</td>
+      <td>{{ r.notes or '' }}</td>
+      <td>{{ r.customer_phone or '' }}</td>
       <td>{{ '%.3f'|format(r.fee) }}</td>
+      <td><span class="badge b-{{ r.status.split()[0] }}">{{ r.status }}</span></td>
+      <td>{{ r.driver or '—' }}</td>
       <td>{{ r.payment_status }}</td>
       <td>
         <form method="post" action="{{ url_for('toggle_payment', oid=r.id) }}" style="display:inline">
-          <button class="small-btn">تغيير الحالة</button>
+          <button class="small-btn">تغيير الدفع</button>
         </form>
+        {% if r.status == CLAIMED %}
+        <form method="post" action="{{ url_for('unassign_order', oid=r.id) }}" style="display:inline">
+          <button class="small-btn gray">سحب من المندوب</button>
+        </form>
+        {% endif %}
         <form method="post" action="{{ url_for('delete_order', oid=r.id) }}" style="display:inline"
               onsubmit="return confirm('هل تريد الحذف؟')">
-          <button class="small-btn" style="background:#c0392b">حذف</button>
+          <button class="small-btn red">حذف</button>
         </form>
       </td>
     </tr>
     {% else %}
-    <tr><td colspan="8">لا توجد طلبات بعد</td></tr>
+    <tr><td colspan="11">لا توجد طلبيات</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}
+""",
+
+    "d_home.html": """
+{% extends "base.html" %}
+{% block content %}
+<div class="kpis">
+  <div class="kpi">طلبيات متاحة الآن<b>{{ total_available }}</b></div>
+  <div class="kpi">معي حالياً<b>{{ mine_count }}</b></div>
+  <div class="kpi">وصّلتها اليوم<b>{{ delivered_today }}</b></div>
+</div>
+
+<div class="card">
+  <h3>الطلبيات المتاحة — اختر كم تستلم ومن وين</h3>
+  {% for g in groups %}
+    <h4 style="margin-bottom:6px">📍 محافظة {{ g.name }} ({{ g.total }})</h4>
+    <table>
+      <tr><th>الولاية</th><th>المتاح</th><th>كم تستلم؟</th></tr>
+      {% for w in g.wilayat %}
+      <tr>
+        <td>
+          <span class="big">{{ w.name }}</span>
+          <details><summary>عرض التفاصيل</summary>
+            <table>
+              {% for o in w.orders %}
+              <tr>
+                <td>#{{ o.id }}</td><td>{{ o.notes or '' }}</td><td>{{ '%.3f'|format(o.fee) }} ر.ع</td>
+                <td><form method="post" action="{{ url_for('d_claim_one', oid=o.id) }}">
+                  <button class="small-btn green">استلم هذا</button></form></td>
+              </tr>
+              {% endfor %}
+            </table>
+          </details>
+        </td>
+        <td class="big">{{ w.count }}</td>
+        <td>
+          <form method="post" action="{{ url_for('d_claim') }}" class="qty">
+            <input type="hidden" name="governorate" value="{{ g.name }}">
+            <input type="hidden" name="wilaya" value="{{ w.name }}">
+            <input name="qty" type="number" min="1" max="{{ w.count }}" value="{{ w.count }}" required>
+            <button class="green">استلم</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>لا توجد طلبيات متاحة حالياً 👍</p>
+  {% endfor %}
+</div>
+{% endblock %}
+""",
+
+    "d_mine.html": """
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h3>طلبياتي ({{ rows|length }})</h3>
+  <table>
+    <tr><th>#</th><th>المحافظة</th><th>الولاية</th><th>العنوان</th><th>الزبون</th><th>السعر</th><th></th></tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.id }}</td>
+      <td>{{ r.governorate or '' }}</td>
+      <td class="big">{{ r.wilaya }}</td>
+      <td>{{ r.notes or '' }}</td>
+      <td>{% if r.customer_phone %}<a href="tel:{{ r.customer_phone }}">{{ r.customer_phone }}</a>{% endif %}</td>
+      <td>{{ '%.3f'|format(r.fee) }}</td>
+      <td>
+        <form method="post" action="{{ url_for('d_deliver', oid=r.id) }}" style="display:inline">
+          <button class="small-btn green">✓ تم التوصيل</button>
+        </form>
+        <form method="post" action="{{ url_for('d_release', oid=r.id) }}" style="display:inline"
+              onsubmit="return confirm('إرجاع الطلب ليصبح متاحاً لغيرك؟')">
+          <button class="small-btn gray">إرجاع</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7">ليس معك طلبيات حالياً — <a href="{{ url_for('d_home') }}">استلم من هنا</a></td></tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div class="card">
+  <h3>آخر ما وصّلته</h3>
+  <table>
+    <tr><th>#</th><th>الولاية</th><th>العنوان</th><th>وقت التوصيل</th></tr>
+    {% for r in done %}
+    <tr><td>{{ r.id }}</td><td>{{ r.wilaya }}</td><td>{{ r.notes or '' }}</td><td>{{ r.delivered_at }}</td></tr>
+    {% else %}
+    <tr><td colspan="4">لا يوجد</td></tr>
     {% endfor %}
   </table>
 </div>
@@ -223,7 +448,7 @@ TEMPLATES = {
       <td>
         <form method="post" action="{{ url_for('delete_expense', eid=r.id) }}" style="display:inline"
               onsubmit="return confirm('هل تريد الحذف؟')">
-          <button class="small-btn" style="background:#c0392b">حذف</button>
+          <button class="small-btn red">حذف</button>
         </form>
       </td>
     </tr>
@@ -250,31 +475,40 @@ TEMPLATES = {
 {% extends "base.html" %}
 {% block content %}
 <div class="card">
-  <h3>إضافة مندوب / سيارة</h3>
+  <h3>إضافة مندوب</h3>
   <form method="post" action="{{ url_for('add_driver') }}" class="grid">
     <input name="name" placeholder="اسم المندوب أو رقم السيارة" required>
+    <input name="pin" inputmode="numeric" pattern="[0-9]{4,8}" placeholder="رمز PIN للدخول (4 أرقام أو أكثر)" required>
     <button type="submit">إضافة</button>
   </form>
+  <p style="color:#666">أعطِ كل مندوب اسمه ورمز PIN ليدخل من نفس رابط الموقع ويستلم الطلبيات.</p>
 </div>
 
 <div class="card">
   <h3>قائمة المندوبين</h3>
   <table>
-    <tr><th>#</th><th>الاسم</th><th>عدد الطلبات</th><th>إجراءات</th></tr>
+    <tr><th>#</th><th>الاسم</th><th>مستلمة حالياً</th><th>تم التوصيل</th><th>تغيير PIN</th><th>إجراءات</th></tr>
     {% for r in rows %}
     <tr>
       <td>{{ r.id }}</td>
-      <td>{{ r.name }}</td>
-      <td>{{ r.orders_count }}</td>
+      <td>{{ r.name }}{% if not r.pin_hash %} <span class="badge b-متاح">بدون PIN</span>{% endif %}</td>
+      <td>{{ r.claimed }}</td>
+      <td>{{ r.delivered }}</td>
+      <td>
+        <form method="post" action="{{ url_for('set_pin', did=r.id) }}" class="qty">
+          <input name="pin" inputmode="numeric" pattern="[0-9]{4,8}" placeholder="PIN جديد" required style="width:120px">
+          <button class="small-btn">حفظ</button>
+        </form>
+      </td>
       <td>
         <form method="post" action="{{ url_for('delete_driver', did=r.id) }}" style="display:inline"
-              onsubmit="return confirm('حذف المندوب من القائمة؟ (لن تُحذف طلباته أو مصروفاته)')">
-          <button class="small-btn" style="background:#c0392b">حذف</button>
+              onsubmit="return confirm('حذف المندوب؟ طلبياته المستلمة سترجع متاحة.')">
+          <button class="small-btn red">حذف</button>
         </form>
       </td>
     </tr>
     {% else %}
-    <tr><td colspan="4">لا يوجد مندوبون بعد</td></tr>
+    <tr><td colspan="6">لا يوجد مندوبون بعد</td></tr>
     {% endfor %}
   </table>
 </div>
@@ -363,25 +597,58 @@ TEMPLATES = {
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "change-this-secret-key")
 app.jinja_loader = DictLoader(TEMPLATES)
+app.jinja_env.globals.update(AVAILABLE=AVAILABLE, CLAIMED=CLAIMED, DELIVERED=DELIVERED)
+
+
+def _columns(conn, table):
+    return {r[1] for r in conn.execute(f"PRAGMA table_info({table})")}
 
 
 def init_db():
     os.makedirs(DATA_DIR, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.executescript(SCHEMA)
+
+    # ترقية قاعدة بيانات النسخة السابقة
+    cols = _columns(conn, "orders")
+    for col in ("governorate", "claimed_at", "delivered_at"):
+        if col not in cols:
+            conn.execute(f"ALTER TABLE orders ADD COLUMN {col} TEXT")
+    if "status" not in cols:
+        conn.execute(f"ALTER TABLE orders ADD COLUMN status TEXT NOT NULL DEFAULT '{AVAILABLE}'")
+        # الطلبات القديمة كانت مسجلة باسم المندوب مباشرة
+        conn.execute("UPDATE orders SET status = ? WHERE driver <> ''", (CLAIMED,))
+    for wilaya, gov in WILAYA_TO_GOV.items():
+        conn.execute("UPDATE orders SET governorate = ? WHERE governorate IS NULL AND wilaya = ?",
+                     (gov, wilaya))
+    if "pin_hash" not in _columns(conn, "drivers"):
+        conn.execute("ALTER TABLE drivers ADD COLUMN pin_hash TEXT")
+
     # نقل أسماء المندوبين المكتوبة سابقاً إلى القائمة الثابتة
     conn.execute(
         """INSERT OR IGNORE INTO drivers (name)
-           SELECT driver FROM orders UNION SELECT driver FROM expenses""")
+           SELECT driver FROM orders WHERE driver <> ''
+           UNION SELECT driver FROM expenses""")
     conn.execute("DELETE FROM drivers WHERE name = ?", (UNSPECIFIED,))
     conn.commit()
     conn.close()
 
 
 def db_exec(sql, params=()):
+    """ينفّذ أمراً ويعيد عدد الصفوف المتأثرة."""
     conn = sqlite3.connect(DB_PATH)
     try:
-        conn.execute(sql, params)
+        cur = conn.execute(sql, params)
+        conn.commit()
+        return cur.rowcount
+    finally:
+        conn.close()
+
+
+def db_exec_many(sql, rows):
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        conn.executemany(sql, rows)
         conn.commit()
     finally:
         conn.close()
@@ -409,6 +676,10 @@ def today_oman():
     return datetime.now(TZ).date()
 
 
+def now_oman():
+    return datetime.now(TZ).strftime("%Y-%m-%d %H:%M")
+
+
 def date_filter(column, d_from, d_to):
     clauses, params = [], []
     if d_from:
@@ -423,14 +694,28 @@ def date_filter(column, d_from, d_to):
 
 init_db()
 
+PUBLIC_ENDPOINTS = {"login", "d_login", "static"}
+
 
 @app.before_request
 def require_login():
-    if request.endpoint in ("login", "static"):
+    endpoint = request.endpoint or ""
+    if endpoint in PUBLIC_ENDPOINTS:
         return None
-    if not session.get("ok"):
+    role = session.get("role")
+    if endpoint.startswith("d_"):
+        # صفحات المندوب: يجب أن يكون المندوب ما زال موجوداً في القائمة
+        if role == "driver" and session.get("driver") in driver_names():
+            return None
+        session.clear()
         return redirect(url_for("login"))
-    return None
+    if endpoint == "logout" and role:
+        return None
+    if role == "admin":
+        return None
+    if role == "driver":
+        return redirect(url_for("d_home"))
+    return redirect(url_for("login"))
 
 
 # ----------------------------------------------------------------------
@@ -440,10 +725,25 @@ def require_login():
 def login():
     if request.method == "POST":
         if request.form.get("password") == APP_PASSWORD:
-            session["ok"] = True
+            session.clear()
+            session["role"] = "admin"
             return redirect(url_for("dashboard"))
         flash("كلمة المرور غير صحيحة")
-    return render_template("login.html", title="دخول")
+    return render_template("login.html", title="دخول", driver_names=driver_names())
+
+
+@app.route("/driver/login", methods=["POST"])
+def d_login():
+    name = request.form.get("name", "").strip()
+    pin = request.form.get("pin", "").strip()
+    row = db_df("SELECT pin_hash FROM drivers WHERE name = ?", (name,))
+    if not row.empty and row["pin_hash"][0] and check_password_hash(row["pin_hash"][0], pin):
+        session.clear()
+        session["role"] = "driver"
+        session["driver"] = name
+        return redirect(url_for("d_home"))
+    flash("الاسم أو رمز PIN غير صحيح")
+    return redirect(url_for("login"))
 
 
 @app.route("/logout")
@@ -458,51 +758,104 @@ def index():
 
 
 # ----------------------------------------------------------------------
-# 1) الطلبات الواردة
+# 1) الطلبيات (المدير)
 # ----------------------------------------------------------------------
+def build_summary(df):
+    """تجميع عدد الطلبيات لكل محافظة وولاية حسب الحالة."""
+    summary = []
+    if df.empty:
+        return summary
+    df = df.assign(governorate=df["governorate"].fillna(UNSPECIFIED))
+    counts = df.groupby(["governorate", "wilaya", "status"]).size()
+    for gov in sorted(df["governorate"].unique(), key=lambda g: list(OMAN).index(g) if g in OMAN else 99):
+        gdf = df[df["governorate"] == gov]
+        g = {"name": gov, "wilayat": []}
+        for s in ORDER_STATUSES:
+            g[s] = int((gdf["status"] == s).sum())
+        for wil in sorted(gdf["wilaya"].unique()):
+            w = {"name": wil}
+            for s in ORDER_STATUSES:
+                w[s] = int(counts.get((gov, wil, s), 0))
+            g["wilayat"].append(w)
+        summary.append(g)
+    return summary
+
+
 @app.route("/orders")
 def orders():
-    rows = db_df("SELECT * FROM orders ORDER BY id DESC LIMIT 200").to_dict("records")
-    return render_template("orders.html", title="الطلبات",
-                           rows=rows, wilayat=WILAYAT, driver_names=driver_names(),
-                           today=today_oman().isoformat())
+    f_status = request.args.get("status", "")
+    f_gov = request.args.get("gov", "")
+    clauses, params = [], []
+    if f_status:
+        clauses.append("status = ?")
+        params.append(f_status)
+    if f_gov:
+        clauses.append("governorate = ?")
+        params.append(f_gov)
+    where = (" WHERE " + " AND ".join(clauses)) if clauses else ""
+    rows = db_df("SELECT * FROM orders" + where + " ORDER BY id DESC LIMIT 300", params).to_dict("records")
+
+    all_df = db_df("SELECT id, governorate, wilaya, status, driver FROM orders")
+    totals = {s: int((all_df["status"] == s).sum()) for s in ORDER_STATUSES}
+    by_driver = db_df(
+        """SELECT driver,
+                  SUM(status = ?) AS claimed,
+                  SUM(status = ?) AS delivered,
+                  GROUP_CONCAT(DISTINCT CASE WHEN status = ? THEN wilaya END) AS wilayat
+           FROM orders WHERE driver <> '' GROUP BY driver ORDER BY claimed DESC""",
+        (CLAIMED, DELIVERED, CLAIMED)).fillna("").to_dict("records")
+
+    return render_template("orders.html", title="الطلبيات",
+                           rows=rows, oman=OMAN, driver_names=driver_names(),
+                           totals=totals, summary=build_summary(all_df), by_driver=by_driver,
+                           statuses=ORDER_STATUSES, f_status=f_status, f_gov=f_gov,
+                           max_bulk=MAX_BULK, today=today_oman().isoformat())
 
 
 @app.route("/orders/add", methods=["POST"])
 def add_order():
     try:
         fee = float(request.form.get("fee", ""))
-        if fee < 0:
+        count = int(request.form.get("count", "1"))
+        if fee < 0 or not 1 <= count <= MAX_BULK:
             raise ValueError
     except ValueError:
-        flash("سعر التوصيل غير صحيح")
+        flash("السعر أو العدد غير صحيح")
         return redirect(url_for("orders"))
 
-    driver = valid_driver(request.form.get("driver"))
-    if not driver:
-        flash("اختر المندوب من القائمة")
+    gov = request.form.get("governorate", "").strip()
+    wilaya = request.form.get("wilaya", "").strip()
+    if wilaya not in OMAN.get(gov, []):
+        flash("اختر المحافظة والولاية")
         return redirect(url_for("orders"))
+
+    driver = ""
+    if request.form.get("driver"):
+        driver = valid_driver(request.form.get("driver"))
+        if not driver:
+            flash("اختر المندوب من القائمة")
+            return redirect(url_for("orders"))
 
     status = request.form.get("payment_status", PENDING)
     if status not in (PAID, PENDING):
         status = PENDING
 
-    db_exec(
-        """INSERT INTO orders (order_ref, customer_phone, wilaya, driver, fee,
-                               payment_status, order_date, notes)
-           VALUES (?,?,?,?,?,?,?,?)""",
-        (
-            request.form.get("order_ref", "").strip(),
-            request.form.get("customer_phone", "").strip(),
-            request.form.get("wilaya", "").strip() or UNSPECIFIED,
-            driver,
-            fee,
-            status,
-            request.form.get("order_date") or today_oman().isoformat(),
-            request.form.get("notes", "").strip(),
-        ),
+    row = (
+        request.form.get("order_ref", "").strip(),
+        request.form.get("customer_phone", "").strip(),
+        gov, wilaya, driver, fee, status,
+        request.form.get("order_date") or today_oman().isoformat(),
+        request.form.get("notes", "").strip(),
+        CLAIMED if driver else AVAILABLE,
+        now_oman() if driver else None,
     )
-    flash("تم حفظ الطلب")
+    db_exec_many(
+        """INSERT INTO orders (order_ref, customer_phone, governorate, wilaya, driver, fee,
+                               payment_status, order_date, notes, status, claimed_at)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+        [row] * count,
+    )
+    flash(f"تم حفظ {count} طلبية في {wilaya} ({gov})")
     return redirect(url_for("orders"))
 
 
@@ -514,18 +867,112 @@ def toggle_payment(oid):
            WHERE id = ?""",
         (PAID, PENDING, PAID, oid),
     )
-    return redirect(url_for("orders"))
+    return redirect(request.referrer or url_for("orders"))
+
+
+@app.route("/orders/<int:oid>/unassign", methods=["POST"])
+def unassign_order(oid):
+    db_exec("UPDATE orders SET driver = '', status = ?, claimed_at = NULL WHERE id = ? AND status = ?",
+            (AVAILABLE, oid, CLAIMED))
+    flash("رجعت الطلبية متاحة للمندوبين")
+    return redirect(request.referrer or url_for("orders"))
 
 
 @app.route("/orders/<int:oid>/delete", methods=["POST"])
 def delete_order(oid):
     db_exec("DELETE FROM orders WHERE id = ?", (oid,))
     flash("تم الحذف")
-    return redirect(url_for("orders"))
+    return redirect(request.referrer or url_for("orders"))
 
 
 # ----------------------------------------------------------------------
-# 2) المصروفات
+# 2) صفحات المندوب
+# ----------------------------------------------------------------------
+@app.route("/driver")
+def d_home():
+    me = session["driver"]
+    avail = db_df("SELECT id, governorate, wilaya, notes, fee FROM orders WHERE status = ? ORDER BY id",
+                  (AVAILABLE,))
+    avail["governorate"] = avail["governorate"].fillna(UNSPECIFIED)
+    groups = []
+    for gov in sorted(avail["governorate"].unique(), key=lambda g: list(OMAN).index(g) if g in OMAN else 99):
+        gdf = avail[avail["governorate"] == gov]
+        wilayat = []
+        for wil, wdf in gdf.groupby("wilaya"):
+            wilayat.append({"name": wil, "count": len(wdf), "orders": wdf.to_dict("records")})
+        wilayat.sort(key=lambda w: -w["count"])
+        groups.append({"name": gov, "total": len(gdf), "wilayat": wilayat})
+
+    mine = db_df("SELECT COUNT(*) AS n FROM orders WHERE driver = ? AND status = ?", (me, CLAIMED))["n"][0]
+    today = db_df("SELECT COUNT(*) AS n FROM orders WHERE driver = ? AND status = ? AND delivered_at LIKE ?",
+                  (me, DELIVERED, today_oman().isoformat() + "%"))["n"][0]
+    return render_template("d_home.html", title="الطلبيات المتاحة", groups=groups,
+                           total_available=len(avail), mine_count=int(mine), delivered_today=int(today))
+
+
+@app.route("/driver/claim", methods=["POST"])
+def d_claim():
+    try:
+        qty = int(request.form.get("qty", "0"))
+        if qty < 1:
+            raise ValueError
+    except ValueError:
+        flash("اكتب عدداً صحيحاً")
+        return redirect(url_for("d_home"))
+    gov = request.form.get("governorate", "")
+    wilaya = request.form.get("wilaya", "")
+    gov_clause = "governorate IS NULL" if gov == UNSPECIFIED else "governorate = ?"
+    gov_params = () if gov == UNSPECIFIED else (gov,)
+    # تحديث واحد ذرّي حتى لا يستلم مندوبان نفس الطلبية
+    taken = db_exec(
+        f"""UPDATE orders SET driver = ?, status = ?, claimed_at = ?
+            WHERE id IN (SELECT id FROM orders WHERE status = ? AND wilaya = ? AND {gov_clause}
+                         ORDER BY id LIMIT ?)""",
+        (session["driver"], CLAIMED, now_oman(), AVAILABLE, wilaya, *gov_params, qty),
+    )
+    if taken:
+        flash(f"✅ استلمت {taken} طلبية في {wilaya}" + (" (المتاح كان أقل مما طلبت)" if taken < qty else ""))
+        return redirect(url_for("d_mine"))
+    flash("لم تعد هناك طلبيات متاحة في هذه الولاية")
+    return redirect(url_for("d_home"))
+
+
+@app.route("/driver/claim/<int:oid>", methods=["POST"])
+def d_claim_one(oid):
+    taken = db_exec("UPDATE orders SET driver = ?, status = ?, claimed_at = ? WHERE id = ? AND status = ?",
+                    (session["driver"], CLAIMED, now_oman(), oid, AVAILABLE))
+    flash("✅ استلمت الطلبية" if taken else "هذه الطلبية استلمها مندوب آخر")
+    return redirect(url_for("d_home"))
+
+
+@app.route("/driver/mine")
+def d_mine():
+    me = session["driver"]
+    rows = db_df("SELECT * FROM orders WHERE driver = ? AND status = ? ORDER BY governorate, wilaya, id",
+                 (me, CLAIMED)).to_dict("records")
+    done = db_df("SELECT * FROM orders WHERE driver = ? AND status = ? ORDER BY delivered_at DESC LIMIT 30",
+                 (me, DELIVERED)).to_dict("records")
+    return render_template("d_mine.html", title="طلبياتي", rows=rows, done=done)
+
+
+@app.route("/driver/<int:oid>/deliver", methods=["POST"])
+def d_deliver(oid):
+    db_exec("UPDATE orders SET status = ?, delivered_at = ? WHERE id = ? AND driver = ? AND status = ?",
+            (DELIVERED, now_oman(), oid, session["driver"], CLAIMED))
+    flash("✅ تم تسجيل التوصيل")
+    return redirect(url_for("d_mine"))
+
+
+@app.route("/driver/<int:oid>/release", methods=["POST"])
+def d_release(oid):
+    db_exec("UPDATE orders SET driver = '', status = ?, claimed_at = NULL WHERE id = ? AND driver = ? AND status = ?",
+            (AVAILABLE, oid, session["driver"], CLAIMED))
+    flash("رجعت الطلبية متاحة")
+    return redirect(url_for("d_mine"))
+
+
+# ----------------------------------------------------------------------
+# 3) المصروفات
 # ----------------------------------------------------------------------
 @app.route("/expenses")
 def expenses():
@@ -580,37 +1027,64 @@ def delete_expense(eid):
 # ----------------------------------------------------------------------
 # المندوبين / السيارات
 # ----------------------------------------------------------------------
+def valid_pin(pin):
+    return pin.isdigit() and 4 <= len(pin) <= 8
+
+
 @app.route("/drivers")
 def drivers():
     rows = db_df(
-        """SELECT d.id, d.name, COUNT(o.id) AS orders_count
+        """SELECT d.id, d.name, d.pin_hash,
+                  COALESCE(SUM(o.status = ?), 0) AS claimed,
+                  COALESCE(SUM(o.status = ?), 0) AS delivered
            FROM drivers d LEFT JOIN orders o ON o.driver = d.name
-           GROUP BY d.id ORDER BY d.name""").to_dict("records")
+           GROUP BY d.id ORDER BY d.name""", (CLAIMED, DELIVERED)).to_dict("records")
+    for r in rows:
+        r["claimed"], r["delivered"] = int(r["claimed"]), int(r["delivered"])
     return render_template("drivers.html", title="المندوبين", rows=rows)
 
 
 @app.route("/drivers/add", methods=["POST"])
 def add_driver():
     name = request.form.get("name", "").strip()
+    pin = request.form.get("pin", "").strip()
     if not name or name == UNSPECIFIED:
         flash("اكتب اسم المندوب")
+    elif not valid_pin(pin):
+        flash("رمز PIN يجب أن يكون من 4 إلى 8 أرقام")
     elif name in driver_names():
         flash("هذا الاسم موجود مسبقاً")
     else:
-        db_exec("INSERT INTO drivers (name) VALUES (?)", (name,))
-        flash("تمت إضافة المندوب")
+        db_exec("INSERT INTO drivers (name, pin_hash) VALUES (?, ?)", (name, generate_password_hash(pin)))
+        flash(f"تمت إضافة {name} — يدخل باسمه ورمز PIN")
+    return redirect(url_for("drivers"))
+
+
+@app.route("/drivers/<int:did>/pin", methods=["POST"])
+def set_pin(did):
+    pin = request.form.get("pin", "").strip()
+    if not valid_pin(pin):
+        flash("رمز PIN يجب أن يكون من 4 إلى 8 أرقام")
+    else:
+        db_exec("UPDATE drivers SET pin_hash = ? WHERE id = ?", (generate_password_hash(pin), did))
+        flash("تم تغيير رمز PIN")
     return redirect(url_for("drivers"))
 
 
 @app.route("/drivers/<int:did>/delete", methods=["POST"])
 def delete_driver(did):
-    db_exec("DELETE FROM drivers WHERE id = ?", (did,))
-    flash("تم حذف المندوب من القائمة")
+    row = db_df("SELECT name FROM drivers WHERE id = ?", (did,))
+    if not row.empty:
+        # الطلبيات التي لم توصَّل ترجع متاحة لغيره
+        db_exec("UPDATE orders SET driver = '', status = ?, claimed_at = NULL WHERE driver = ? AND status = ?",
+                (AVAILABLE, row["name"][0], CLAIMED))
+        db_exec("DELETE FROM drivers WHERE id = ?", (did,))
+        flash("تم حذف المندوب")
     return redirect(url_for("drivers"))
 
 
 # ----------------------------------------------------------------------
-# 3) التقارير ولوحة التحكم (Pandas)
+# 4) التقارير ولوحة التحكم (Pandas)
 # ----------------------------------------------------------------------
 def load_data(d_from="", d_to=""):
     w, p = date_filter("order_date", d_from, d_to)
@@ -635,11 +1109,12 @@ def build_reports(orders_df, expenses_df):
     }
     k["net"] = k["collected"] - k["expenses"]
 
-    # حسب المندوب / السيارة
+    # حسب المندوب / السيارة (بدون الطلبيات التي لم يستلمها أحد)
+    assigned = orders_df[orders_df["driver"] != ""]
     drv = pd.DataFrame({
-        "orders_count": orders_df.groupby("driver")["id"].count(),
-        "collected": paid.groupby("driver")["fee"].sum(),
-        "pending": pending.groupby("driver")["fee"].sum(),
+        "orders_count": assigned.groupby("driver")["id"].count(),
+        "collected": paid[paid["driver"] != ""].groupby("driver")["fee"].sum(),
+        "pending": pending[pending["driver"] != ""].groupby("driver")["fee"].sum(),
         "expenses": expenses_df.groupby("driver")["amount"].sum(),
     }).astype(float).fillna(0)
     drv["net"] = drv["collected"] - drv["expenses"]
@@ -683,7 +1158,7 @@ def dashboard():
 
 
 # ----------------------------------------------------------------------
-# 4) تصدير Excel
+# 5) تصدير Excel
 # ----------------------------------------------------------------------
 @app.route("/export")
 def export_excel():
