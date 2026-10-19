@@ -1,6 +1,7 @@
 import io
 import os
 import sqlite3
+import urllib.parse
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -77,13 +78,19 @@ CREATE TABLE IF NOT EXISTS claims (
     pickup_time TEXT NOT NULL,
     created_at TEXT NOT NULL,
     status TEXT NOT NULL,
-    forced INTEGER NOT NULL DEFAULT 0
+    forced INTEGER NOT NULL DEFAULT 0,
+    notified_at TEXT
 );
 CREATE TABLE IF NOT EXISTS drivers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL UNIQUE,
     pin_hash TEXT,
     phone TEXT
+);
+CREATE TABLE IF NOT EXISTS supervisors (
+    governorate TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    phone TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS settings (
     key TEXT PRIMARY KEY,
@@ -95,6 +102,7 @@ CLAIM_COLUMNS_AR = {
     "id": "رقم الحجز", "driver": "المندوب", "phone": "الهاتف", "governorate": "المحافظة",
     "wilaya": "الولاية", "qty": "العدد", "pickup_time": "موعد الاستلام",
     "created_at": "وقت الحجز", "status": "الحالة", "forced": "أُجبر على الباقي",
+    "notified_at": "وقت إبلاغ المشرف",
 }
 
 # ----------------------------------------------------------------------
@@ -261,6 +269,7 @@ TEMPLATES = {
       <a href="{{ url_for('shipments') }}" class="{{ 'active' if ep == 'shipments' }}">{{ icon('box') }}<span>الشحنات</span>{% if nav_available %}<span class="chip gray">{{ nav_available }}</span>{% endif %}</a>
       <a href="{{ url_for('claims') }}" class="{{ 'active' if ep == 'claims' }}">{{ icon('cal') }}<span>حجوزات المندوبين</span></a>
       <a href="{{ url_for('drivers') }}" class="{{ 'active' if ep == 'drivers' }}">{{ icon('users') }}<span>المندوبين</span></a>
+      <a href="{{ url_for('supervisors') }}" class="{{ 'active' if ep == 'supervisors' }}">{{ icon('bell') }}<span>مشرفو المحافظات</span></a>
       <div class="menu-label">الأدوات</div>
       <a href="{{ url_for('export_excel') }}">{{ icon('file') }}<span>تصدير Excel</span></a>
       <div class="bottom">
@@ -464,7 +473,7 @@ TEMPLATES = {
   </div>
   <table>
     <tr><th>#</th><th>المندوب</th><th>الهاتف</th><th>المحافظة</th><th>الولاية</th><th>العدد</th>
-        <th>موعد الاستلام</th><th>وقت الحجز</th><th>الحالة</th><th>إجراءات</th></tr>
+        <th>موعد الاستلام</th><th>وقت الحجز</th><th>المشرف</th><th>الحالة</th><th>إجراءات</th></tr>
     {% for c in rows %}
     <tr>
       <td>{{ c.id }}</td>
@@ -475,6 +484,8 @@ TEMPLATES = {
       <td class="big">{{ c.qty }}{% if c.forced %} <small title="أُجبر على أخذ الباقي">⚠️</small>{% endif %}</td>
       <td><span class="time">{{ c.pickup_time }}</span></td>
       <td class="muted">{{ c.created_at }}</td>
+      <td>{% if c.notified_at %}<span class="badge b-تم" title="{{ c.notified_at }}">✓ تم الإبلاغ</span>
+          {% else %}<span class="badge b-ملغي">لم يُبلَّغ</span>{% endif %}</td>
       <td><span class="badge b-{{ c.status.split()[0] }}">{{ c.status }}</span></td>
       <td>
         {% if c.status == WAITING %}
@@ -492,7 +503,7 @@ TEMPLATES = {
       </td>
     </tr>
     {% else %}
-    <tr><td colspan="10">لا توجد حجوزات</td></tr>
+    <tr><td colspan="11" class="empty">لا توجد حجوزات</td></tr>
     {% endfor %}
   </table>
 </div>
@@ -629,9 +640,47 @@ TEMPLATES = {
 {% endblock %}
 """,
 
+    "supervisors.html": """
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h3>مشرف كل محافظة</h3>
+  <p class="muted" style="margin-top:-8px">عندما يحجز مندوب شحنات في محافظة، يرسل رسالة واتساب جاهزة إلى مشرفها.</p>
+  <table>
+    <tr><th>المحافظة</th><th>اسم المشرف</th><th>رقم الواتساب</th><th></th></tr>
+    {% for g in oman %}
+    <tr>
+      <form method="post" action="{{ url_for('save_supervisor') }}">
+        <td class="big">{{ g }}<input type="hidden" name="governorate" value="{{ g }}"></td>
+        <td><input name="name" value="{{ sups.get(g, {}).get('name', '') }}" placeholder="اسم المشرف"></td>
+        <td><input name="phone" value="{{ sups.get(g, {}).get('phone', '') }}" inputmode="tel" placeholder="مثال: 99123456" style="direction:ltr;text-align:right"></td>
+        <td style="white-space:nowrap">
+          <button class="small-btn">حفظ</button>
+          {% if g in sups %}<button class="small-btn red" name="clear" value="1" formnovalidate>حذف</button>{% endif %}
+        </td>
+      </form>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}
+""",
+
     "d_mine.html": """
 {% extends "base.html" %}
 {% block content %}
+{% if notify %}
+<div class="card" style="border:2px solid #25d366">
+  <h3>📲 خطوة أخيرة: بلّغ مشرف {{ notify.governorate }}</h3>
+  {% if notify.wa %}
+  <p class="muted">سيُفتح واتساب والرسالة جاهزة إلى المشرف <b>{{ notify.sup_name }}</b>. اضغط <b>إرسال</b> في واتساب فقط.</p>
+  <pre style="background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px;white-space:pre-wrap;font-family:inherit">{{ notify.text }}</pre>
+  <a class="btn-link" style="background:#25d366;font-size:17px;padding:14px 22px" href="{{ url_for('d_notify', cid=notify.id) }}" target="_blank">📲 أرسل للمشرف عبر واتساب</a>
+  {% else %}
+  <p class="warn">لم يُضَف مشرف لمحافظة {{ notify.governorate }} بعد — أبلغ الإدارة.</p>
+  {% endif %}
+</div>
+{% endif %}
 <div class="card">
   <h3>حجوزاتي</h3>
   <table>
@@ -650,6 +699,10 @@ TEMPLATES = {
               onsubmit="return confirm('تأكيد توصيل كل شحنات هذا الحجز؟')">
           <button class="small-btn green">✓ وصّلت الكل</button>
         </form>
+        {% endif %}
+        {% if c.status == WAITING and has_sup.get(c.governorate) %}
+        <a class="small-btn" style="background:#25d366;color:#fff;text-decoration:none;display:inline-block"
+           href="{{ url_for('d_notify', cid=c.id) }}" target="_blank">📲 {{ 'أعد الإرسال' if c.notified_at else 'بلّغ المشرف' }}</a>
         {% endif %}
         {% if c.status == WAITING %}
         <form method="post" action="{{ url_for('d_claim_cancel', cid=c.id) }}" style="display:inline"
@@ -688,6 +741,8 @@ def init_db():
     conn = sqlite3.connect(DB_PATH)
     conn.executescript(SCHEMA)
     # ترقية جدول المندوبين من النسخ السابقة
+    if "notified_at" not in _columns(conn, "claims"):
+        conn.execute("ALTER TABLE claims ADD COLUMN notified_at TEXT")
     driver_cols = _columns(conn, "drivers")
     for col in ("pin_hash", "phone"):
         if col not in driver_cols:
@@ -946,6 +1001,67 @@ def set_min_left():
 
 
 # ----------------------------------------------------------------------
+# مشرفو المحافظات ورسائل الواتساب
+# ----------------------------------------------------------------------
+def supervisors_map():
+    df = db_df("SELECT governorate, name, phone FROM supervisors")
+    return {r.governorate: {"name": r.name, "phone": r.phone} for r in df.itertuples()}
+
+
+def whatsapp_number(phone):
+    """يحوّل الرقم إلى صيغة واتساب الدولية (أرقام عُمان من 8 خانات تأخذ 968)."""
+    digits = "".join(ch for ch in phone if ch.isdigit())
+    if digits.startswith("00"):
+        digits = digits[2:]
+    if len(digits) == 8:
+        digits = "968" + digits
+    return digits
+
+
+def whatsapp_link(phone, text):
+    return f"https://wa.me/{whatsapp_number(phone)}?text={urllib.parse.quote(text)}"
+
+
+def claim_message(c):
+    lines = [
+        f"📦 حجز شحنات جديد رقم {c['id']}",
+        f"المندوب: {c['driver']}",
+        f"الهاتف: {c['phone']}",
+        f"المحافظة: {c['governorate']}",
+        f"الولاية: {c['wilaya']}",
+        f"العدد: {c['qty']} شحنة",
+        f"موعد الاستلام: {c['pickup_time']}",
+    ]
+    return "\n".join(lines)
+
+
+@app.route("/supervisors")
+def supervisors():
+    return render_template("supervisors.html", title="مشرفو المحافظات",
+                           subtitle="يستلم المشرف رسالة واتساب عند كل حجز في محافظته",
+                           oman=OMAN, sups=supervisors_map())
+
+
+@app.route("/supervisors/save", methods=["POST"])
+def save_supervisor():
+    gov = request.form.get("governorate", "")
+    if gov not in OMAN:
+        return redirect(url_for("supervisors"))
+    if request.form.get("clear"):
+        db_exec("DELETE FROM supervisors WHERE governorate = ?", (gov,))
+        flash(f"تم حذف مشرف {gov}")
+        return redirect(url_for("supervisors"))
+    name = request.form.get("name", "").strip()
+    phone = request.form.get("phone", "").strip()
+    if not name or len(whatsapp_number(phone)) < 8:
+        flash("اكتب اسم المشرف ورقم واتساب صحيح")
+        return redirect(url_for("supervisors"))
+    db_exec("INSERT OR REPLACE INTO supervisors (governorate, name, phone) VALUES (?, ?, ?)", (gov, name, phone))
+    flash(f"✅ تم حفظ مشرف {gov}: {name}")
+    return redirect(url_for("supervisors"))
+
+
+# ----------------------------------------------------------------------
 # 3) المندوبين (المدير)
 # ----------------------------------------------------------------------
 def valid_pin(pin):
@@ -1089,14 +1205,38 @@ def d_claim():
     if forced:
         msg += f" (أُضيف الباقي لأنه أقل من {min_left})"
     flash(msg)
-    return redirect(url_for("d_mine"))
+    return redirect(url_for("d_mine", notify=cid))
 
 
 @app.route("/driver/mine")
 def d_mine():
     claims_list = db_df("SELECT * FROM claims WHERE driver = ? AND status <> ? ORDER BY id DESC LIMIT 50",
                         (session["driver"], CANCELLED)).to_dict("records")
-    return render_template("d_mine.html", title="حجوزاتي", subtitle="حجوزاتك ومواعيد استلامها", claims=claims_list)
+    sups = supervisors_map()
+    notify = None
+    nid = request.args.get("notify", type=int)
+    claim = next((c for c in claims_list if c["id"] == nid), None)
+    if claim:
+        sup = sups.get(claim["governorate"])
+        notify = {"id": claim["id"], "governorate": claim["governorate"], "text": claim_message(claim),
+                  "wa": bool(sup), "sup_name": sup["name"] if sup else ""}
+    return render_template("d_mine.html", title="حجوزاتي", subtitle="حجوزاتك ومواعيد استلامها",
+                           claims=claims_list, notify=notify, has_sup={g: True for g in sups})
+
+
+@app.route("/driver/claims/<int:cid>/notify")
+def d_notify(cid):
+    """يسجّل الإبلاغ ثم يفتح واتساب برسالة جاهزة إلى مشرف المحافظة."""
+    row = db_df("SELECT * FROM claims WHERE id = ? AND driver = ?", (cid, session["driver"]))
+    if row.empty:
+        return redirect(url_for("d_mine"))
+    claim = row.to_dict("records")[0]
+    sup = supervisors_map().get(claim["governorate"])
+    if not sup:
+        flash(f"لا يوجد مشرف لمحافظة {claim['governorate']}")
+        return redirect(url_for("d_mine"))
+    db_exec("UPDATE claims SET notified_at = ? WHERE id = ?", (now_oman(), cid))
+    return redirect(whatsapp_link(sup["phone"], claim_message(claim)))
 
 
 @app.route("/driver/claims/<int:cid>/cancel", methods=["POST"])
