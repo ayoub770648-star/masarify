@@ -441,6 +441,15 @@ TEMPLATES = {
   .tabs a{box-shadow:0 1px 0 #e2e8f0}
   .btn-ghost,.seg button,.quick button,.langs a,.auth-lang a{box-shadow:inset 0 1px 0 #fff,0 2px 0 #e5e9f0,0 4px 8px -6px rgba(15,23,42,.2)}
   .seg button:not(.on){box-shadow:none}
+  /* أزرار الاختيار بألوان الشركة (لا يصلها تدرّج الأزرار الزرقاء) */
+  .seg{background:#eef2f9;border:1px solid #e3e8f2}
+  .seg button{background:transparent !important;color:var(--navy) !important;font-weight:600;border-radius:8px}
+  .seg button:hover{background:rgba(255,255,255,.6) !important}
+  .seg button.on{background:#fff !important;color:var(--orange) !important;font-weight:700;
+                 box-shadow:inset 0 -3px 0 var(--orange),0 2px 6px -2px rgba(30,58,138,.25) !important}
+  .quick button{background:var(--orange-soft) !important;color:var(--orange-dark) !important;border:1px solid #fed7aa;
+                box-shadow:0 2px 0 #fde2c4 !important}
+  .quick button:active{box-shadow:inset 0 2px 3px rgba(234,88,12,.2) !important}
   .green{background:linear-gradient(180deg,#34d399,#16a34a)}.red{background:linear-gradient(180deg,#fb7185,#e11d48)}
   .wa{background:linear-gradient(180deg,#4ade80,#22c55e)}
   button:not(.small-btn):not(.green):not(.red):not(.gray):not(.wa):not(.btn-dark){background:linear-gradient(180deg,#4f8df7,#2563eb)}
