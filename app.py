@@ -18,6 +18,8 @@ DATA_DIR = os.environ.get("DATA_DIR", BASE_DIR)      # على Railway سنضبط
 DB_PATH = os.path.join(DATA_DIR, "delivery.db")
 APP_PASSWORD = os.environ.get("APP_PASSWORD", "1234")  # غيّرها من متغيرات Railway
 TZ = ZoneInfo("Asia/Muscat")
+BRAND_EN = os.environ.get("BRAND_NAME", "Parcel Express")
+BRAND_AR = os.environ.get("BRAND_SUBTITLE", "نظام توزيع الشحنات")
 
 # حالات الشحنة
 AVAILABLE = "متاح"
@@ -105,92 +107,124 @@ TEMPLATES = {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ title }} | توزيع الشحنات</title>
+<title>{{ title }} | {{ brand_ar }}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#f4f6fb; --surface:#fff; --ink:#0f172a; --muted:#64748b; --line:#e6eaf2;
-    --brand:#4338ca; --brand-soft:#eef2ff; --side:#0b1224; --side-ink:#a5b0c8;
-    --ok:#059669; --ok-soft:#ecfdf5; --warn:#d97706; --warn-soft:#fffbeb;
-    --info:#2563eb; --info-soft:#eff6ff; --bad:#dc2626; --bad-soft:#fef2f2;
-    --radius:14px; --shadow:0 1px 2px rgba(15,23,42,.04),0 4px 16px rgba(15,23,42,.06);
+    --bg:#f8fafc; --surface:#fff; --ink:#0f172a; --text:#334155; --muted:#64748b; --line:#e5e7eb;
+    --navy:#1e3a8a; --navy-dark:#0f172a; --orange:#f7941d; --orange-dark:#ea580c; --orange-soft:#fff7ed;
+    --blue:#2563eb; --blue-soft:#eff6ff;
+    --ok:#16a34a; --ok-soft:#f0fdf4; --warn:#ea580c; --warn-soft:#fff7ed;
+    --bad:#e11d48; --bad-soft:#fff1f2; --gray-soft:#f1f5f9;
+    --radius:12px;
   }
   *{box-sizing:border-box}
-  body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);margin:0;color:var(--ink);font-size:15px}
-  a{color:var(--brand)}
+  body{font-family:'IBM Plex Sans Arabic',Tahoma,sans-serif;background:var(--bg);margin:0;color:var(--text);font-size:15px}
+  a{color:var(--blue)}
   /* التخطيط */
   .layout{display:flex;min-height:100vh}
-  .side{width:250px;background:var(--side);color:#fff;padding:22px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
-  .logo{display:flex;align-items:center;gap:10px;padding:0 10px 22px;font-weight:700;font-size:17px}
-  .logo-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#06b6d4);display:grid;place-items:center}
-  .side a{display:flex;align-items:center;gap:12px;color:var(--side-ink);text-decoration:none;padding:11px 12px;border-radius:10px;margin-bottom:4px;font-weight:500}
-  .side a:hover{background:rgba(255,255,255,.06);color:#fff}
-  .side a.active{background:rgba(99,102,241,.18);color:#fff}
+  .side{width:272px;background:var(--surface);border-inline-start:1px solid var(--line);padding:16px 12px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;overflow-y:auto}
+  .brand{display:flex;align-items:center;gap:10px;padding:6px 6px 16px;border-bottom:1px solid var(--line);margin-bottom:12px}
+  .brand-mark{width:42px;height:42px;border-radius:10px;background:var(--navy);display:grid;place-items:center;flex:none}
+  .brand-mark svg{width:22px;height:22px}
+  .brand-name{font-weight:700;font-size:16px;line-height:1.2;direction:ltr;text-align:right}
+  .brand-name .p{color:var(--orange)} .brand-name .e{color:var(--navy)}
+  .brand-sub{font-size:12.5px;color:var(--muted)}
+  .menu-label{font-size:12px;color:var(--muted);padding:10px 10px 6px;font-weight:600}
+  .side a{display:flex;align-items:center;gap:12px;color:var(--text);text-decoration:none;padding:10px 12px;border-radius:10px;margin-bottom:2px;font-weight:500}
+  .side a:hover{background:var(--gray-soft)}
+  .side a.active{background:var(--blue-soft);color:var(--navy-dark);font-weight:600;box-shadow:inset -3px 0 0 var(--orange)}
+  .side a.attn{color:var(--orange-dark)}
   .side svg{width:19px;height:19px;flex:none}
-  .side .bottom{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding-top:14px}
-  .user{display:flex;align-items:center;gap:10px;padding:8px 12px;color:#fff;font-weight:600}
-  .avatar{width:32px;height:32px;border-radius:50%;background:#1e293b;display:grid;place-items:center;font-size:14px}
-  .main{flex:1;min-width:0;padding:28px 32px}
-  .page-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px;gap:12px;flex-wrap:wrap}
-  .page-head h1{margin:0;font-size:24px;font-weight:700}
+  .chip{margin-inline-start:auto;background:var(--orange-soft);color:var(--orange-dark);font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px}
+  .chip.gray{background:var(--gray-soft);color:var(--muted)}
+  .side .bottom{margin-top:auto;border-top:1px solid var(--line);padding-top:12px}
+  .user{display:flex;align-items:center;gap:10px;padding:8px 10px;color:var(--ink);font-weight:600}
+  .avatar{width:34px;height:34px;border-radius:8px;background:var(--gray-soft);display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--navy)}
+  .main{flex:1;min-width:0}
+  .topbar{height:64px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:0 24px;position:sticky;top:0;z-index:5}
+  .topbar .tab{color:var(--blue);font-weight:600;border-bottom:2px solid var(--blue);padding:20px 8px 18px}
+  .content{padding:24px 32px}
+  .page-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+  .page-head h1{margin:0;font-size:28px;font-weight:700;color:var(--ink)}
   .page-head p{margin:4px 0 0;color:var(--muted)}
+  /* تبويبات الحالات */
+  .tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+  .tabs a{display:inline-flex;align-items:center;gap:10px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--text);text-decoration:none;font-weight:500;font-size:14px}
+  .tabs a .n{background:var(--gray-soft);color:var(--ink);font-weight:700;font-size:12px;padding:2px 8px;border-radius:999px}
+  .tabs a.on{background:var(--navy-dark);color:#fff;border-color:var(--navy-dark)}
+  .tabs a.on .n{background:rgba(255,255,255,.18);color:#fff}
   /* البطاقات */
-  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:20px;box-shadow:var(--shadow);overflow-x:auto}
-  .card h3{margin:0 0 16px;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:20px;overflow-x:auto}
+  .card h3{margin:0 0 16px;font-size:16px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
   .card h4{margin:18px 0 8px}
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:20px}
-  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);color:var(--muted);font-weight:500;position:relative;overflow:hidden}
-  .kpi b{display:block;font-size:30px;margin-top:6px;color:var(--ink);font-weight:700}
-  .kpi::before{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:4px;background:var(--brand)}
-  .kpi.k-ok::before{background:var(--ok)}.kpi.k-warn::before{background:var(--warn)}.kpi.k-info::before{background:var(--info)}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:20px}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;color:var(--muted);font-weight:500;font-size:14px}
+  .kpi b{display:block;font-size:28px;margin-top:6px;color:var(--ink);font-weight:700}
+  .kpi.k-warn b{color:var(--orange-dark)}.kpi.k-info b{color:var(--blue)}.kpi.k-ok b{color:var(--ok)}
   /* النماذج */
   form.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;align-items:end}
-  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;font-weight:500}
-  input,select,button{font-family:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:15px;width:100%;background:#fff;color:var(--ink)}
-  input:focus,select:focus{outline:none;border-color:#818cf8;box-shadow:0 0 0 3px rgba(99,102,241,.15)}
-  button{background:var(--brand);color:#fff;border:0;cursor:pointer;font-weight:600;transition:filter .15s}
-  button:hover{filter:brightness(1.08)}
-  .btn-link{background:var(--ok);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;display:inline-block}
+  label{display:block;font-size:13.5px;color:var(--ink);margin-bottom:6px;font-weight:600}
+  input,select,button{font-family:inherit;padding:11px 14px;border:1px solid #d1d5db;border-radius:10px;font-size:15px;width:100%;background:#fff;color:var(--ink)}
+  input:focus,select:focus{outline:none;border:2px solid var(--navy-dark);padding:10px 13px}
+  button{background:var(--blue);color:#fff;border:0;cursor:pointer;font-weight:600}
+  button:hover{filter:brightness(1.07)}
+  .btn-dark{background:var(--navy-dark)}
+  .btn-link{background:var(--blue);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;display:inline-block}
   /* الجداول */
-  table{width:100%;border-collapse:separate;border-spacing:0;font-size:14px}
-  th{background:#f8fafc;color:var(--muted);font-weight:600;font-size:13px;padding:11px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
-  td{padding:12px;border-bottom:1px solid var(--line);text-align:right;vertical-align:middle}
+  table{width:100%;border-collapse:separate;border-spacing:0;font-size:14.5px}
+  th{background:#f8fafc;color:var(--ink);font-weight:600;font-size:13.5px;padding:13px 14px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:14px;border-bottom:1px solid var(--line);text-align:right;vertical-align:middle}
   tr:last-child td{border-bottom:0}
-  tbody tr:hover td,table tr:hover td{background:#fafbff}
-  .gov td{background:#f8fafc !important;font-weight:700}
+  table tr:hover td{background:#fafafa}
+  .gov td{background:#f8fafc !important;font-weight:700;color:var(--ink)}
   .small-btn{width:auto;padding:7px 12px;font-size:13px;margin:2px;border-radius:8px}
   .green{background:var(--ok)}.red{background:var(--bad)}.gray{background:#475569}
-  .flash{background:var(--brand-soft);color:#3730a3;border:1px solid #c7d2fe;padding:12px 14px;border-radius:12px;margin-bottom:16px;font-weight:500}
-  .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
-  .b-بانتظار{background:var(--warn-soft);color:var(--warn)}.b-استلمها{background:var(--info-soft);color:var(--info)}
-  .b-تم{background:var(--ok-soft);color:var(--ok)}.b-ملغي{background:#f1f5f9;color:#64748b}
+  .flash{background:var(--blue-soft);color:var(--navy);border:1px solid #bfdbfe;padding:12px 14px;border-radius:10px;margin-bottom:16px;font-weight:500}
+  .badge{display:inline-block;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap;border:1px solid transparent}
+  .b-بانتظار{background:var(--warn-soft);color:var(--warn);border-color:#fed7aa}
+  .b-استلمها{background:var(--blue-soft);color:var(--blue);border-color:#bfdbfe}
+  .b-تم{background:var(--ok-soft);color:var(--ok);border-color:#bbf7d0}
+  .b-ملغي{background:var(--bad-soft);color:var(--bad);border-color:#fecdd3}
   .qty{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.qty input{width:100px}.qty button{width:auto}
   .qty label{margin:0}
-  .big{font-size:17px;font-weight:700}
+  .big{font-size:16px;font-weight:700;color:var(--ink)}
   .muted{color:var(--muted)}
-  .num{font-variant-numeric:tabular-nums;font-weight:700}
+  .num{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink)}
   .warn{background:var(--bad-soft);color:var(--bad);padding:12px;border-radius:10px;font-weight:600}
   .ok{background:var(--ok-soft);color:var(--ok);padding:12px;border-radius:10px;font-weight:600}
-  .time{display:inline-flex;align-items:center;gap:6px;background:var(--warn-soft);color:#92400e;padding:5px 10px;border-radius:8px;font-weight:600;white-space:nowrap}
-  .empty{color:var(--muted);text-align:center;padding:24px}
+  .time{display:inline-flex;align-items:center;gap:6px;background:var(--orange-soft);color:var(--orange-dark);border:1px solid #fed7aa;padding:5px 12px;border-radius:999px;font-weight:600;white-space:nowrap;direction:ltr}
+  .phone{display:inline-flex;align-items:center;gap:6px;color:var(--text);text-decoration:none;direction:ltr;white-space:nowrap}
+  td.muted{white-space:nowrap}
+  .empty{color:var(--muted);text-align:center;padding:28px}
   /* صفحة الدخول */
-  .auth{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
-  .auth-hero{background:linear-gradient(150deg,#0b1224 0%,#1e1b4b 60%,#0e7490 140%);color:#fff;padding:56px;display:flex;flex-direction:column;justify-content:center}
-  .auth-hero h1{font-size:34px;margin:18px 0 10px}
-  .auth-hero p{color:#c7d2fe;font-size:17px;line-height:1.8;max-width:420px}
-  .auth-forms{display:flex;flex-direction:column;justify-content:center;padding:40px;gap:18px;max-width:480px;width:100%;margin:auto}
+  .auth{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;background:#fff}
+  .auth-forms{display:flex;flex-direction:column;justify-content:center;padding:48px;max-width:520px;width:100%;margin:auto}
+  .auth-forms h1{font-size:32px;color:var(--ink);margin:28px 0 6px}
+  .auth-forms .lead{color:var(--muted);margin:0 0 28px}
+  .seg{display:flex;background:var(--gray-soft);border-radius:10px;padding:4px;margin-bottom:22px}
+  .seg button{background:transparent;color:var(--muted);padding:9px}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .auth-hero{position:relative;overflow:hidden;background:linear-gradient(160deg,#fbb040 0%,#f7941d 45%,#f26522 100%);display:flex;align-items:center;justify-content:center}
+  .auth-hero .word{font-size:84px;font-weight:700;font-style:italic;color:#fff;line-height:.95;text-align:center;direction:ltr;letter-spacing:1px;text-shadow:0 6px 24px rgba(0,0,0,.12);transform:rotate(-6deg)}
+  .auth-hero .corner{position:absolute;top:0;inset-inline-end:0;background:#fff;border-end-start-radius:110px;padding:26px 30px 34px 40px}
+  .shape{position:absolute;border:3px solid rgba(255,255,255,.85)}
+  .s1{width:44px;height:44px;border-radius:50%;top:16%;right:28%}
+  .s2{width:44px;height:44px;border-radius:50%;bottom:30%;left:22%}
+  .plus{position:absolute;color:#fff;font-size:44px;font-weight:300}
+  .arc{position:absolute;bottom:-120px;left:-10%;right:-10%;height:260px;border-radius:50%;background:rgba(255,255,255,.18)}
   @media (max-width:900px){
     .layout{flex-direction:column}
-    .side{width:100%;height:auto;position:static;flex-direction:row;align-items:center;overflow-x:auto;padding:10px;gap:4px}
-    .logo{padding:0 6px}.logo span{display:none}
+    .side{width:100%;height:auto;position:static;flex-direction:row;align-items:center;overflow-x:auto;padding:8px;gap:4px;border:0;border-bottom:1px solid var(--line)}
+    .brand{border:0;padding:0 6px;margin:0}.brand-text,.menu-label{display:none}
     .side a{margin:0;white-space:nowrap;padding:9px 10px}
-    .side a span{font-size:14px}
     .side .bottom{margin:0;border:0;padding:0;display:flex}
-    .user{display:none}
-    .main{padding:16px}
-    .auth{grid-template-columns:1fr}.auth-hero{padding:28px}.auth-hero h1{font-size:24px}
+    .user,.topbar{display:none}
+    .content{padding:16px}
+    .auth{grid-template-columns:1fr}.auth-hero{min-height:200px;order:-1}.auth-hero .word{font-size:46px}.auth-hero .corner{display:none}
+    .auth-forms{padding:24px}
   }
 </style>
 </head>
@@ -199,26 +233,42 @@ TEMPLATES = {
 {% macro icon(name) -%}
   {%- if name == 'box' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
   {%- elif name == 'cal' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>
+  {%- elif name == 'bell' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
   {%- elif name == 'users' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6"/><path d="M17 11a3 3 0 100-6M22 21c0-3-2-5-5-5.5"/></svg>
   {%- elif name == 'file' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6M9 15l2 2 4-4"/></svg>
   {%- elif name == 'out' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l-5-5 5-5M5 12h12"/></svg>
-  {%- elif name == 'truck' -%}<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M1 4h14v12H1zM15 9h4l4 4v3h-8"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+  {%- elif name == 'mark' -%}<svg viewBox="0 0 24 24" fill="none" stroke="#f7941d" stroke-width="2.2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8" stroke="#fff"/><path d="M12 13v8" stroke="#fff"/></svg>
   {%- endif -%}
+{%- endmacro %}
+{% macro brandblock() -%}
+  <div class="brand">
+    <div class="brand-mark">{{ icon('mark') }}</div>
+    <div class="brand-text">
+      <div class="brand-name"><span class="p">{{ brand_en[0] }}</span> <span class="e">{{ brand_en[1] }}</span></div>
+      <div class="brand-sub">{{ brand_ar }}</div>
+    </div>
+  </div>
 {%- endmacro %}
 {% if session.get('role') %}
 <div class="layout">
   <aside class="side">
-    <div class="logo"><div class="logo-mark">{{ icon('truck') }}</div><span>توزيع الشحنات</span></div>
+    {{ brandblock() }}
     {% if session.get('role') == 'admin' %}
-      <a href="{{ url_for('shipments') }}" class="{{ 'active' if ep == 'shipments' }}">{{ icon('box') }}<span>الشحنات</span></a>
+      {% if nav_waiting %}
+      <a href="{{ url_for('claims', status=WAITING) }}" class="attn">{{ icon('bell') }}<span>بانتظار الاستلام</span><span class="chip">{{ nav_waiting }}</span></a>
+      {% endif %}
+      <div class="menu-label">القائمة</div>
+      <a href="{{ url_for('shipments') }}" class="{{ 'active' if ep == 'shipments' }}">{{ icon('box') }}<span>الشحنات</span>{% if nav_available %}<span class="chip gray">{{ nav_available }}</span>{% endif %}</a>
       <a href="{{ url_for('claims') }}" class="{{ 'active' if ep == 'claims' }}">{{ icon('cal') }}<span>حجوزات المندوبين</span></a>
       <a href="{{ url_for('drivers') }}" class="{{ 'active' if ep == 'drivers' }}">{{ icon('users') }}<span>المندوبين</span></a>
+      <div class="menu-label">الأدوات</div>
       <a href="{{ url_for('export_excel') }}">{{ icon('file') }}<span>تصدير Excel</span></a>
       <div class="bottom">
-        <div class="user"><div class="avatar">م</div>المدير</div>
+        <div class="user"><div class="avatar">PE</div>الإدارة</div>
         <a href="{{ url_for('logout') }}">{{ icon('out') }}<span>خروج</span></a>
       </div>
     {% else %}
+      <div class="menu-label">القائمة</div>
       <a href="{{ url_for('d_home') }}" class="{{ 'active' if ep == 'd_home' }}">{{ icon('box') }}<span>حجز شحنات</span></a>
       <a href="{{ url_for('d_mine') }}" class="{{ 'active' if ep == 'd_mine' }}">{{ icon('cal') }}<span>حجوزاتي</span></a>
       <div class="bottom">
@@ -228,21 +278,29 @@ TEMPLATES = {
     {% endif %}
   </aside>
   <main class="main">
-    <div class="page-head"><div><h1>{{ title }}</h1>{% if subtitle %}<p>{{ subtitle }}</p>{% endif %}</div></div>
-    {% for m in get_flashed_messages() %}<div class="flash">{{ m }}</div>{% endfor %}
-    {% block content %}{% endblock %}
+    <div class="topbar"><span class="tab">{{ title }}</span></div>
+    <div class="content">
+      <div class="page-head"><div><h1>{{ title }}</h1>{% if subtitle %}<p>{{ subtitle }}</p>{% endif %}</div></div>
+      {% for m in get_flashed_messages() %}<div class="flash">{{ m }}</div>{% endfor %}
+      {% block content %}{% endblock %}
+    </div>
   </main>
 </div>
 {% else %}
 <div class="auth">
-  <div class="auth-hero">
-    <div class="logo-mark" style="width:54px;height:54px;border-radius:14px">{{ icon('truck') }}</div>
-    <h1>نظام توزيع الشحنات</h1>
-    <p>إدارة الشحنات في جميع محافظات وولايات السلطنة، وحجوزات المندوبين ومواعيد الاستلام في مكان واحد.</p>
-  </div>
   <div class="auth-forms">
-    {% for m in get_flashed_messages() %}<div class="flash">{{ m }}</div>{% endfor %}
+    {{ brandblock() }}
     {% block auth %}{% endblock %}
+  </div>
+  <div class="auth-hero">
+    <div class="corner">
+      <div class="brand-name" style="font-size:26px"><span class="p">{{ brand_en[0] }}</span> <span class="e">{{ brand_en[1] }}</span></div>
+      <div class="brand-sub" style="font-size:15px;text-align:right">{{ brand_ar }}</div>
+    </div>
+    <span class="shape s1"></span><span class="shape s2"></span>
+    <span class="plus" style="top:30%;left:20%">+</span><span class="plus" style="top:42%;right:16%">+</span>
+    <div class="arc"></div>
+    <div class="word">{{ brand_en[0]|upper }}<br>{{ brand_en[1]|upper }}</div>
   </div>
 </div>
 {% endif %}
@@ -253,30 +311,40 @@ TEMPLATES = {
     "login.html": """
 {% extends "base.html" %}
 {% block auth %}
-<div class="card">
-  <h3>دخول المندوب</h3>
-  <form method="post" action="{{ url_for('d_login') }}">
-    <label>الاسم</label>
-    <select name="name" required>
-      <option value="">— اختر اسمك —</option>
-      {% for d in driver_names %}<option>{{ d }}</option>{% endfor %}
-    </select>
-    <br><br>
-    <label>رمز PIN</label>
-    <input type="password" name="pin" inputmode="numeric" placeholder="••••" required>
-    <br><br>
-    <button type="submit">دخول</button>
-  </form>
+<h1>مرحباً بعودتك</h1>
+<p class="lead">سجّل دخولك لإدارة الشحنات وحجوزات المندوبين</p>
+{% for m in get_flashed_messages() %}<div class="flash">{{ m }}</div>{% endfor %}
+<div class="seg">
+  <button type="button" id="t-driver" class="on" onclick="showForm('driver')">مندوب</button>
+  <button type="button" id="t-admin" onclick="showForm('admin')">الإدارة</button>
 </div>
-<div class="card">
-  <h3>دخول الإدارة</h3>
-  <form method="post" action="{{ url_for('login') }}">
-    <label>كلمة المرور</label>
-    <input type="password" name="password" required>
-    <br><br>
-    <button type="submit" class="gray">دخول الإدارة</button>
-  </form>
-</div>
+<form method="post" action="{{ url_for('d_login') }}" id="f-driver">
+  <label>الاسم</label>
+  <select name="name" required>
+    <option value="">— اختر اسمك —</option>
+    {% for d in driver_names %}<option>{{ d }}</option>{% endfor %}
+  </select>
+  <br><br>
+  <label>رمز PIN</label>
+  <input type="password" name="pin" inputmode="numeric" placeholder="أدخل الرمز..." required>
+  <br><br>
+  <button type="submit" class="btn-dark">دخول</button>
+</form>
+<form method="post" action="{{ url_for('login') }}" id="f-admin" style="display:none">
+  <label>كلمة المرور</label>
+  <input type="password" name="password" placeholder="أدخل كلمة المرور..." required>
+  <br><br>
+  <button type="submit" class="btn-dark">دخول</button>
+</form>
+<script>
+  function showForm(which) {
+    ['driver', 'admin'].forEach(function (k) {
+      document.getElementById('f-' + k).style.display = k === which ? '' : 'none';
+      document.getElementById('t-' + k).classList.toggle('on', k === which);
+    });
+  }
+  {% if show_admin %}showForm('admin');{% endif %}
+</script>
 {% endblock %}
 """,
 
@@ -295,7 +363,7 @@ TEMPLATES = {
       <select name="wilaya" id="wil" required><option value="">— اختر المحافظة أولاً —</option></select></div>
     <div><label>عدد الشحنات</label>
       <input name="count" type="number" min="1" max="{{ max_bulk }}" required></div>
-    <button type="submit">إضافة</button>
+    <button type="submit">＋ إضافة الشحنات</button>
   </form>
   <script>
     const OMAN = {{ oman|tojson }};
@@ -322,7 +390,7 @@ TEMPLATES = {
     <tr>
       <td><span class="time">{{ c.pickup_time }}</span></td>
       <td class="big">{{ c.driver }}</td>
-      <td><a href="tel:{{ c.phone }}">{{ c.phone }}</a></td>
+      <td><a class="phone" href="tel:{{ c.phone }}">📞 {{ c.phone }}</a></td>
       <td>{{ c.governorate }} / {{ c.wilaya }}</td>
       <td class="num">{{ c.qty }}{% if c.forced %} <small title="أُجبر على أخذ الباقي">⚠️</small>{% endif %}</td>
       <td>
@@ -388,14 +456,12 @@ TEMPLATES = {
 </div>
 
 <div class="card">
-  <h3>حجوزات المندوبين</h3>
-  <form method="get" class="qty" style="margin-bottom:10px">
-    <select name="status" style="width:auto">
-      <option value="">كل الحالات</option>
-      {% for s in statuses %}<option {% if s == f_status %}selected{% endif %}>{{ s }}</option>{% endfor %}
-    </select>
-    <button class="small-btn">تصفية</button>
-  </form>
+  <div class="tabs">
+    <a href="{{ url_for('claims') }}" class="{{ 'on' if not f_status }}">الكل <span class="n">{{ counts.values()|sum }}</span></a>
+    {% for s in statuses %}
+    <a href="{{ url_for('claims', status=s) }}" class="{{ 'on' if s == f_status }}">{{ s }} <span class="n">{{ counts.get(s, 0) }}</span></a>
+    {% endfor %}
+  </div>
   <table>
     <tr><th>#</th><th>المندوب</th><th>الهاتف</th><th>المحافظة</th><th>الولاية</th><th>العدد</th>
         <th>موعد الاستلام</th><th>وقت الحجز</th><th>الحالة</th><th>إجراءات</th></tr>
@@ -403,7 +469,7 @@ TEMPLATES = {
     <tr>
       <td>{{ c.id }}</td>
       <td class="big">{{ c.driver }}</td>
-      <td><a href="tel:{{ c.phone }}">{{ c.phone }}</a></td>
+      <td><a class="phone" href="tel:{{ c.phone }}">📞 {{ c.phone }}</a></td>
       <td>{{ c.governorate or '' }}</td>
       <td>{{ c.wilaya }}</td>
       <td class="big">{{ c.qty }}{% if c.forced %} <small title="أُجبر على أخذ الباقي">⚠️</small>{% endif %}</td>
@@ -455,7 +521,7 @@ TEMPLATES = {
     <tr>
       <td>{{ r.id }}</td>
       <td>{{ r.name }}{% if not r.pin_hash %} <span class="badge b-بانتظار">بدون PIN</span>{% endif %}</td>
-      <td>{% if r.phone %}<a href="tel:{{ r.phone }}">{{ r.phone }}</a>{% endif %}</td>
+      <td>{% if r.phone %}<a class="phone" href="tel:{{ r.phone }}">📞 {{ r.phone }}</a>{% endif %}</td>
       <td>{{ r.claimed }}</td>
       <td>{{ r.delivered }}</td>
       <td>
@@ -609,7 +675,8 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "change-this-secret-key")
 app.jinja_loader = DictLoader(TEMPLATES)
 app.jinja_env.globals.update(AVAILABLE=AVAILABLE, CLAIMED=CLAIMED, DELIVERED=DELIVERED,
-                             WAITING=WAITING, PICKED=PICKED)
+                             WAITING=WAITING, PICKED=PICKED,
+                             brand_en=(BRAND_EN.split(" ", 1) + [""])[:2], brand_ar=BRAND_AR)
 
 
 def _columns(conn, table):
@@ -671,6 +738,16 @@ init_db()
 PUBLIC_ENDPOINTS = {"login", "d_login", "static"}
 
 
+@app.context_processor
+def nav_counts():
+    """أعداد القائمة الجانبية للمدير."""
+    if session.get("role") != "admin":
+        return {}
+    waiting = db_df("SELECT COUNT(*) AS n FROM claims WHERE status = ?", (WAITING,))["n"][0]
+    available = db_df("SELECT COUNT(*) AS n FROM shipments WHERE status = ?", (AVAILABLE,))["n"][0]
+    return {"nav_waiting": int(waiting), "nav_available": int(available)}
+
+
 @app.before_request
 def require_login():
     endpoint = request.endpoint or ""
@@ -703,7 +780,8 @@ def login():
             session["role"] = "admin"
             return redirect(url_for("shipments"))
         flash("كلمة المرور غير صحيحة")
-    return render_template("login.html", title="دخول", driver_names=driver_names())
+    return render_template("login.html", title="دخول", driver_names=driver_names(),
+                           show_admin=request.method == "POST")
 
 
 @app.route("/driver/login", methods=["POST"])
@@ -828,6 +906,7 @@ def claims():
     return render_template("claims.html", title="حجوزات المندوبين",
                            subtitle="من حجز، وكم، ومن أي ولاية، ومتى سيأتي للاستلام", rows=rows,
                            statuses=CLAIM_STATUSES, f_status=f_status, min_left=get_min_left(),
+                           counts={k: v[0] for k, v in stat.items()},
                            waiting_count=stat.get(WAITING, (0, 0))[0],
                            waiting_qty=stat.get(WAITING, (0, 0))[1],
                            picked_qty=stat.get(PICKED, (0, 0))[1])
