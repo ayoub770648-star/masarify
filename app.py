@@ -121,7 +121,10 @@ EN = {
     "📅 المواعيد القادمة": "📅 Upcoming pickups", "لا يوجد أحد بانتظار الاستلام اليوم": "No one waiting for pickup today",
     "لا توجد مواعيد قادمة": "No upcoming pickups",
     "بانتظار الاستلام اليوم": "Awaiting pickup today", "تم استلامها اليوم": "Picked up today",
-    "✅ تم استلامها اليوم": "✅ Picked up today", "لم يستلم أحد اليوم بعد": "No pickups yet today", "✓ تأكيد الاستلام": "✓ Confirm pickup",
+    "✅ تم استلامها اليوم": "✅ Picked up today", "لم يستلم أحد اليوم بعد": "No pickups yet today",
+    "المواعيد القادمة": "Upcoming", "عرض القائمة ←": "View list →", "✕ إغلاق": "✕ Close",
+    "← عرض الكل": "← Show all", "{n} شحنة": "{n} shipments", "لا يوجد متأخرون 👍": "No one is late 👍",
+    "وقت الاستلام الفعلي": "Picked up at", "أكّد الاستلام": "Confirmed by", "✓ تأكيد الاستلام": "✓ Confirm pickup",
     "تأكيد أن {d} استلم {n} شحنة؟": "Confirm {d} picked up {n} shipments?",
     "إلغاء الحجز وإرجاع الشحنات للمتاح؟": "Cancel booking and return shipments?",
     "المتاح في {g}": "Available in {g}", "لا توجد شحنات متاحة": "No available shipments",
@@ -334,6 +337,11 @@ TEMPLATES = {
   .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:20px}
   .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;color:var(--muted);font-weight:500;font-size:14px}
   .kpi b{display:block;font-size:28px;margin-top:6px;color:var(--ink);font-weight:700}
+  a.kpi{text-decoration:none;display:block;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+  a.kpi:hover{border-color:#cbd5e1;box-shadow:0 2px 8px rgba(15,23,42,.06)}
+  a.kpi.on{border:2px solid var(--navy-dark);padding:15px 17px}
+  a.kpi small{display:block;margin-top:2px}
+  a.kpi .open{display:block;margin-top:10px;font-size:12.5px;color:var(--blue);font-weight:600}
   .kpi.k-warn b{color:var(--orange-dark)}.kpi.k-info b{color:var(--blue)}.kpi.k-ok b{color:var(--ok)}.kpi.k-bad b{color:var(--bad)}
   /* النماذج */
   form.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;align-items:end}
@@ -445,8 +453,9 @@ TEMPLATES = {
     </div>
   </div>
 {%- endmacro %}
-{% macro navlink(endpoint, ic, label, count=0, chip='', cls='') -%}
-  <a href="{{ url_for(endpoint) }}" class="{{ cls }} {{ 'active' if ep == endpoint }}">{{ icon(ic) }}<span>{{ t(label) }}</span>
+{% macro navlink(endpoint, ic, label, count=0, chip='', cls='', view=None) -%}
+  {%- set is_on = ep == endpoint and request.args.get('view', 'all') == (view or 'all') -%}
+  <a href="{{ url_for(endpoint, view=view) if view else url_for(endpoint) }}" class="{{ cls }} {{ 'active' if is_on }}">{{ icon(ic) }}<span>{{ t(label) }}</span>
     {%- if count %}<span class="chip {{ chip }}">{{ count }}</span>{% endif %}</a>
 {%- endmacro %}
 {% set role = session.get('role') %}
@@ -455,7 +464,7 @@ TEMPLATES = {
   <aside class="side">
     {{ brandblock() }}
     {% if role == 'admin' %}
-      {% if nav_late %}{{ navlink('today', 'bell', 'متأخرة', nav_late, 'red', 'late') }}{% endif %}
+      {% if nav_late %}{{ navlink('today', 'bell', 'متأخرة', nav_late, 'red', 'late', 'late') }}{% endif %}
       <div class="menu-label">{{ t('القائمة') }}</div>
       {{ navlink('today', 'clock', 'اليوم', nav_today) }}
       {{ navlink('shipments', 'box', 'الشحنات', nav_available, 'gray') }}
@@ -467,7 +476,7 @@ TEMPLATES = {
       {{ navlink('export_excel', 'file', 'تصدير Excel') }}
       {% set who, initials = t('الإدارة'), 'PE' %}
     {% elif role == 'supervisor' %}
-      {% if nav_late %}{{ navlink('s_home', 'bell', 'متأخرة', nav_late, 'red', 'late') }}{% endif %}
+      {% if nav_late %}{{ navlink('s_home', 'bell', 'متأخرة', nav_late, 'red', 'late', 'late') }}{% endif %}
       <div class="menu-label">{{ t('القائمة') }}</div>
       {{ navlink('s_home', 'clock', 'حجوزات محافظتي', nav_today) }}
       {% set who, initials = t('مشرف') ~ ' ' ~ place(session.get('gov')), session.get('gov', '')[:1] %}
@@ -552,11 +561,12 @@ TEMPLATES = {
   {% endif %}
 {%- endmacro %}
 
-{% macro claims_table(rows, pick_ep, cancel_ep, empty, show_gov=True) -%}
+{% macro claims_table(rows, pick_ep, cancel_ep, empty, show_gov=True, picked=False) -%}
   <table class="stack">
     <tr><th>{{ t('موعد الاستلام') }}</th><th>{{ t('المندوب') }}</th><th>{{ t('الهاتف') }}</th>
         <th>{{ t('المحافظة / الولاية') if show_gov else t('الولاية') }}</th><th>{{ t('العدد') }}</th>
-        <th>{{ t('المشرف') }}</th><th>{{ t('الحالة') }}</th><th></th></tr>
+        {% if picked %}<th>{{ t('وقت الاستلام الفعلي') }}</th><th>{{ t('أكّد الاستلام') }}</th>
+        {% else %}<th>{{ t('المشرف') }}</th>{% endif %}<th>{{ t('الحالة') }}</th><th></th></tr>
     {% for c in rows %}
     <tr>
       <td data-label="{{ t('موعد الاستلام') }}">{{ pickup(c) }}</td>
@@ -564,13 +574,18 @@ TEMPLATES = {
       <td data-label="{{ t('الهاتف') }}"><a class="phone" href="tel:{{ c.phone }}">📞 {{ c.phone }}</a></td>
       <td data-label="{{ t('الولاية') }}">{% if show_gov %}{{ place(c.governorate) }} / {% endif %}{{ place(c.wilaya) }}</td>
       <td data-label="{{ t('العدد') }}" class="num">{{ c.qty }}{% if c.forced %} <small title="{{ t('أُجبر على أخذ الباقي') }}">⚠️</small>{% endif %}</td>
+      {% if picked %}
+      <td data-label="{{ t('وقت الاستلام الفعلي') }}"><span class="time" style="background:var(--ok-soft);color:var(--ok);border-color:#bbf7d0">{{ c.picked_at or '' }}</span></td>
+      <td data-label="{{ t('أكّد الاستلام') }}">{{ by_label(c.picked_by) }}</td>
+      {% else %}
       <td data-label="{{ t('المشرف') }}">{% if c.notified_at %}<span class="badge b-تم" title="{{ c.notified_at }}">{{ t('✓ تم الإبلاغ') }}</span>
           {% else %}<span class="badge b-ملغي">{{ t('لم يُبلَّغ') }}</span>{% endif %}</td>
+      {% endif %}
       <td data-label="{{ t('الحالة') }}">{{ status_badge(c) }}</td>
       <td class="acts" style="white-space:nowrap">{{ actions(c, pick_ep, cancel_ep) }}</td>
     </tr>
     {% else %}
-    <tr><td colspan="8" class="empty">{{ t(empty) }}</td></tr>
+    <tr><td colspan="9" class="empty">{{ t(empty) }}</td></tr>
     {% endfor %}
   </table>
 {%- endmacro %}
@@ -632,37 +647,53 @@ TEMPLATES = {
     "today.html": """
 {% extends "base.html" %}
 {% from "macros.html" import claims_table with context %}
+{% macro kpi(key, label, value, cls, sub='') -%}
+  <a href="{{ url_for(request.endpoint, view='all' if view == key else key) }}"
+     class="kpi {{ cls }} {{ 'on' if view == key }}">{{ t(label) }}<b>{{ value }}</b>
+    {%- if sub %}<small class="muted">{{ sub }}</small>{% endif -%}
+    <span class="open">{{ t('✕ إغلاق') if view == key else t('عرض القائمة ←') }}</span></a>
+{%- endmacro %}
 {% block content %}
 <div class="kpis">
-  <div class="kpi k-warn">{{ t('بانتظار الاستلام اليوم') }}<b>{{ k.waiting }}</b></div>
-  <div class="kpi">{{ t('شحنات بانتظار الاستلام') }}<b>{{ k.waiting_qty }}</b></div>
-  <div class="kpi k-bad">{{ t('متأخرون') }}<b>{{ k.late }}</b></div>
-  <div class="kpi k-ok">{{ t('تم استلامها اليوم') }}<b>{{ k.picked }}</b></div>
+  {{ kpi('waiting', 'بانتظار الاستلام اليوم', k.waiting, 'k-warn', t('{n} شحنة').format(n=k.waiting_qty)) }}
+  {{ kpi('late', 'متأخرون', k.late, 'k-bad') }}
+  {{ kpi('picked', 'تم استلامها اليوم', k.picked, 'k-ok', t('{n} شحنة').format(n=k.picked_qty)) }}
+  {{ kpi('upcoming', 'المواعيد القادمة', k.upcoming, 'k-info') }}
 </div>
 
-{% if late %}
+{% if view != 'all' %}
+<p><a class="btn-link btn-ghost" href="{{ url_for(request.endpoint) }}">{{ t('← عرض الكل') }}</a></p>
+{% endif %}
+
+{% if view == 'late' or (view == 'all' and late) %}
 <div class="card alert">
-  <h3>{{ t('⚠️ متأخرون عن موعد الاستلام') }}</h3>
-  {{ claims_table(late, pick_ep, cancel_ep, '', show_gov) }}
+  <h3>{{ t('⚠️ متأخرون عن موعد الاستلام') }} ({{ late|length }})</h3>
+  {{ claims_table(late, pick_ep, cancel_ep, 'لا يوجد متأخرون 👍', show_gov) }}
 </div>
 {% endif %}
 
+{% if view in ('all', 'waiting') %}
 <div class="card">
-  <h3>{{ t('🕒 مواعيد استلام اليوم') }}</h3>
+  <h3>{{ t('🕒 مواعيد استلام اليوم') }} ({{ today_rows|length }})</h3>
   {{ claims_table(today_rows, pick_ep, cancel_ep, 'لا يوجد أحد بانتظار الاستلام اليوم', show_gov) }}
 </div>
+{% endif %}
 
+{% if view in ('all', 'upcoming') %}
 <div class="card">
-  <h3>{{ t('📅 المواعيد القادمة') }}</h3>
+  <h3>{{ t('📅 المواعيد القادمة') }} ({{ upcoming|length }})</h3>
   {{ claims_table(upcoming, pick_ep, cancel_ep, 'لا توجد مواعيد قادمة', show_gov) }}
 </div>
+{% endif %}
 
+{% if view in ('all', 'picked') %}
 <div class="card">
-  <h3>{{ t('✅ تم استلامها اليوم') }}</h3>
-  {{ claims_table(picked_today, pick_ep, cancel_ep, 'لم يستلم أحد اليوم بعد', show_gov) }}
+  <h3>{{ t('✅ تم استلامها اليوم') }} ({{ picked_today|length }})</h3>
+  {{ claims_table(picked_today, pick_ep, cancel_ep, 'لم يستلم أحد اليوم بعد', show_gov, picked=True) }}
 </div>
+{% endif %}
 
-{% if avail is not none %}
+{% if avail is not none and view == 'all' %}
 <div class="card">
   <h3>{{ t('المتاح في {g}').format(g=place(gov)) }}</h3>
   <table>
@@ -1332,6 +1363,21 @@ def claims_query(gov, condition, params):
     return sql, params
 
 
+TODAY_VIEWS = ("all", "waiting", "late", "picked", "upcoming")
+
+
+def by_label(by):
+    """من أكّد الاستلام بلغة المستخدم."""
+    if not by:
+        return ""
+    if by.startswith("مشرف "):
+        return tr("مشرف") + " " + place(by[len("مشرف "):])
+    return tr(by)
+
+
+app.jinja_env.globals["by_label"] = by_label
+
+
 def day_board(gov=None):
     """بيانات صفحة اليوم (للمدير أو لمشرف محافظة)."""
     tomorrow = (datetime.now(TZ) + timedelta(days=1)).strftime("%Y-%m-%d")
@@ -1349,9 +1395,13 @@ def day_board(gov=None):
         "waiting": len(today_rows),
         "waiting_qty": sum(c["qty"] for c in today_rows),
         "picked": len(picked_today),
+        "picked_qty": sum(c["qty"] for c in picked_today),
         "late": len(late),
+        "upcoming": len(upcoming),
     }
-    return {"late": late, "today_rows": today_rows, "picked_today": picked_today, "upcoming": upcoming, "k": k}
+    view = request.args.get("view", "all")
+    return {"late": late, "today_rows": today_rows, "picked_today": picked_today, "upcoming": upcoming, "k": k,
+            "view": view if view in TODAY_VIEWS else "all"}
 
 
 def mark_picked(cid, by, gov=None):
