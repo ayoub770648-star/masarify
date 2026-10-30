@@ -655,6 +655,51 @@ TEMPLATES = {
     .side{border-bottom:1px solid var(--line)}
     table.stack tr{border-color:var(--line);background:var(--surface-2)}
   }
+
+  /* ===== «المدار» الفخم: كوكب متحرك، أرقام كبيرة، حواف متوهجة، ودخول متدرّج ===== */
+  .orbit-sky{position:fixed;inset:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;display:block}
+  body:has(.orbit-sky)::before{display:none}
+  .kicker{font:600 11.5px ui-monospace,Menlo,monospace;letter-spacing:.16em;color:var(--orange);direction:ltr;text-align:start;margin-bottom:6px;text-transform:uppercase}
+  .page-head h1{font-size:36px;letter-spacing:-.01em;background:linear-gradient(180deg,#fff 30%,#c9d4f0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .page-head p{color:var(--muted)}
+  .brand-mark{background:radial-gradient(circle at 30% 25%,#3b5fd0,#1e3a8a 60%,#0a1430);
+              box-shadow:0 0 0 1px rgba(247,148,29,.35),0 0 22px -4px rgba(247,148,29,.55),inset 0 1px 2px rgba(255,255,255,.3)}
+  .side{background:linear-gradient(180deg,rgba(12,18,40,.78),rgba(5,8,19,.78))}
+  .side a.active::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--orange);box-shadow:0 0 10px 2px rgba(247,148,29,.7);margin-inline-start:auto}
+  .side a.active:has(.chip)::after{display:none}
+  /* البطاقات: حافة متدرجة ولمعة علوية */
+  .card{position:relative;border:1px solid transparent;
+        background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,0) 120px),linear-gradient(rgba(12,19,42,.72),rgba(8,13,30,.72)) padding-box,
+                   linear-gradient(150deg,rgba(255,255,255,.18),rgba(255,255,255,.04) 40%,rgba(247,148,29,.22)) border-box}
+  .card.alert{background:linear-gradient(180deg,rgba(251,113,133,.08),rgba(251,113,133,0) 140px),linear-gradient(rgba(20,10,22,.75),rgba(12,8,20,.75)) padding-box,
+                         linear-gradient(150deg,rgba(251,113,133,.6),rgba(251,113,133,.1) 50%,rgba(251,113,133,.35)) border-box}
+  .card h3{font-size:17px}
+  /* بطاقات الأرقام */
+  .kpi{border:1px solid transparent;border-radius:20px;
+       background:radial-gradient(160px 120px at 85% 0%,var(--tint,rgba(255,255,255,.06)),transparent 70%) padding-box,
+                  linear-gradient(165deg,rgba(20,30,62,.82),rgba(8,13,30,.82)) padding-box,
+                  linear-gradient(150deg,var(--edge,rgba(255,255,255,.2)),rgba(255,255,255,.05) 45%,var(--edge,rgba(255,255,255,.12))) border-box}
+  .kpi b{font-family:'Alexandria','IBM Plex Sans Arabic',Tahoma,sans-serif;font-size:42px;font-weight:800;line-height:1.1;display:block;margin-top:6px;
+         text-shadow:0 0 28px var(--glow,transparent)}
+  .kpi.k-warn b{color:#ffb35c}.kpi.k-bad b{color:#ff8197}.kpi.k-ok b{color:#5ff0a0}.kpi.k-info b{color:#9dbaff}
+  .kpi-ic{border-radius:14px;box-shadow:0 0 0 1px rgba(255,255,255,.15) inset,0 8px 22px -6px var(--glow,rgba(0,0,0,.6))}
+  a.kpi:hover{transform:translateY(-2px)}
+  a.kpi.on{background:radial-gradient(200px 140px at 85% 0%,var(--tint),transparent 75%) padding-box,linear-gradient(165deg,rgba(26,38,76,.9),rgba(10,16,36,.9)) padding-box,
+                      linear-gradient(150deg,var(--edge),var(--edge)) border-box}
+  /* الجداول */
+  th{font-size:12.5px;letter-spacing:.02em}
+  table tr:hover td{background:linear-gradient(90deg,rgba(247,148,29,.06),rgba(247,148,29,0))}
+  /* دخول متدرّج للمحتوى */
+  .content > *{animation:orbit-rise .6s cubic-bezier(.2,.7,.2,1) both}
+  .content > *:nth-child(2){animation-delay:.05s}.content > *:nth-child(3){animation-delay:.1s}
+  .content > *:nth-child(4){animation-delay:.15s}.content > *:nth-child(5){animation-delay:.2s}
+  .kpis > *{animation:orbit-rise .6s cubic-bezier(.2,.7,.2,1) both}
+  .kpis > *:nth-child(2){animation-delay:.06s}.kpis > *:nth-child(3){animation-delay:.12s}.kpis > *:nth-child(4){animation-delay:.18s}
+  @media (max-width:900px){
+    .page-head h1{font-size:30px}
+    .kpi b{font-size:34px}
+  }
+  @media (prefers-reduced-motion:reduce){.content > *,.kpis > *{animation:none !important}}
 </style>
 </head>
 <body>
@@ -688,6 +733,7 @@ TEMPLATES = {
 {%- endmacro %}
 {% set role = session.get('role') %}
 {% if role %}
+<canvas class="orbit-sky" id="orbit-sky" aria-hidden="true"></canvas>
 <div class="layout">
   <aside class="side">
     {{ brandblock() }}
@@ -726,7 +772,7 @@ TEMPLATES = {
   <main class="main">
     <div class="topbar"><span class="tab">{{ t(title) }}</span></div>
     <div class="content">
-      <div class="page-head"><div><h1>{{ t(title) }}</h1>{% if subtitle %}<p>{{ t(subtitle) }}</p>{% endif %}</div></div>
+      <div class="page-head"><div><div class="kicker">ORBIT · OMAN · <span id="orbit-clock">--:--</span></div><h1>{{ t(title) }}</h1>{% if subtitle %}<p>{{ t(subtitle) }}</p>{% endif %}</div></div>
       {% for m in get_flashed_messages() %}<div class="flash">{{ m }}</div>{% endfor %}
       {% block content %}{% endblock %}
     </div>
@@ -811,6 +857,62 @@ TEMPLATES = {
 </script>
 {% endif %}
 <script>
+  // خلفية النظام: كوكب في الزاوية ومدار تدور فيه الشحنات (خفيفة: ٣٠ إطاراً وتتوقف عند إخفاء الصفحة)
+  (function () {
+    var clock = document.getElementById('orbit-clock');
+    if (clock) {
+      var tick = function () {
+        clock.textContent = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Muscat', hour: '2-digit', minute: '2-digit', weekday: 'short', day: '2-digit', month: 'short' }).format(new Date());
+      };
+      tick(); setInterval(tick, 30000);
+    }
+    var cv = document.getElementById('orbit-sky');
+    if (!cv || !cv.getContext) return;
+    var ctx = cv.getContext('2d'), still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var W, H, stars = [], seed = 7, last = 0, rtl = document.documentElement.dir === 'rtl';
+    function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+    function size() {
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth; H = window.innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      seed = 7; stars = [];
+      for (var i = 0, n = Math.round(W * H / 4200); i < n; i++) stars.push({ x: rnd() * W, y: rnd() * H, r: rnd() * 1.2 + .2, t: rnd() * 6 });
+    }
+    function draw(time) {
+      if (!still) requestAnimationFrame(draw);
+      if (!still && time - last < 33) return;
+      last = time;
+      ctx.clearRect(0, 0, W, H);
+      for (var i = 0; i < stars.length; i++) {
+        var s = stars[i]; ctx.globalAlpha = .25 + .55 * Math.abs(Math.sin(s.t + time / 1600));
+        ctx.fillStyle = '#dfe6ff'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      var mobile = W < 900, pr = mobile ? W * .9 : Math.max(W * .32, 420);
+      var px = rtl ? (mobile ? W * .2 : W * .08) : (mobile ? W * .8 : W * .92), py = H + pr * .55;
+      var glow = ctx.createRadialGradient(px, py, pr * .95, px, py, pr * 1.22);
+      glow.addColorStop(0, 'rgba(247,148,29,.32)'); glow.addColorStop(.4, 'rgba(247,148,29,.08)'); glow.addColorStop(1, 'rgba(247,148,29,0)');
+      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(px, py, pr * 1.25, 0, 7); ctx.fill();
+      var body = ctx.createRadialGradient(px, py - pr * .9, pr * .1, px, py, pr);
+      body.addColorStop(0, 'rgba(30,58,138,.75)'); body.addColorStop(.6, 'rgba(10,20,48,.8)'); body.addColorStop(1, 'rgba(5,9,21,.85)');
+      ctx.fillStyle = body; ctx.beginPath(); ctx.arc(px, py, pr, 0, 7); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,197,138,.55)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(px, py, pr, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
+      var rings = [[1.25, .34, .6], [1.5, .46, -.4]];
+      for (var k = 0; k < rings.length; k++) {
+        var a = pr * rings[k][0], b = pr * rings[k][1];
+        ctx.save(); ctx.translate(px, py - pr * .62); ctx.rotate(rtl ? .22 : -.22);
+        ctx.strokeStyle = 'rgba(255,255,255,.07)'; ctx.setLineDash(k ? [3, 7] : []); ctx.beginPath(); ctx.ellipse(0, 0, a, b, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]);
+        for (var j = 0; j < 3; j++) {
+          var t = time / 1000 * .12 * rings[k][2] + j * 2.1 + k;
+          var x = Math.cos(t) * a, y = Math.sin(t) * b;
+          if (y > b * .2) continue;
+          ctx.shadowColor = '#f7941d'; ctx.shadowBlur = 12; ctx.fillStyle = '#f7941d'; ctx.fillRect(x - 3, y - 3, 6, 6); ctx.shadowBlur = 0;
+        }
+        ctx.restore();
+      }
+    }
+    size(); requestAnimationFrame(draw);
+    var rz; window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { size(); if (still) draw(0); }, 150); });
+  })();
   if ('serviceWorker' in navigator) { navigator.serviceWorker.register('{{ url_for("service_worker") }}'); }
 </script>
 </body>
