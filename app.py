@@ -761,6 +761,51 @@ TEMPLATES = {
     .langs{margin:0}
   }
   @media (prefers-reduced-motion:reduce){.kpi-ic::before,.kpi-ic::after{animation:none !important}}
+
+  /* ===== أزرار «المدار» ===== */
+  /* الزر الرئيسي: برتقالي بلمعة تعبر عند المرور وسهم يتحرك باتجاه القراءة */
+  button:not(.small-btn):not(.green):not(.red):not(.gray):not(.wa):not(.btn-dark):not(.seg *):not(.quick *),.btn-link:not(.btn-ghost):not(.wa),.auth .btn-dark{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:46px;border-radius:14px !important;
+     color:#160a00 !important;font-weight:700;letter-spacing:.01em;
+     background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.55) 50%,transparent 65%) -150% 0/250% 100% no-repeat,
+                linear-gradient(180deg,#ffbc6b,#f7941d 55%,#e26c0a) !important;
+     box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(120,40,0,.28),0 10px 28px -12px #f7941d !important;
+     transition:background-position .8s ease,transform .15s,box-shadow .2s}
+  :is(button:not(.small-btn):not(.green):not(.red):not(.gray):not(.wa):not(.btn-dark):not(.seg *):not(.quick *),.btn-link:not(.btn-ghost):not(.wa),.auth .btn-dark):hover{background-position:150% 0,0 0;transform:translateY(-1px);filter:none;
+     box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(120,40,0,.28),0 16px 38px -10px #f7941d !important}
+  :is(button:not(.small-btn):not(.green):not(.red):not(.gray):not(.wa):not(.btn-dark):not(.seg *):not(.quick *),.btn-link:not(.btn-ghost):not(.wa),.auth .btn-dark)::after{content:"";width:17px;height:17px;flex:none;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 12H5M11 6l-6 6 6 6'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 12H5M11 6l-6 6 6 6'/%3E%3C/svg%3E") center/contain no-repeat;
+     transition:transform .2s}
+  [dir=ltr] :is(button:not(.small-btn):not(.green):not(.red):not(.gray):not(.wa):not(.btn-dark):not(.seg *):not(.quick *),.btn-link:not(.btn-ghost):not(.wa),.auth .btn-dark)::after{transform:scaleX(-1)}
+  :is(button:not(.small-btn):not(.green):not(.red):not(.gray):not(.wa):not(.btn-dark):not(.seg *):not(.quick *),.btn-link:not(.btn-ghost):not(.wa),.auth .btn-dark):hover::after{transform:translateX(-4px)}
+  [dir=ltr] :is(button:not(.small-btn):not(.green):not(.red):not(.gray):not(.wa):not(.btn-dark):not(.seg *):not(.quick *),.btn-link:not(.btn-ghost):not(.wa),.auth .btn-dark):hover::after{transform:scaleX(-1) translateX(-4px)}
+  :is(button:not(.small-btn):not(.green):not(.red):not(.gray):not(.wa):not(.btn-dark):not(.seg *):not(.quick *),.btn-link:not(.btn-ghost):not(.wa),.auth .btn-dark):active{transform:scale(.98)}
+  :is(button:not(.small-btn):not(.green):not(.red):not(.gray):not(.wa):not(.btn-dark):not(.seg *):not(.quick *),.btn-link:not(.btn-ghost):not(.wa),.auth .btn-dark):focus-visible{outline:2px solid #ffd2a8;outline-offset:3px}
+  /* زر التأكيد الكبير (حجز المندوب) بنفس الأسلوب بالأخضر */
+  button.green:not(.small-btn){min-height:48px;border-radius:14px !important;color:#022010 !important;
+     background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.5) 50%,transparent 65%) -150% 0/250% 100% no-repeat,
+                linear-gradient(180deg,#8af5b6,#22c55e 60%,#15a34a) !important;
+     box-shadow:inset 0 1px 0 rgba(255,255,255,.5),inset 0 -2px 0 rgba(0,60,20,.3),0 12px 30px -12px #22c55e !important;transition:background-position .8s ease,transform .15s}
+  button.green:not(.small-btn):hover{background-position:150% 0,0 0}
+  /* الأزرار الصغيرة: كبسولة زجاجية بأيقونة */
+  .small-btn,a.small-btn{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:6px 14px 6px 12px;font-size:13px;
+     -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);transition:background .15s,box-shadow .2s,transform .15s}
+  .small-btn::before,a.small-btn::before{content:"";width:14px;height:14px;flex:none;background:currentColor;
+     -webkit-mask:var(--ico,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E")) center/contain no-repeat;mask:var(--ico,url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E")) center/contain no-repeat}
+  .small-btn:hover{transform:translateY(-1px)}
+  .red{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 7l10 10M17 7L7 17'/%3E%3C/svg%3E")}
+  .wa{--ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20l1.4-4.2A8 8 0 1 1 8.5 19z'/%3E%3C/svg%3E")}
+  .btn-link.wa{display:inline-flex;align-items:center;gap:10px;border-radius:14px !important;
+     box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 12px 30px -12px #22c55e !important}
+  .btn-link.wa::before{content:"";width:20px;height:20px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20l1.4-4.2A8 8 0 1 1 8.5 19z'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20l1.4-4.2A8 8 0 1 1 8.5 19z'/%3E%3C/svg%3E") center/contain no-repeat}
+  /* الزر الثانوي: زجاج بحافة متدرجة */
+  .btn-ghost,.btn-link.btn-ghost{border:1px solid transparent !important;border-radius:14px !important;color:var(--ink) !important;
+     background:linear-gradient(rgba(14,22,46,.8),rgba(14,22,46,.8)) padding-box,linear-gradient(140deg,rgba(255,255,255,.3),rgba(255,255,255,.06) 50%,rgba(247,148,29,.4)) border-box !important}
+  .btn-ghost:hover{box-shadow:0 0 22px -8px rgba(247,148,29,.6) !important}
+  input[type=file]{color:var(--muted)}
+  input[type=file]::file-selector-button{font:600 13px inherit;font-family:inherit;color:var(--ink);cursor:pointer;margin-inline-end:12px;padding:8px 14px;border-radius:10px;border:1px solid var(--line-2);background:rgba(255,255,255,.07)}
+  input[type=file]::file-selector-button:hover{border-color:var(--orange);background:var(--orange-soft)}
+  /* زر «بكرة صباحاً» */
+  .quick button{border-radius:999px !important}
+  @media (prefers-reduced-motion:reduce){:is(button:not(.small-btn):not(.green):not(.red):not(.gray):not(.wa):not(.btn-dark):not(.seg *):not(.quick *),.btn-link:not(.btn-ghost):not(.wa),.auth .btn-dark),button.green{transition:none !important}}
 </style>
 </head>
 <body>
