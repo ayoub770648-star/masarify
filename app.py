@@ -278,7 +278,7 @@ TEMPLATES = {
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{{ t(title) }} | {{ brand_en|join(' ') }}</title>
 <link rel="manifest" href="{{ url_for('manifest') }}">
-<meta name="theme-color" content="#1e3a8a">
+<meta name="theme-color" content="#03050c">
 <link rel="icon" href="{{ url_for('static', filename='icon-192.png') }}">
 <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -550,6 +550,111 @@ TEMPLATES = {
     .auth-forms{padding:24px 18px;max-width:none}
   }
   @media (prefers-reduced-motion:reduce){.auth-forms,.auth-hero > *{animation:none !important}}
+
+  /* ===== هوية «المدار» داخل النظام: فضاء داكن ثابت، زجاج، وبرتقالي الشركة ===== */
+  :root{
+    color-scheme:dark;
+    --bg:#03050c; --surface:rgba(14,22,46,.62); --surface-2:rgba(255,255,255,.035); --ink:#f2f4fa; --text:#c9d1e4; --muted:#8d97b3;
+    --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+    --navy:#1e3a8a; --navy-dark:#0a1430; --orange:#f7941d; --orange-dark:#ffae52; --orange-soft:rgba(247,148,29,.13);
+    --blue:#8fb0ff; --blue-soft:rgba(110,150,255,.13);
+    --ok:#4ade80; --ok-soft:rgba(74,222,128,.12); --ok-line:rgba(74,222,128,.32);
+    --warn:#fdba74; --warn-soft:rgba(253,186,116,.12);
+    --bad:#fb7185; --bad-soft:rgba(251,113,133,.12); --gray-soft:rgba(255,255,255,.06);
+    --glass:blur(18px) saturate(140%);
+  }
+  body{color:var(--text);background-color:var(--bg);
+       background-image:radial-gradient(1000px 520px at 88% -12%,rgba(30,58,138,.38),transparent 62%),
+                        radial-gradient(760px 440px at -8% 112%,rgba(247,148,29,.11),transparent 60%);
+       background-attachment:fixed}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.55;
+    background-image:radial-gradient(1px 1px at 24px 36px,#fff 50%,transparent 51%),radial-gradient(1px 1px at 132px 88px,rgba(255,255,255,.7) 50%,transparent 51%),
+                     radial-gradient(1.4px 1.4px at 176px 170px,#ffd7ad 50%,transparent 51%),radial-gradient(1px 1px at 70px 150px,rgba(255,255,255,.6) 50%,transparent 51%),
+                     radial-gradient(1px 1px at 300px 40px,rgba(255,255,255,.8) 50%,transparent 51%),radial-gradient(1.2px 1.2px at 250px 260px,#dfe6ff 50%,transparent 51%);
+    background-size:220px 220px,220px 220px,220px 220px,220px 220px,340px 340px,340px 340px}
+  a{color:var(--blue)}
+  .page-head h1{font-family:'Alexandria','IBM Plex Sans Arabic',Tahoma,sans-serif;font-weight:800;color:var(--ink)}
+  .card h3{color:var(--ink)}
+  /* القائمة الجانبية والشريط العلوي */
+  .side{background:rgba(8,13,30,.72);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);border-inline-end:1px solid var(--line);box-shadow:none}
+  [dir=ltr] .side{box-shadow:none}
+  .brand{border-bottom-color:var(--line)}
+  .brand-name .e{color:#fff}
+  .side a{color:var(--text)}
+  .side a:hover{background:rgba(255,255,255,.05)}
+  .side a.active{background:linear-gradient(90deg,rgba(247,148,29,.18),rgba(247,148,29,.04));color:#fff;
+                 box-shadow:inset -3px 0 0 var(--orange),0 6px 18px -12px rgba(247,148,29,.6)}
+  [dir=ltr] .side a.active{background:linear-gradient(270deg,rgba(247,148,29,.18),rgba(247,148,29,.04));box-shadow:inset 3px 0 0 var(--orange),0 6px 18px -12px rgba(247,148,29,.6)}
+  .side a.active svg{color:var(--orange)}
+  .side .bottom{border-top-color:var(--line)}
+  .user{color:var(--ink)}
+  .avatar{background:var(--orange-soft);color:var(--orange)}
+  .langs a{border-color:var(--line);color:var(--text);box-shadow:none !important}
+  .langs a.on{background:var(--orange);color:#0a0a0f;border-color:var(--orange)}
+  .topbar{background:rgba(5,8,19,.66);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);border-bottom:1px solid var(--line);box-shadow:none}
+  .topbar .tab{color:var(--orange);border-bottom-color:var(--orange)}
+  .chip{box-shadow:none}
+  /* البطاقات */
+  .card{background:var(--surface);border:1px solid var(--line);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);
+        box-shadow:0 20px 50px -30px rgba(0,0,0,.8)}
+  .card.alert{border:1px solid rgba(251,113,133,.4);box-shadow:0 0 0 1px rgba(251,113,133,.12) inset,0 20px 50px -30px rgba(225,29,72,.5)}
+  .kpi{background:linear-gradient(165deg,rgba(20,30,60,.7),rgba(10,16,34,.6));border:1px solid var(--line);border-bottom:2px solid var(--edge,var(--line-2));
+       color:var(--muted);-webkit-backdrop-filter:var(--glass);backdrop-filter:var(--glass);
+       box-shadow:0 18px 40px -26px var(--glow,rgba(0,0,0,.8))}
+  .kpi b{color:var(--ink);text-shadow:none}
+  .kpi.k-warn{--edge:rgba(253,186,116,.6);--glow:rgba(247,148,29,.45);--tint:rgba(247,148,29,.12)}
+  .kpi.k-bad{--edge:rgba(251,113,133,.6);--glow:rgba(225,29,72,.45);--tint:rgba(251,113,133,.12)}
+  .kpi.k-ok{--edge:rgba(74,222,128,.55);--glow:rgba(22,163,74,.4);--tint:rgba(74,222,128,.10)}
+  .kpi.k-info{--edge:rgba(143,176,255,.55);--glow:rgba(59,130,246,.4);--tint:rgba(110,150,255,.12)}
+  a.kpi:hover{border-color:var(--line-2)}
+  a.kpi.on{background:var(--tint,rgba(255,255,255,.06));border-color:var(--edge,var(--line-2));
+           box-shadow:0 0 0 3px color-mix(in srgb,var(--edge,#fff) 30%,transparent),0 18px 40px -24px var(--glow,#000)}
+  a.kpi.k-bad.has:not(.on){background:linear-gradient(165deg,rgba(80,20,40,.55),rgba(30,10,20,.55))}
+  @keyframes pulse{50%{box-shadow:0 0 0 1px rgba(251,113,133,.3),0 14px 34px -10px rgba(225,29,72,.6)}}
+  /* النماذج والأزرار */
+  label{color:var(--muted)}
+  input,select{background:rgba(0,0,0,.32);color:var(--ink);border:1px solid var(--line-2)}
+  input::placeholder{color:rgba(255,255,255,.35)}
+  input:focus,select:focus{border:2px solid var(--orange);box-shadow:0 0 0 4px rgba(247,148,29,.16)}
+  select option{background:#0b0f1c;color:var(--ink)}
+  button:not(.small-btn):not(.green):not(.red):not(.gray):not(.wa):not(.btn-dark){background:linear-gradient(135deg,#ffc58a,#f7941d 55%,#ea580c);color:#0a0a0f;font-weight:700}
+  button,.btn-link,a.small-btn{box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 8px 20px -12px rgba(0,0,0,.8)}
+  button:not(.small-btn):not(.green):not(.red):not(.gray):not(.wa):not(.btn-dark):hover{box-shadow:0 12px 30px -12px var(--orange)}
+  .btn-dark{background:rgba(255,255,255,.08);color:var(--ink);border:1px solid var(--line-2)}
+  .btn-link{background:linear-gradient(135deg,#ffc58a,#f7941d 55%,#ea580c);color:#0a0a0f}
+  .btn-link.btn-ghost,.btn-ghost{background:rgba(255,255,255,.05);color:var(--ink);border:1px solid var(--line-2);box-shadow:none}
+  .btn-link.wa{background:linear-gradient(180deg,#4ade80,#22c55e);color:#04210f}
+  .gray{background:rgba(255,255,255,.1)}
+  .small-btn:not(.green):not(.red):not(.gray):not(.wa){background:rgba(110,150,255,.2);color:#dbe5ff;border:1px solid rgba(143,176,255,.35)}
+  .quick button{background:var(--orange-soft) !important;color:var(--orange-dark) !important;border:1px solid rgba(247,148,29,.3);box-shadow:none !important}
+  .seg{background:rgba(255,255,255,.04);border:1px solid var(--line)}
+  .seg button{color:var(--muted) !important}
+  .seg button:hover{background:rgba(255,255,255,.07) !important}
+  .seg button.on{background:var(--orange) !important;color:#0a0a0f !important;box-shadow:0 8px 22px -10px var(--orange) !important}
+  /* التبويبات والحالات */
+  .tabs a{background:var(--surface-2);border-color:var(--line);color:var(--text);box-shadow:none}
+  .tabs a .n{background:rgba(255,255,255,.08);color:var(--ink)}
+  .tabs a.on{background:var(--orange);color:#0a0a0f;border-color:var(--orange)}
+  .tabs a.on .n{background:rgba(0,0,0,.18);color:#0a0a0f}
+  .badge,.time{box-shadow:none}
+  .b-بانتظار{border-color:rgba(253,186,116,.35)}
+  .b-استلمها{border-color:rgba(143,176,255,.35)}
+  .b-تم{border-color:var(--ok-line)}
+  .b-ملغي,.b-late{border-color:rgba(251,113,133,.35)}
+  .time{border-color:rgba(253,186,116,.35);color:var(--warn)}
+  .time.late{border-color:rgba(251,113,133,.35)}
+  .flash{background:var(--orange-soft);color:#ffd2a8;border:1px solid rgba(247,148,29,.35);box-shadow:none}
+  .big,.num,.gov td{color:var(--ink)}
+  pre.msg{background:rgba(0,0,0,.3);border-color:var(--line);color:var(--text)}
+  /* الجداول */
+  th{background:rgba(255,255,255,.035);color:var(--muted);border-bottom:1px solid var(--line)}
+  td{border-bottom:1px solid var(--line)}
+  table tr:hover td{background:rgba(255,255,255,.025)}
+  .gov td{background:rgba(247,148,29,.06) !important}
+  @media (max-width:900px){
+    .side{border-bottom:1px solid var(--line)}
+    table.stack tr{border-color:var(--line);background:var(--surface-2)}
+  }
 </style>
 </head>
 <body>
@@ -770,7 +875,7 @@ TEMPLATES = {
       <td data-label="{{ t('الولاية') }}">{% if show_gov %}{{ place(c.governorate) }} / {% endif %}{{ place(c.wilaya) }}</td>
       <td data-label="{{ t('العدد') }}" class="num">{{ c.qty }}{% if c.forced %} <small title="{{ t('أُجبر على أخذ الباقي') }}">⚠️</small>{% endif %}</td>
       {% if picked %}
-      <td data-label="{{ t('وقت الاستلام الفعلي') }}"><span class="time" style="background:var(--ok-soft);color:var(--ok);border-color:#bbf7d0">{{ c.picked_at or '' }}</span></td>
+      <td data-label="{{ t('وقت الاستلام الفعلي') }}"><span class="time" style="background:var(--ok-soft);color:var(--ok);border-color:var(--ok-line)">{{ c.picked_at or '' }}</span></td>
       <td data-label="{{ t('أكّد الاستلام') }}">{{ by_label(c.picked_by) }}</td>
       {% else %}
       <td data-label="{{ t('المشرف') }}">{% if c.notified_at %}<span class="badge b-تم" title="{{ c.notified_at }}">{{ t('✓ تم الإبلاغ') }}</span>
@@ -1485,8 +1590,8 @@ def manifest():
         "start_url": "/",
         "scope": "/",
         "display": "standalone",
-        "background_color": "#ffffff",
-        "theme_color": "#1e3a8a",
+        "background_color": "#03050c",
+        "theme_color": "#03050c",
         "lang": "ar",
         "dir": "rtl",
         "icons": [
