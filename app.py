@@ -125,13 +125,13 @@ EN = {
     # اليوم
     "مواعيد استلام اليوم والمتأخرون": "Today's pickups and late drivers",
     "مواعيد اليوم": "Today's pickups", "تم استلامها": "Picked up", "متأخرون": "Late",
-    "⚠️ متأخرون عن موعد الاستلام": "⚠️ Late for pickup", "🕒 مواعيد استلام اليوم": "🕒 Today's pickups",
-    "📅 المواعيد القادمة": "📅 Upcoming pickups", "لا يوجد أحد بانتظار الاستلام اليوم": "No one waiting for pickup today",
+    "متأخرون عن موعد الاستلام": "Late for pickup", "مواعيد استلام اليوم": "Today's pickups",
+    "المواعيد القادمة": "Upcoming pickups", "لا يوجد أحد بانتظار الاستلام اليوم": "No one waiting for pickup today",
     "لا توجد مواعيد قادمة": "No upcoming pickups",
     "بانتظار الاستلام اليوم": "Awaiting pickup today", "تم استلامها اليوم": "Picked up today",
-    "✅ تم استلامها اليوم": "✅ Picked up today", "لم يستلم أحد اليوم بعد": "No pickups yet today",
+    "تم استلامها اليوم": "Picked up today", "لم يستلم أحد اليوم بعد": "No pickups yet today",
     "المواعيد القادمة": "Upcoming", "اضغط على أي بطاقة لعرض قائمتها": "Tap any card to see its list", "{n} شحنة": "{n} shipments", "لا يوجد متأخرون 👍": "No one is late 👍",
-    "وقت الاستلام الفعلي": "Picked up at", "أكّد الاستلام": "Confirmed by", "✓ تأكيد الاستلام": "✓ Confirm pickup",
+    "وقت الاستلام الفعلي": "Picked up at", "أكّد الاستلام": "Confirmed by", "تأكيد الاستلام": "Confirm pickup",
     "تأكيد أن {d} استلم {n} شحنة؟": "Confirm {d} picked up {n} shipments?",
     "إلغاء الحجز وإرجاع الشحنات للمتاح؟": "Cancel booking and return shipments?",
     "المتاح في {g}": "Available in {g}", "لا توجد شحنات متاحة": "No available shipments",
@@ -140,14 +140,14 @@ EN = {
     # الشحنات
     "أضف الشحنات لكل محافظة وولاية وتابع مواعيد استلام المندوبين":
         "Add shipments per governorate and wilaya and track driver pickups",
-    "➕ إضافة شحنات": "➕ Add shipments", "عدد الشحنات": "Number of shipments",
-    "＋ إضافة الشحنات": "＋ Add shipments", "الشحنات حسب المحافظة والولاية": "Shipments by governorate & wilaya",
+    "إضافة شحنات": "Add shipments", "عدد الشحنات": "Number of shipments",
+    "إضافة الشحنات": "Add shipments", "الشحنات حسب المحافظة والولاية": "Shipments by governorate & wilaya",
     "المحافظة / الولاية": "Governorate / Wilaya", "متاحة": "Available", "إنقاص المتاح": "Reduce available",
     "حذف هذا العدد من الشحنات المتاحة؟": "Remove this many available shipments?",
     "لا توجد شحنات بعد": "No shipments yet",
     # رفع Excel
     "أضف شحنات كثيرة دفعة واحدة من ملف Excel": "Add many shipments at once from an Excel file",
-    "1. حمّل ملف النموذج": "1. Download the template", "⬇️ تحميل النموذج": "⬇️ Download template",
+    "1. حمّل ملف النموذج": "1. Download the template", "تحميل النموذج": "Download template",
     "الأعمدة: المحافظة، الولاية، العدد. يمكن كتابة الأسماء بالعربي أو الإنجليزي.":
         "Columns: Governorate, Wilaya, Qty. Names can be in Arabic or English.",
     "2. ارفع الملف بعد تعبئته": "2. Upload the filled file", "رفع وإضافة": "Upload & add",
@@ -161,7 +161,7 @@ EN = {
     "إجبار المندوب على أخذ الباقي إذا بقي أقل من": "Force the driver to take the rest if fewer than",
     "شحنات في الولاية": "shipments remain in the wilaya",
     "اسم المندوب أو الهاتف": "Driver name or phone", "لا توجد حجوزات": "No bookings",
-    "✓ تم الإبلاغ": "✓ Notified", "لم يُبلَّغ": "Not notified", "أُجبر على أخذ الباقي": "Forced to take the rest",
+    "تم الإبلاغ": "Notified", "لم يُبلَّغ": "Not notified", "أُجبر على أخذ الباقي": "Forced to take the rest",
     # المندوبين
     "أضف المندوبين وأعطِ كل واحد رمز PIN للدخول": "Add drivers and give each a login PIN",
     "إضافة مندوب": "Add driver", "اسم المندوب": "Driver name", "رقم الهاتف": "Phone number",
@@ -181,20 +181,20 @@ EN = {
         "Supervisors log in by choosing “Supervisor”, then their governorate and PIN.",
     # المندوب
     "اختر الولاية وعدد الشحنات وموعد الاستلام": "Choose the wilaya, quantity and pickup time",
-    "📦 حجز شحنات": "📦 Book shipments", "كم شحنة تستلم؟": "How many shipments?",
+    "حجز شحنات": "Book shipments", "كم شحنة تستلم؟": "How many shipments?",
     "متى تجي تستلم؟": "When will you pick up?", "رقم هاتفك": "Your phone", "تأكيد الحجز": "Confirm booking",
     "ملاحظة: إذا بقي في الولاية أقل من {n} شحنات بعد حجزك، يجب أن تأخذ الباقي كله.":
         "Note: if fewer than {n} shipments would remain in the wilaya, you must take them all.",
     "لا توجد شحنات متاحة حالياً 👍": "No shipments available right now 👍", "المتاح الآن": "Available now",
     "العدد المتاح": "Available", "اختر": "Choose",
     "حجوزاتك ومواعيد استلامها": "Your bookings and pickup times",
-    "📲 خطوة أخيرة: بلّغ مشرف {g}": "📲 Last step: notify the {g} supervisor",
+    "خطوة أخيرة: بلّغ مشرف {g}": "Last step: notify the {g} supervisor",
     "سيُفتح واتساب والرسالة جاهزة إلى المشرف": "WhatsApp will open with the message ready for supervisor",
     "اضغط «إرسال» في واتساب فقط.": "Just tap “Send” in WhatsApp.",
-    "📲 أرسل للمشرف عبر واتساب": "📲 Send to supervisor on WhatsApp",
+    "أرسل للمشرف عبر واتساب": "Send to supervisor on WhatsApp",
     "لم يُضَف مشرف لمحافظة {g} بعد — أبلغ الإدارة.": "No supervisor set for {g} yet — tell the admin.",
-    "📲 بلّغ المشرف": "📲 Notify supervisor", "📲 أعد الإرسال": "📲 Send again",
-    "✓ وصّلت الكل": "✓ Delivered all", "إلغاء الحجز": "Cancel booking",
+    "بلّغ المشرف": "Notify supervisor", "أعد الإرسال": "Send again",
+    "وصّلت الكل": "Delivered all", "إلغاء الحجز": "Cancel booking",
     "تأكيد توصيل كل شحنات هذا الحجز؟": "Confirm all shipments in this booking were delivered?",
     "إلغاء الحجز وإرجاع الشحنات؟": "Cancel booking and return the shipments?",
     "ليس عندك حجوزات": "You have no bookings", "احجز من هنا": "Book here",
@@ -210,7 +210,7 @@ EN = {
     "لم تعد هناك شحنات متاحة في هذه الولاية": "No shipments left in this wilaya",
     "اكتب عدداً صحيحاً": "Enter a valid number", "اكتب رقم هاتفك وموعد الاستلام": "Enter your phone and pickup time",
     "تم إلغاء الحجز ورجعت الشحنات متاحة": "Booking cancelled and shipments returned",
-    "✅ تم تسجيل التوصيل": "✅ Delivery recorded", "تم تسجيل تسليم الشحنات للمندوب": "Pickup confirmed",
+    "تم تسجيل التوصيل": "Delivery recorded", "تم تسجيل تسليم الشحنات للمندوب": "Pickup confirmed",
     "لا يوجد مشرف لمحافظة {g}": "No supervisor for {g}",
 }
 
@@ -700,6 +700,67 @@ TEMPLATES = {
     .kpi b{font-size:34px}
   }
   @media (prefers-reduced-motion:reduce){.content > *,.kpis > *{animation:none !important}}
+
+  /* ===== «المدار» بدون بقايا التصميم القديم ===== */
+  /* الشعار الحقيقي بدل المكعّب، بدون مربع */
+  .brand-mark{width:46px;height:40px;border-radius:0;background:none !important;box-shadow:none !important}
+  .brand-mark svg{width:42px;height:32px;filter:drop-shadow(0 0 10px rgba(247,148,29,.45))}
+  /* الشريط العلوي كان يكرر عنوان الصفحة */
+  .topbar{display:none}
+  .content{padding-top:34px}
+  /* أيقونات الأرقام: حلقة مدارية بدل المربعات اللامعة */
+  .kpi.k-warn{--kc:#ffb35c}.kpi.k-bad{--kc:#ff8197}.kpi.k-ok{--kc:#5ff0a0}.kpi.k-info{--kc:#9dbaff}
+  .kpi-ic{border-radius:50% !important;background:radial-gradient(circle,color-mix(in srgb,var(--kc,#fff) 18%,transparent),transparent 70%) !important;
+          border:1.5px solid color-mix(in srgb,var(--kc,#fff) 70%,transparent);box-shadow:0 0 18px -4px var(--kc,#fff) !important;overflow:visible}
+  .kpi-ic svg{stroke:var(--kc,#fff) !important}
+  .kpi-ic::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px dashed color-mix(in srgb,var(--kc,#fff) 45%,transparent);
+                 animation:orbit-spin 14s linear infinite}
+  .kpi-ic::before{content:"";position:absolute;width:5px;height:5px;border-radius:50%;background:var(--kc,#fff);box-shadow:0 0 8px var(--kc,#fff);
+                  top:-9px;left:50%;margin-left:-2.5px;transform-origin:2.5px 32px;animation:orbit-spin 6s linear infinite}
+  @keyframes orbit-spin{to{transform:rotate(360deg)}}
+  /* العناوين: نقطة مدار بدل الإيموجي */
+  .card h3::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px rgba(247,148,29,.15),0 0 12px rgba(247,148,29,.7);flex:none}
+  .card.alert h3::before{background:var(--bad);box-shadow:0 0 0 4px rgba(251,113,133,.15),0 0 12px rgba(251,113,133,.8)}
+  /* الأزرار: مسطّحة ومضيئة بدل الأزرار البارزة القديمة */
+  button,.btn-link,a.small-btn{box-shadow:none;border-radius:12px}
+  button:active,.btn-link:active,a.small-btn:active{transform:scale(.97);box-shadow:none}
+  .small-btn,a.small-btn{border-radius:999px !important;font-weight:600;padding:7px 14px}
+  .green{background:rgba(74,222,128,.14) !important;color:#86f2b4 !important;border:1px solid rgba(74,222,128,.42) !important}
+  .green:hover{background:rgba(74,222,128,.24) !important;box-shadow:0 0 18px -6px #4ade80 !important}
+  .red{background:transparent !important;color:#ff9aab !important;border:1px solid rgba(251,113,133,.38) !important}
+  .red:hover{background:rgba(251,113,133,.12) !important}
+  .gray{background:rgba(255,255,255,.06) !important;color:var(--text) !important;border:1px solid var(--line-2) !important}
+  .wa,.btn-link.wa{background:#22c55e !important;color:#03220f !important;border:0}
+  button.green:not(.small-btn){background:linear-gradient(135deg,#86efac,#22c55e) !important;color:#03220f !important;border:0 !important;font-weight:700;box-shadow:0 12px 30px -14px #22c55e !important}
+  .wa:hover{box-shadow:0 0 22px -6px #22c55e !important}
+  /* الحالات: نقطة مضيئة ونص بدل الكبسولات القديمة */
+  .badge{display:inline-flex;align-items:center;gap:7px;background:transparent !important;border:1px solid currentColor;border-color:color-mix(in srgb,currentColor 30%,transparent) !important;padding:4px 11px}
+  .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+  .time{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;letter-spacing:.02em;background:transparent !important;font-variant-numeric:tabular-nums}
+  .time.late{background:rgba(251,113,133,.1) !important}
+  /* الجداول: رأس خفيف بحروف صغيرة */
+  th{background:transparent !important;color:var(--muted);font-size:12px;font-weight:600;border-bottom:1px solid var(--line-2)}
+  .gov td{background:transparent !important;color:var(--orange) !important;font-weight:700;border-bottom:1px solid rgba(247,148,29,.25)}
+  /* تبويبات الفلترة: شريط واحد بدل كبسولات منفصلة */
+  .tabs{display:inline-flex;gap:4px;padding:4px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+  .tabs a{border:0 !important;background:transparent !important;padding:7px 14px}
+  .tabs a.on{background:var(--orange) !important;color:#0a0a0f}
+  /* أسفل القائمة: المستخدم واللغة */
+  .avatar{border-radius:50%;background:transparent;border:1.5px solid var(--orange);box-shadow:0 0 12px -3px var(--orange);font-size:11px}
+  .langs,.auth-lang{display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+  .langs{margin:4px 10px 8px}
+  .langs a,.auth .auth-lang a{border:0 !important;border-radius:999px !important;background:transparent !important;color:var(--muted) !important;padding:6px 12px}
+  .langs a.on{background:var(--orange) !important;color:#0a0a0f !important}
+  .auth-lang{align-self:flex-end;width:max-content;margin-inline-start:auto}
+  .chip{font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
+  .menu-label{font:600 10.5px ui-monospace,Menlo,monospace;letter-spacing:.14em;color:rgba(141,151,179,.7)}
+  @media (max-width:900px){
+    .content{padding-top:18px}
+    .side{position:sticky;top:0;z-index:6;border-radius:0 0 18px 18px;border:1px solid var(--line);border-top:0}
+    .brand-mark svg{width:34px;height:26px}
+    .langs{margin:0}
+  }
+  @media (prefers-reduced-motion:reduce){.kpi-ic::before,.kpi-ic::after{animation:none !important}}
 </style>
 </head>
 <body>
@@ -714,7 +775,7 @@ TEMPLATES = {
   {%- elif name == 'up' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
   {%- elif name == 'file' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6M9 15l2 2 4-4"/></svg>
   {%- elif name == 'out' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l-5-5 5-5M5 12h12"/></svg>
-  {%- elif name == 'mark' -%}<svg viewBox="0 0 24 24" fill="none" stroke="#f7941d" stroke-width="2.2"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8" stroke="#fff"/><path d="M12 13v8" stroke="#fff"/></svg>
+  {%- elif name == 'mark' -%}<svg viewBox="0 0 40 30" fill="none" stroke-width="3.2" stroke-linejoin="round"><path d="M17 3h20l-5 13H21" stroke="#fff"/><path d="M21 16v12" stroke="#fff"/><path d="M2 8h15M8 14h9" stroke="#f7941d"/></svg>
   {%- endif -%}
 {%- endmacro %}
 {% macro brandblock() -%}
@@ -952,7 +1013,7 @@ TEMPLATES = {
   {% if c.status == WAITING %}
   <form method="post" action="{{ url_for(pick_ep, cid=c.id) }}" style="display:inline"
         onsubmit='return confirm({{ t("تأكيد أن {d} استلم {n} شحنة؟").format(d=c.driver, n=c.qty)|tojson }})'>
-    <button class="small-btn green">{{ t('✓ تأكيد الاستلام') }}</button>
+    <button class="small-btn green">{{ t('تأكيد الاستلام') }}</button>
   </form>
   {% endif %}
   {% if c.status in (WAITING, PICKED) %}
@@ -980,7 +1041,7 @@ TEMPLATES = {
       <td data-label="{{ t('وقت الاستلام الفعلي') }}"><span class="time" style="background:var(--ok-soft);color:var(--ok);border-color:var(--ok-line)">{{ c.picked_at or '' }}</span></td>
       <td data-label="{{ t('أكّد الاستلام') }}">{{ by_label(c.picked_by) }}</td>
       {% else %}
-      <td data-label="{{ t('المشرف') }}">{% if c.notified_at %}<span class="badge b-تم" title="{{ c.notified_at }}">{{ t('✓ تم الإبلاغ') }}</span>
+      <td data-label="{{ t('المشرف') }}">{% if c.notified_at %}<span class="badge b-تم" title="{{ c.notified_at }}">{{ t('تم الإبلاغ') }}</span>
           {% else %}<span class="badge b-ملغي">{{ t('لم يُبلَّغ') }}</span>{% endif %}</td>
       {% endif %}
       <td data-label="{{ t('الحالة') }}">{{ status_badge(c) }}</td>
@@ -1067,28 +1128,28 @@ TEMPLATES = {
 
 {% if view == 'late' %}
 <div class="card alert">
-  <h3>{{ t('⚠️ متأخرون عن موعد الاستلام') }} ({{ late|length }})</h3>
+  <h3>{{ t('متأخرون عن موعد الاستلام') }} ({{ late|length }})</h3>
   {{ claims_table(late, pick_ep, cancel_ep, 'لا يوجد متأخرون 👍', show_gov) }}
 </div>
 {% endif %}
 
 {% if view == 'waiting' %}
 <div class="card">
-  <h3>{{ t('🕒 مواعيد استلام اليوم') }} ({{ today_rows|length }})</h3>
+  <h3>{{ t('مواعيد استلام اليوم') }} ({{ today_rows|length }})</h3>
   {{ claims_table(today_rows, pick_ep, cancel_ep, 'لا يوجد أحد بانتظار الاستلام اليوم', show_gov) }}
 </div>
 {% endif %}
 
 {% if view == 'upcoming' %}
 <div class="card">
-  <h3>{{ t('📅 المواعيد القادمة') }} ({{ upcoming|length }})</h3>
+  <h3>{{ t('المواعيد القادمة') }} ({{ upcoming|length }})</h3>
   {{ claims_table(upcoming, pick_ep, cancel_ep, 'لا توجد مواعيد قادمة', show_gov) }}
 </div>
 {% endif %}
 
 {% if view == 'picked' %}
 <div class="card">
-  <h3>{{ t('✅ تم استلامها اليوم') }} ({{ picked_today|length }})</h3>
+  <h3>{{ t('تم استلامها اليوم') }} ({{ picked_today|length }})</h3>
   {{ claims_table(picked_today, pick_ep, cancel_ep, 'لم يستلم أحد اليوم بعد', show_gov, picked=True) }}
 </div>
 {% endif %}
@@ -1114,7 +1175,7 @@ TEMPLATES = {
 {% from "macros.html" import kpi with context %}
 {% block content %}
 <div class="card">
-  <h3>{{ t('➕ إضافة شحنات') }}</h3>
+  <h3>{{ t('إضافة شحنات') }}</h3>
   <form method="post" action="{{ url_for('add_shipments') }}" class="grid">
     <div><label>{{ t('المحافظة') }}</label>
       <select name="governorate" id="gov" required onchange="fillWilayat()">
@@ -1125,7 +1186,7 @@ TEMPLATES = {
       <select name="wilaya" id="wil" required><option value="">{{ t('— اختر المحافظة أولاً —') }}</option></select></div>
     <div><label>{{ t('عدد الشحنات') }}</label>
       <input name="count" type="number" min="1" max="{{ max_bulk }}" required></div>
-    <button type="submit">{{ t('＋ إضافة الشحنات') }}</button>
+    <button type="submit">{{ t('إضافة الشحنات') }}</button>
   </form>
   <script>
     const OMAN = {{ oman|tojson }}, PLACE = {{ place_map|tojson }}, PICK = {{ t('— اختر —')|tojson }};
@@ -1182,7 +1243,7 @@ TEMPLATES = {
 <div class="card">
   <h3>{{ t('1. حمّل ملف النموذج') }}</h3>
   <p class="muted">{{ t('الأعمدة: المحافظة، الولاية، العدد. يمكن كتابة الأسماء بالعربي أو الإنجليزي.') }}</p>
-  <a class="btn-link btn-ghost" href="{{ url_for('upload_template') }}">{{ t('⬇️ تحميل النموذج') }}</a>
+  <a class="btn-link btn-ghost" href="{{ url_for('upload_template') }}">{{ t('تحميل النموذج') }}</a>
 </div>
 <div class="card">
   <h3>{{ t('2. ارفع الملف بعد تعبئته') }}</h3>
@@ -1327,7 +1388,7 @@ TEMPLATES = {
 {% extends "base.html" %}
 {% block content %}
 <div class="card">
-  <h3>{{ t('📦 حجز شحنات') }}</h3>
+  <h3>{{ t('حجز شحنات') }}</h3>
   {% if avail %}
   <form method="post" action="{{ url_for('d_claim') }}" class="grid">
     <div><label>{{ t('المحافظة') }}</label>
@@ -1418,11 +1479,11 @@ TEMPLATES = {
 {% block content %}
 {% if notify %}
 <div class="card" style="border:2px solid #25d366">
-  <h3>{{ t('📲 خطوة أخيرة: بلّغ مشرف {g}').format(g=place(notify.governorate)) }}</h3>
+  <h3>{{ t('خطوة أخيرة: بلّغ مشرف {g}').format(g=place(notify.governorate)) }}</h3>
   {% if notify.wa %}
   <p class="muted">{{ t('سيُفتح واتساب والرسالة جاهزة إلى المشرف') }} <b>{{ notify.sup_name }}</b>. {{ t('اضغط «إرسال» في واتساب فقط.') }}</p>
   <pre class="msg">{{ notify.text }}</pre>
-  <a class="btn-link wa" style="font-size:17px;padding:14px 22px" href="{{ url_for('d_notify', cid=notify.id) }}" target="_blank">{{ t('📲 أرسل للمشرف عبر واتساب') }}</a>
+  <a class="btn-link wa" style="font-size:17px;padding:14px 22px" href="{{ url_for('d_notify', cid=notify.id) }}" target="_blank">{{ t('أرسل للمشرف عبر واتساب') }}</a>
   {% else %}
   <p class="warn">{{ t('لم يُضَف مشرف لمحافظة {g} بعد — أبلغ الإدارة.').format(g=place(notify.governorate)) }}</p>
   {% endif %}
@@ -1445,11 +1506,11 @@ TEMPLATES = {
         {% if c.status == PICKED %}
         <form method="post" action="{{ url_for('d_claim_done', cid=c.id) }}" style="display:inline"
               onsubmit='return confirm({{ t("تأكيد توصيل كل شحنات هذا الحجز؟")|tojson }})'>
-          <button class="small-btn green">{{ t('✓ وصّلت الكل') }}</button>
+          <button class="small-btn green">{{ t('وصّلت الكل') }}</button>
         </form>
         {% endif %}
         {% if c.status == WAITING and has_sup.get(c.governorate) %}
-        <a class="small-btn wa" href="{{ url_for('d_notify', cid=c.id) }}" target="_blank">{{ t('📲 أعد الإرسال') if c.notified_at else t('📲 بلّغ المشرف') }}</a>
+        <a class="small-btn wa" href="{{ url_for('d_notify', cid=c.id) }}" target="_blank">{{ t('أعد الإرسال') if c.notified_at else t('بلّغ المشرف') }}</a>
         {% endif %}
         {% if c.status == WAITING %}
         <form method="post" action="{{ url_for('d_claim_cancel', cid=c.id) }}" style="display:inline"
@@ -1899,7 +1960,7 @@ def add_shipments():
         flash("اختر المحافظة والولاية")
         return redirect(url_for("shipments"))
     insert_shipments([(gov, wilaya, count)])
-    flash(f"✅ تمت إضافة {count} شحنة في {place(wilaya)} ({place(gov)})")
+    flash(f"تمت إضافة {count} شحنة في {place(wilaya)} ({place(gov)})")
     return redirect(url_for("shipments"))
 
 
@@ -2022,7 +2083,7 @@ def upload_shipments():
     if errors:
         return upload_view(errors)
     insert_shipments(rows)
-    flash(f"✅ تمت إضافة {sum(q for _, _, q in rows)} شحنة في {len(rows)} سطر من الملف")
+    flash(f"تمت إضافة {sum(q for _, _, q in rows)} شحنة في {len(rows)} سطر من الملف")
     return redirect(url_for("shipments"))
 
 
@@ -2122,7 +2183,7 @@ def whatsapp_link(phone, text):
 
 def claim_message(c):
     lines = [
-        f"📦 حجز شحنات جديد رقم {c['id']}",
+        f"حجز شحنات جديد رقم {c['id']}",
         f"المندوب: {c['driver']}",
         f"الهاتف: {c['phone']}",
         f"المحافظة: {c['governorate']}",
@@ -2162,7 +2223,7 @@ def save_supervisor():
     pin_hash = generate_password_hash(pin) if pin else old.get("pin_hash")
     db_exec("INSERT OR REPLACE INTO supervisors (governorate, name, phone, pin_hash) VALUES (?, ?, ?, ?)",
             (gov, name, phone, pin_hash))
-    flash(f"✅ تم حفظ مشرف {place(gov)}: {name}")
+    flash(f"تم حفظ مشرف {place(gov)}: {name}")
     return redirect(url_for("supervisors"))
 
 
@@ -2344,7 +2405,7 @@ def d_claim():
     finally:
         conn.close()
 
-    msg = "✅ " + tr("تم حجز {n} شحنة في {w} — موعد الاستلام {t}").format(n=qty, w=place(wilaya), t=pickup)
+    msg = tr("تم حجز {n} شحنة في {w} — موعد الاستلام {t}").format(n=qty, w=place(wilaya), t=pickup)
     if forced:
         msg += tr(" (أُضيف الباقي لأنه أقل من {m})").format(m=min_left)
     flash(msg)
@@ -2406,7 +2467,7 @@ def d_claim_done(cid):
                          (DELIVERED, now_oman(), cid, CLAIMED))
             conn.execute("UPDATE claims SET status = ? WHERE id = ?", (CLAIM_DONE, cid))
             conn.commit()
-            flash(tr("✅ تم تسجيل التوصيل"))
+            flash(tr("تم تسجيل التوصيل"))
     finally:
         conn.close()
     return redirect(url_for("d_mine"))
