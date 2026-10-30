@@ -108,6 +108,7 @@ EN = {
     "حجوزات محافظتي": "My governorate",
     # الدخول
     "مرحباً بعودتك": "Welcome back",
+    "المظهر": "Appearance", "ليلي": "Dark", "نهاري": "Light", "تلقائي": "Auto",
     "كل شحنة": "Every parcel",
     "في": "in its",
     "مدارها.": "orbit.",
@@ -272,13 +273,27 @@ CREATE TABLE IF NOT EXISTS settings (
 TEMPLATES = {
     "base.html": """
 <!doctype html>
-<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}">
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}" data-theme="{{ theme }}" data-mode="{{ 'light' if theme == 'light' else 'dark' }}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{{ t(title) }} | {{ brand_en|join(' ') }}</title>
 <link rel="manifest" href="{{ url_for('manifest') }}">
 <meta name="theme-color" content="#03050c">
+<script>
+  // يحدد الوضع الفعلي (ليلي/نهاري) قبل رسم الصفحة، ويتبع الجهاز في الوضع التلقائي
+  (function () {
+    var root = document.documentElement, mq = window.matchMedia('(prefers-color-scheme: light)');
+    function apply() {
+      var mode = root.dataset.theme === 'auto' ? (mq.matches ? 'light' : 'dark') : root.dataset.theme;
+      root.dataset.mode = mode;
+      var meta = document.querySelector('meta[name=theme-color]');
+      if (meta) meta.content = mode === 'light' ? '#f4f6fb' : '#03050c';
+    }
+    apply();
+    if (mq.addEventListener) mq.addEventListener('change', apply);
+  })();
+</script>
 <link rel="icon" href="{{ url_for('static', filename='icon-192.png') }}">
 <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -806,6 +821,87 @@ TEMPLATES = {
   /* زر «بكرة صباحاً» */
   .quick button{border-radius:999px !important}
   @media (prefers-reduced-motion:reduce){:is(button:not(.small-btn):not(.green):not(.red):not(.gray):not(.wa):not(.btn-dark):not(.seg *):not(.quick *),.btn-link:not(.btn-ghost):not(.wa),.auth .btn-dark),button.green{transition:none !important}}
+
+  /* ===== مفتاح المظهر ===== */
+  .brand-mark{color:#fff}
+  .themes{display:flex;gap:2px;padding:3px;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+  .side .themes{margin:0 10px 8px}
+  .themes a{flex:1;display:inline-flex !important;align-items:center;justify-content:center;gap:5px;margin:0 !important;padding:6px 8px !important;border-radius:999px !important;
+            color:var(--muted) !important;text-decoration:none;font-size:12.5px;font-weight:500;background:transparent !important;box-shadow:none !important}
+  .themes a svg{width:14px !important;height:14px !important}
+  .themes a:hover{color:var(--ink) !important}
+  .themes a.on{background:var(--orange) !important;color:#160a00 !important;font-weight:700}
+  .auth-switches{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-bottom:24px}
+  .auth-switches .auth-lang{margin:0}
+  .auth .themes{background:rgba(255,255,255,.04);border-color:var(--sp-line)}
+  .auth-lang a.on{background:var(--orange) !important;color:#160a00 !important}
+  @media (max-width:900px){ .side .themes{margin:0} .side .themes span{display:none} }
+
+  /* ===== الوضع النهاري لهوية «المدار» ===== */
+  :root[data-mode="light"]{
+    color-scheme:light;
+    --bg:#f4f6fb; --surface:rgba(255,255,255,.78); --surface-2:rgba(15,23,42,.03); --ink:#0b1430; --text:#334160; --muted:#64708c;
+    --line:rgba(15,23,42,.08); --line-2:rgba(15,23,42,.14);
+    --orange:#f28a12; --orange-dark:#c2410c; --orange-soft:rgba(247,148,29,.12);
+    --blue:#2557d6; --blue-soft:rgba(37,87,214,.09);
+    --ok:#15803d; --ok-soft:rgba(22,163,74,.1); --ok-line:rgba(22,163,74,.3);
+    --warn:#c2410c; --warn-soft:rgba(234,88,12,.09);
+    --bad:#d61f45; --bad-soft:rgba(225,29,72,.08); --gray-soft:rgba(15,23,42,.05);
+  }
+  :root[data-mode="light"] body{background-image:radial-gradient(1000px 520px at 88% -12%,rgba(37,87,214,.12),transparent 62%),
+                                                 radial-gradient(760px 440px at -8% 112%,rgba(247,148,29,.12),transparent 60%)}
+  :root[data-mode="light"] body::before{opacity:.12;filter:invert(1)}
+  :root[data-mode="light"] .brand-mark{color:#1e3a8a}
+  :root[data-mode="light"] .brand-name .e{color:#1e3a8a}
+  :root[data-mode="light"] .kicker{color:#d9730d}
+  :root[data-mode="light"] .page-head h1{background:linear-gradient(180deg,#0b1430 30%,#33456f);-webkit-background-clip:text;background-clip:text}
+  :root[data-mode="light"] .side{background:linear-gradient(180deg,rgba(255,255,255,.86),rgba(246,248,253,.86));border-inline-end-color:var(--line)}
+  :root[data-mode="light"] .side a:hover{background:rgba(15,23,42,.04)}
+  :root[data-mode="light"] .side a.active{color:var(--ink)}
+  :root[data-mode="light"] .card{background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.72)) padding-box,
+                                  linear-gradient(150deg,rgba(15,23,42,.1),rgba(15,23,42,.04) 40%,rgba(247,148,29,.35)) border-box;
+                                  box-shadow:0 18px 40px -28px rgba(15,23,42,.35)}
+  :root[data-mode="light"] .card.alert{background:linear-gradient(180deg,rgba(255,241,243,.95),rgba(255,255,255,.85)) padding-box,
+                                        linear-gradient(150deg,rgba(225,29,72,.5),rgba(225,29,72,.1) 50%,rgba(225,29,72,.3)) border-box}
+  :root[data-mode="light"] .kpi{background:radial-gradient(160px 120px at 85% 0%,var(--tint,rgba(15,23,42,.04)),transparent 70%) padding-box,
+                                 linear-gradient(165deg,#ffffff,#f7f9fd) padding-box,
+                                 linear-gradient(150deg,var(--edge,rgba(15,23,42,.14)),rgba(15,23,42,.04) 45%,var(--edge,rgba(15,23,42,.1))) border-box;
+                                 box-shadow:0 16px 34px -24px var(--glow,rgba(15,23,42,.3))}
+  :root[data-mode="light"] .kpi.k-warn{--kc:#e46f0a;--edge:rgba(234,88,12,.45)}
+  :root[data-mode="light"] .kpi.k-bad{--kc:#e11d48;--edge:rgba(225,29,72,.45)}
+  :root[data-mode="light"] .kpi.k-ok{--kc:#16a34a;--edge:rgba(22,163,74,.45)}
+  :root[data-mode="light"] .kpi.k-info{--kc:#2563eb;--edge:rgba(37,99,235,.4)}
+  :root[data-mode="light"] .kpi b{text-shadow:none}
+  :root[data-mode="light"] .kpi.k-warn b{color:#e46f0a}:root[data-mode="light"] .kpi.k-bad b{color:#e11d48}
+  :root[data-mode="light"] .kpi.k-ok b{color:#16a34a}:root[data-mode="light"] .kpi.k-info b{color:#2563eb}
+  :root[data-mode="light"] a.kpi.on{background:radial-gradient(200px 140px at 85% 0%,var(--tint),transparent 75%) padding-box,linear-gradient(165deg,#ffffff,#f3f6fc) padding-box,
+                                     linear-gradient(150deg,var(--edge),var(--edge)) border-box}
+  :root[data-mode="light"] a.kpi.k-bad.has:not(.on){background:linear-gradient(165deg,#fff5f7,#ffe9ee) padding-box,linear-gradient(150deg,rgba(225,29,72,.5),rgba(225,29,72,.2)) border-box}
+  :root[data-mode="light"] input,:root[data-mode="light"] select{background:#fff;color:var(--ink);border-color:var(--line-2)}
+  :root[data-mode="light"] input::placeholder{color:rgba(15,23,42,.38)}
+  :root[data-mode="light"] select option{background:#fff;color:var(--ink)}
+  :root[data-mode="light"] .btn-dark{background:rgba(15,23,42,.06);color:var(--ink)}
+  :root[data-mode="light"] .btn-ghost,:root[data-mode="light"] .btn-link.btn-ghost{
+      background:linear-gradient(#fff,#fff) padding-box,linear-gradient(140deg,rgba(15,23,42,.18),rgba(15,23,42,.05) 50%,rgba(247,148,29,.5)) border-box !important}
+  :root[data-mode="light"] .green{background:rgba(22,163,74,.1) !important;color:#15803d !important;border-color:rgba(22,163,74,.38) !important}
+  :root[data-mode="light"] .red{color:#d61f45 !important;border-color:rgba(225,29,72,.35) !important}
+  :root[data-mode="light"] .gray{background:rgba(15,23,42,.05) !important}
+  :root[data-mode="light"] .small-btn:not(.green):not(.red):not(.gray):not(.wa){background:rgba(37,87,214,.08);color:#2557d6;border-color:rgba(37,87,214,.3)}
+  :root[data-mode="light"] .flash{color:#9a3412;border-color:rgba(234,88,12,.3)}
+  :root[data-mode="light"] .tabs,:root[data-mode="light"] .langs,:root[data-mode="light"] .themes,:root[data-mode="light"] .seg{background:rgba(15,23,42,.04)}
+  :root[data-mode="light"] .seg button:hover{background:rgba(15,23,42,.05) !important}
+  :root[data-mode="light"] pre.msg{background:rgba(15,23,42,.03)}
+  :root[data-mode="light"] input[type=file]::file-selector-button{background:#fff}
+  :root[data-mode="light"] table tr:hover td{background:linear-gradient(90deg,rgba(247,148,29,.07),rgba(247,148,29,0))}
+  /* صفحة الدخول نهاراً */
+  :root[data-mode="light"] .auth{--sp:#eef2fb;--sp-ink:#0b1430;--sp-mute:#5b6785;--sp-line:rgba(15,23,42,.1);--sp-glass:rgba(255,255,255,.74)}
+  :root[data-mode="light"] .auth-forms{box-shadow:0 30px 70px -36px rgba(15,23,42,.45)}
+  :root[data-mode="light"] .auth .brand-name .e,:root[data-mode="light"] .auth-hero h2,:root[data-mode="light"] .auth-hero .meta b{color:#0b1430}
+  :root[data-mode="light"] .auth input,:root[data-mode="light"] .auth select{background:#fff}
+  :root[data-mode="light"] .auth select option{background:#fff;color:#0b1430}
+  :root[data-mode="light"] .auth .flash{color:#9a3412}
+  :root[data-mode="light"] .auth .auth-lang a:not(.on){color:var(--sp-ink) !important}
+  :root[data-mode="light"] .auth .themes,:root[data-mode="light"] .auth .auth-lang{background:rgba(255,255,255,.6)}
 </style>
 </head>
 <body>
@@ -820,8 +916,18 @@ TEMPLATES = {
   {%- elif name == 'up' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
   {%- elif name == 'file' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M14 3v6h6M9 15l2 2 4-4"/></svg>
   {%- elif name == 'out' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l-5-5 5-5M5 12h12"/></svg>
-  {%- elif name == 'mark' -%}<svg viewBox="0 0 40 30" fill="none" stroke-width="3.2" stroke-linejoin="round"><path d="M17 3h20l-5 13H21" stroke="#fff"/><path d="M21 16v12" stroke="#fff"/><path d="M2 8h15M8 14h9" stroke="#f7941d"/></svg>
+  {%- elif name == 'moon' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>
+  {%- elif name == 'sun' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6L6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg>
+  {%- elif name == 'auto' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg>
+  {%- elif name == 'mark' -%}<svg viewBox="0 0 40 30" fill="none" stroke-width="3.2" stroke-linejoin="round"><path d="M17 3h20l-5 13H21" stroke="currentColor"/><path d="M21 16v12" stroke="currentColor"/><path d="M2 8h15M8 14h9" stroke="#f7941d"/></svg>
   {%- endif -%}
+{%- endmacro %}
+{% macro theme_switch(extra='') -%}
+  <div class="themes {{ extra }}" role="group" aria-label="{{ t('المظهر') }}">
+    <a href="{{ url_for('set_theme', mode='dark') }}" class="{{ 'on' if theme == 'dark' }}" title="{{ t('ليلي') }}">{{ icon('moon') }}<span>{{ t('ليلي') }}</span></a>
+    <a href="{{ url_for('set_theme', mode='light') }}" class="{{ 'on' if theme == 'light' }}" title="{{ t('نهاري') }}">{{ icon('sun') }}<span>{{ t('نهاري') }}</span></a>
+    <a href="{{ url_for('set_theme', mode='auto') }}" class="{{ 'on' if theme == 'auto' }}" title="{{ t('تلقائي') }}">{{ icon('auto') }}<span>{{ t('تلقائي') }}</span></a>
+  </div>
 {%- endmacro %}
 {% macro brandblock() -%}
   <div class="brand">
@@ -872,6 +978,7 @@ TEMPLATES = {
         <a href="{{ url_for('set_lang', code='ar') }}" class="{{ 'on' if lang == 'ar' }}">عربي</a>
         <a href="{{ url_for('set_lang', code='en') }}" class="{{ 'on' if lang == 'en' }}">English</a>
       </div>
+      {{ theme_switch() }}
       <a href="{{ url_for('logout') }}">{{ icon('out') }}<span>{{ t('خروج') }}</span></a>
     </div>
   </aside>
@@ -887,8 +994,11 @@ TEMPLATES = {
 {% else %}
 <div class="auth">
   <div class="auth-forms">
-    <div class="auth-lang">
-      <a href="{{ url_for('set_lang', code='ar') }}">عربي</a><a href="{{ url_for('set_lang', code='en') }}">English</a>
+    <div class="auth-switches">
+      {{ theme_switch() }}
+      <div class="auth-lang">
+        <a href="{{ url_for('set_lang', code='ar') }}" class="{{ 'on' if lang == 'ar' }}">عربي</a><a href="{{ url_for('set_lang', code='en') }}" class="{{ 'on' if lang == 'en' }}">English</a>
+      </div>
     </div>
     {{ brandblock() }}
     {% block auth %}{% endblock %}
@@ -922,13 +1032,14 @@ TEMPLATES = {
     function draw(time) {
       var hr = hero.getBoundingClientRect(), cr = cv.getBoundingClientRect();
       var hx = hr.width ? hr.left - cr.left + hr.width / 2 : W / 2, mobile = W < 900;
-      ctx.fillStyle = '#03050c'; ctx.fillRect(0, 0, W, H);
+      var day = document.documentElement.dataset.mode === 'light';
+      ctx.fillStyle = day ? '#eef2fb' : '#03050c'; ctx.fillRect(0, 0, W, H);
       var neb = ctx.createRadialGradient(hx, H * .25, 0, hx, H * .25, W * .6);
-      neb.addColorStop(0, 'rgba(30,58,138,.33)'); neb.addColorStop(1, 'rgba(3,5,12,0)');
+      neb.addColorStop(0, day ? 'rgba(247,148,29,.16)' : 'rgba(30,58,138,.33)'); neb.addColorStop(1, day ? 'rgba(238,242,251,0)' : 'rgba(3,5,12,0)');
       ctx.fillStyle = neb; ctx.fillRect(0, 0, W, H);
       for (var i = 0; i < stars.length; i++) {
-        var s = stars[i]; ctx.globalAlpha = .35 + .65 * Math.abs(Math.sin(s.t + time / 1400));
-        ctx.fillStyle = '#dfe6ff'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
+        var s = stars[i]; ctx.globalAlpha = (day ? .25 : 1) * (.35 + .65 * Math.abs(Math.sin(s.t + time / 1400)));
+        ctx.fillStyle = day ? '#1e3a8a' : '#dfe6ff'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
       }
       ctx.globalAlpha = 1;
       var pr = Math.max(W, H) * (mobile ? .7 : .55), px = hx, py = H + pr * (mobile ? .72 : .62);
@@ -944,7 +1055,7 @@ TEMPLATES = {
       for (var k = 0; k < rings.length; k++) {
         var a = W * rings[k][0] * (mobile ? 1.4 : 1), b = H * rings[k][1] * (mobile ? .6 : 1), sp = rings[k][2];
         ctx.save(); ctx.translate(cx, cy); ctx.rotate(tilt);
-        ctx.strokeStyle = 'rgba(255,255,255,.11)'; ctx.lineWidth = 1; ctx.setLineDash(k === 1 ? [3, 6] : []);
+        ctx.strokeStyle = day ? 'rgba(30,58,138,.16)' : 'rgba(255,255,255,.11)'; ctx.lineWidth = 1; ctx.setLineDash(k === 1 ? [3, 6] : []);
         ctx.beginPath(); ctx.ellipse(0, 0, a, b, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]);
         for (var j = 0; j < 2 + k; j++) {
           var t = time / 1000 * .25 * sp + j * (Math.PI * 2 / (2 + k)) + k;
@@ -988,9 +1099,10 @@ TEMPLATES = {
       if (!still && time - last < 33) return;
       last = time;
       ctx.clearRect(0, 0, W, H);
+      var day = document.documentElement.dataset.mode === 'light';
       for (var i = 0; i < stars.length; i++) {
-        var s = stars[i]; ctx.globalAlpha = .25 + .55 * Math.abs(Math.sin(s.t + time / 1600));
-        ctx.fillStyle = '#dfe6ff'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
+        var s = stars[i]; ctx.globalAlpha = (day ? .22 : 1) * (.25 + .55 * Math.abs(Math.sin(s.t + time / 1600)));
+        ctx.fillStyle = day ? '#1e3a8a' : '#dfe6ff'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
       }
       ctx.globalAlpha = 1;
       var mobile = W < 900, pr = mobile ? W * .9 : Math.max(W * .32, 420);
@@ -1006,7 +1118,7 @@ TEMPLATES = {
       for (var k = 0; k < rings.length; k++) {
         var a = pr * rings[k][0], b = pr * rings[k][1];
         ctx.save(); ctx.translate(px, py - pr * .62); ctx.rotate(rtl ? .22 : -.22);
-        ctx.strokeStyle = 'rgba(255,255,255,.07)'; ctx.setLineDash(k ? [3, 7] : []); ctx.beginPath(); ctx.ellipse(0, 0, a, b, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]);
+        ctx.strokeStyle = day ? 'rgba(30,58,138,.12)' : 'rgba(255,255,255,.07)'; ctx.setLineDash(k ? [3, 7] : []); ctx.beginPath(); ctx.ellipse(0, 0, a, b, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]);
         for (var j = 0; j < 3; j++) {
           var t = time / 1000 * .12 * rings[k][2] + j * 2.1 + k;
           var x = Math.cos(t) * a, y = Math.sin(t) * b;
@@ -1587,6 +1699,12 @@ def current_lang():
     return "en" if request.cookies.get("lang") == "en" else "ar"
 
 
+def current_theme():
+    """الوضع المحفوظ: ليلي (افتراضي) أو نهاري أو تلقائي حسب الجهاز."""
+    t = request.cookies.get("theme")
+    return t if t in ("dark", "light", "auto") else "dark"
+
+
 def tr(text):
     """يترجم نص الواجهة حسب لغة المستخدم."""
     return EN.get(text, text) if current_lang() == "en" else text
@@ -1678,13 +1796,13 @@ def valid_pin(pin):
 
 init_db()
 
-PUBLIC_ENDPOINTS = {"login", "d_login", "s_login", "set_lang", "manifest", "service_worker", "static"}
+PUBLIC_ENDPOINTS = {"login", "d_login", "s_login", "set_lang", "set_theme", "manifest", "service_worker", "static"}
 
 
 @app.context_processor
 def common_context():
     """اللغة وأعداد القائمة الجانبية."""
-    ctx = {"lang": current_lang(), "place_map": PLACES_EN if current_lang() == "en" else {}}
+    ctx = {"lang": current_lang(), "theme": current_theme(), "place_map": PLACES_EN if current_lang() == "en" else {}}
     role = session.get("role")
     if role in ("admin", "supervisor"):
         gov_sql, params = ("AND governorate = ?", (session.get("gov"),)) if role == "supervisor" else ("", ())
@@ -1787,6 +1905,14 @@ def logout():
 def set_lang(code):
     resp = make_response(redirect(request.referrer or url_for("login")))
     resp.set_cookie("lang", "en" if code == "en" else "ar", max_age=365 * 24 * 3600, samesite="Lax")
+    return resp
+
+
+@app.route("/theme/<mode>")
+def set_theme(mode):
+    resp = make_response(redirect(request.referrer or url_for("login")))
+    resp.set_cookie("theme", mode if mode in ("dark", "light", "auto") else "dark",
+                    max_age=365 * 24 * 3600, samesite="Lax")
     return resp
 
 
