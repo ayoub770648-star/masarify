@@ -108,6 +108,14 @@ EN = {
     "حجوزات محافظتي": "My governorate",
     # الدخول
     "مرحباً بعودتك": "Welcome back",
+    "كل شحنة": "Every parcel",
+    "في": "in its",
+    "مدارها.": "orbit.",
+    "المناديب والمشرفون والإدارة على منصة واحدة. كل حجز له موعد، وكل محافظة تتابعها لحظة بلحظة.":
+        "Drivers, supervisors and admins on one platform. Every booking has a time slot, and every governorate is tracked live.",
+    "محافظة": "Governorates",
+    "ولاية": "Wilayats",
+    "صلاحيات دخول": "Access roles",
     "سجّل دخولك لإدارة الشحنات وحجوزات المندوبين": "Sign in to manage shipments and driver bookings",
     "— اختر اسمك —": "— Select your name —", "رمز PIN": "PIN", "أدخل الرمز...": "Enter PIN...",
     "كلمة المرور": "Password", "أدخل كلمة المرور...": "Enter password...",
@@ -278,7 +286,7 @@ TEMPLATES = {
 <meta name="apple-mobile-web-app-title" content="{{ brand_en|join(' ') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Alexandria:wght@700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#f8fafc; --surface:#fff; --ink:#0f172a; --text:#334155; --muted:#64748b; --line:#e5e7eb;
@@ -493,6 +501,55 @@ TEMPLATES = {
     .auth{grid-template-columns:1fr}.auth-hero{min-height:200px;order:-1}.auth-hero .word{font-size:46px}.auth-hero .corner{display:none}
     .auth-forms{padding:24px}
   }
+
+  /* صفحة الدخول: تصميم «المدار» الفضائي */
+  .auth{--sp:#03050c;--sp-ink:#f2f4fa;--sp-mute:#8d97b3;--sp-line:rgba(255,255,255,.1);--sp-glass:rgba(10,16,34,.55);
+        position:relative;isolation:isolate;overflow:hidden;background:var(--sp);color:var(--sp-ink);
+        grid-template-columns:minmax(0,460px) minmax(0,1fr);gap:56px;align-items:center;padding:40px max(16px,5vw)}
+  .auth-sky{position:absolute;inset:0;width:100%;height:100%;z-index:-1;display:block}
+  .auth-forms{background:var(--sp-glass);border:1px solid var(--sp-line);border-radius:24px;padding:32px;margin:0;max-width:460px;
+              -webkit-backdrop-filter:blur(22px) saturate(140%);backdrop-filter:blur(22px) saturate(140%);
+              box-shadow:0 30px 80px -30px rgba(0,0,0,.8);animation:orbit-rise .8s cubic-bezier(.2,.7,.2,1) both .1s}
+  .auth-forms h1{color:var(--sp-ink);font-size:28px;margin:22px 0 4px}
+  .auth-forms .lead{color:var(--sp-mute);margin-bottom:22px}
+  .auth .brand{border-bottom-color:var(--sp-line)}
+  .auth .brand-name .e{color:#fff}
+  .auth .brand-sub{color:var(--sp-mute)}
+  .auth label{color:var(--sp-mute);font-weight:500}
+  .auth input,.auth select{background:rgba(0,0,0,.32);color:var(--sp-ink);border-color:var(--sp-line)}
+  .auth input::placeholder{color:rgba(255,255,255,.35)}
+  .auth input:focus,.auth select:focus{border-color:var(--orange);box-shadow:0 0 0 4px rgba(247,148,29,.18)}
+  .auth select option{background:#0b0f1c;color:#f2f4fa}
+  .auth .seg{background:rgba(255,255,255,.04);border-color:var(--sp-line)}
+  .auth .seg button{color:var(--sp-mute) !important}
+  .auth .seg button:hover{background:rgba(255,255,255,.07) !important}
+  .auth .seg button.on{background:var(--orange) !important;color:#0a0a0f !important;box-shadow:0 8px 22px -10px var(--orange) !important}
+  .auth .btn-dark{background:linear-gradient(135deg,#ffc58a,#f7941d 55%,#ea580c) !important;color:#0a0a0f;font-weight:700;
+                  box-shadow:0 12px 36px -12px #f7941d}
+  .auth .btn-dark:hover{filter:none;transform:translateY(-1px);box-shadow:0 16px 44px -10px #f7941d}
+  .auth .auth-lang a{background:rgba(255,255,255,.05);border-color:var(--sp-line);color:var(--sp-ink);box-shadow:none}
+  .auth .flash{background:rgba(247,148,29,.12);color:#ffd2a8;border-color:rgba(247,148,29,.35);box-shadow:none}
+  .auth-hero{background:none;display:grid;gap:18px;align-content:center;justify-content:start;overflow:visible;min-height:0}
+  .auth-hero > *{animation:orbit-rise .8s cubic-bezier(.2,.7,.2,1) both}
+  .auth-hero > *:nth-child(2){animation-delay:.06s}.auth-hero > *:nth-child(3){animation-delay:.12s}.auth-hero > *:nth-child(4){animation-delay:.18s}
+  .auth-hero .kicker{font:600 12px ui-monospace,Menlo,monospace;letter-spacing:.14em;color:var(--orange);direction:ltr;text-align:start}
+  .auth-hero h2{font-family:'Alexandria','IBM Plex Sans Arabic',Tahoma,sans-serif;font-weight:800;font-size:clamp(40px,5.4vw,72px);
+                line-height:1.15;margin:0;color:#fff;text-wrap:balance}
+  .auth-hero h2 em{font-style:normal;color:var(--orange)}
+  .auth-hero p{color:var(--sp-mute);max-width:44ch;margin:0;font-size:16px;line-height:1.8}
+  .auth-hero .meta{display:flex;gap:10px 32px;flex-wrap:wrap;margin-top:6px}
+  .auth-hero .meta div{display:grid}
+  .auth-hero .meta b{font:600 22px ui-monospace,Menlo,monospace;color:#fff;font-variant-numeric:tabular-nums}
+  .auth-hero .meta span{color:var(--sp-mute);font-size:13px}
+  @keyframes orbit-rise{from{transform:translateY(14px);opacity:.001}}
+  @media (max-width:900px){
+    .auth{grid-template-columns:1fr;gap:20px;padding:24px 16px 40px;align-content:start}
+    .auth-hero{order:-1;min-height:0;gap:10px;padding-top:12px}
+    .auth-hero h2{font-size:36px}
+    .auth-hero p,.auth-hero .meta{display:none}
+    .auth-forms{padding:24px 18px;max-width:none}
+  }
+  @media (prefers-reduced-motion:reduce){.auth-forms,.auth-hero > *{animation:none !important}}
 </style>
 </head>
 <body>
@@ -580,16 +637,73 @@ TEMPLATES = {
     {% block auth %}{% endblock %}
   </div>
   <div class="auth-hero">
-    <div class="corner">
-      <div class="brand-name" style="font-size:26px"><span class="p">{{ brand_en[0] }}</span> <span class="e">{{ brand_en[1] }}</span></div>
-      <div class="brand-sub" style="font-size:15px">{{ t(brand_ar) }}</div>
+    <div class="kicker">ORBIT · OMAN · 23.58°N 58.38°E</div>
+    <h2>{{ t('كل شحنة') }}<br>{{ t('في') }} <em>{{ t('مدارها.') }}</em></h2>
+    <p>{{ t('المناديب والمشرفون والإدارة على منصة واحدة. كل حجز له موعد، وكل محافظة تتابعها لحظة بلحظة.') }}</p>
+    <div class="meta">
+      <div><b>{{ gov_count }}</b><span>{{ t('محافظة') }}</span></div>
+      <div><b>{{ wilaya_count }}</b><span>{{ t('ولاية') }}</span></div>
+      <div><b>3</b><span>{{ t('صلاحيات دخول') }}</span></div>
     </div>
-    <span class="shape s1"></span><span class="shape s2"></span>
-    <span class="plus" style="top:30%;left:20%">+</span><span class="plus" style="top:42%;right:16%">+</span>
-    <div class="arc"></div>
-    <div class="word">{{ brand_en[0]|upper }}<br>{{ brand_en[1]|upper }}</div>
   </div>
+  <canvas class="auth-sky" id="auth-sky" aria-hidden="true"></canvas>
 </div>
+<script>
+  // خلفية صفحة الدخول: كوكب ومدارات تدور فيها الشحنات
+  (function () {
+    var cv = document.getElementById('auth-sky'), hero = document.querySelector('.auth-hero');
+    if (!cv || !cv.getContext) return;
+    var ctx = cv.getContext('2d'), still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var W, H, stars = [], seed = 11;
+    function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+    function size() {
+      var r = cv.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = r.width; H = r.height; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      seed = 11; stars = [];
+      for (var i = 0, n = Math.round(W * H / 3500); i < n; i++) stars.push({ x: rnd() * W, y: rnd() * H, r: rnd() * 1.3 + .2, t: rnd() * 6 });
+    }
+    function draw(time) {
+      var hr = hero.getBoundingClientRect(), cr = cv.getBoundingClientRect();
+      var hx = hr.width ? hr.left - cr.left + hr.width / 2 : W / 2, mobile = W < 900;
+      ctx.fillStyle = '#03050c'; ctx.fillRect(0, 0, W, H);
+      var neb = ctx.createRadialGradient(hx, H * .25, 0, hx, H * .25, W * .6);
+      neb.addColorStop(0, 'rgba(30,58,138,.33)'); neb.addColorStop(1, 'rgba(3,5,12,0)');
+      ctx.fillStyle = neb; ctx.fillRect(0, 0, W, H);
+      for (var i = 0; i < stars.length; i++) {
+        var s = stars[i]; ctx.globalAlpha = .35 + .65 * Math.abs(Math.sin(s.t + time / 1400));
+        ctx.fillStyle = '#dfe6ff'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      var pr = Math.max(W, H) * (mobile ? .7 : .55), px = hx, py = H + pr * (mobile ? .72 : .62);
+      var glow = ctx.createRadialGradient(px, py, pr * .96, px, py, pr * 1.18);
+      glow.addColorStop(0, 'rgba(247,148,29,.55)'); glow.addColorStop(.35, 'rgba(247,148,29,.14)'); glow.addColorStop(1, 'rgba(247,148,29,0)');
+      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(px, py, pr * 1.2, 0, 7); ctx.fill();
+      var body = ctx.createRadialGradient(px, py - pr * .9, pr * .1, px, py, pr);
+      body.addColorStop(0, '#1e3a8a'); body.addColorStop(.6, '#0a1430'); body.addColorStop(1, '#050915');
+      ctx.fillStyle = body; ctx.beginPath(); ctx.arc(px, py, pr, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#ffc58a'; ctx.lineWidth = 1.5; ctx.globalAlpha = .7;
+      ctx.beginPath(); ctx.arc(px, py, pr, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke(); ctx.globalAlpha = 1;
+      var cx = hx, cy = mobile ? H * .2 : H * .48, tilt = -.35, rings = [[.34, .1, 1], [.46, .14, -.7], [.6, .18, .5]];
+      for (var k = 0; k < rings.length; k++) {
+        var a = W * rings[k][0] * (mobile ? 1.4 : 1), b = H * rings[k][1] * (mobile ? .6 : 1), sp = rings[k][2];
+        ctx.save(); ctx.translate(cx, cy); ctx.rotate(tilt);
+        ctx.strokeStyle = 'rgba(255,255,255,.11)'; ctx.lineWidth = 1; ctx.setLineDash(k === 1 ? [3, 6] : []);
+        ctx.beginPath(); ctx.ellipse(0, 0, a, b, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]);
+        for (var j = 0; j < 2 + k; j++) {
+          var t = time / 1000 * .25 * sp + j * (Math.PI * 2 / (2 + k)) + k;
+          ctx.save(); ctx.translate(Math.cos(t) * a, Math.sin(t) * b); ctx.rotate(-tilt);
+          ctx.shadowColor = '#f7941d'; ctx.shadowBlur = 16; ctx.fillStyle = '#f7941d'; ctx.fillRect(-4, -4, 8, 8); ctx.shadowBlur = 0;
+          ctx.strokeStyle = '#ffe0bf'; ctx.beginPath(); ctx.moveTo(-4, 0); ctx.lineTo(4, 0); ctx.stroke();
+          ctx.restore();
+        }
+        ctx.restore();
+      }
+      if (!still) requestAnimationFrame(draw);
+    }
+    size(); requestAnimationFrame(draw);
+    var rz; window.addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { size(); if (still) draw(0); }, 150); });
+  })();
+</script>
 {% endif %}
 <script>
   if ('serviceWorker' in navigator) { navigator.serviceWorker.register('{{ url_for("service_worker") }}'); }
@@ -1306,7 +1420,8 @@ def require_login():
 def login_page(show_form=None):
     sup_govs = [g for g, s in supervisors_map().items() if s.get("pin_hash")]
     return render_template("login.html", title="دخول", driver_names=driver_names(),
-                           sup_govs=sorted(sup_govs, key=gov_order), show_form=show_form)
+                           sup_govs=sorted(sup_govs, key=gov_order), show_form=show_form,
+                           gov_count=len(OMAN), wilaya_count=len(WILAYA_TO_GOV))
 
 
 @app.route("/login", methods=["GET", "POST"])
