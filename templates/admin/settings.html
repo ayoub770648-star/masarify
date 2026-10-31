@@ -9,14 +9,15 @@
       <input type="tel" id="wa" name="whatsapp" value="{{ s.whatsapp }}" placeholder="9XXXXXXX" required>
       <p class="hint">٨ أرقام عماني، أو الرقم كامل مع رمز الدولة.</p></div>
 
-    <h2 style="margin-top:12px">الحساب البنكي (يظهر للعميل بعد الطلب)</h2>
+    <h2 style="margin-top:12px">طرق التحويل (تظهر للعميل بعد الطلب)</h2>
+    <p class="hint" style="margin:-8px 0 12px">العميل يحوّل برقم الهاتف من تطبيق البنك أو على رقم الحساب. عبّ واحد منهم على الأقل.</p>
     <div class="field-row">
       <div class="field"><label class="f" for="bn">البنك</label><input type="text" id="bn" name="bank_name" value="{{ s.bank_name }}" placeholder="مثل: بنك مسقط"></div>
       <div class="field"><label class="f" for="an">اسم صاحب الحساب</label><input type="text" id="an" name="account_name" value="{{ s.account_name }}"></div>
     </div>
     <div class="field-row">
       <div class="field"><label class="f" for="acc">رقم الحساب</label><input type="text" id="acc" name="account_number" class="ltr" value="{{ s.account_number }}"></div>
-      <div class="field"><label class="f" for="iban">IBAN</label><input type="text" id="iban" name="iban" class="ltr" value="{{ s.iban }}" placeholder="OM.."></div>
+      <div class="field"><label class="f" for="tphone">رقم الهاتف للتحويل</label><input type="tel" id="tphone" name="transfer_phone" value="{{ s.transfer_phone }}" placeholder="9XXXXXXX"><p class="hint">الرقم المربوط بحسابك في تطبيق البنك</p></div>
     </div>
 
     <h2 style="margin-top:12px">رسوم التوصيل (ر.ع)</h2>

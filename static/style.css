@@ -922,3 +922,13 @@ header.site .wrap { min-height: 66px; }
 .logo b { line-height: 1; height: 1.05em; display: block; overflow: visible; }
 @media (min-width: 961px) { .hero .seals { flex-wrap: nowrap; } .hero .seal-card { flex: 1 1 0; min-width: 0; } .hero .seal-card .txt b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
 html { scrollbar-gutter: stable; }   /* مكان شريط التمرير محجوز من البداية حتى ما تتحرك الصفحة لما يظهر */
+
+/* طرق التحويل: برقم الهاتف أو رقم الحساب */
+.pay-ways { display: grid; gap: 14px; }
+.pay-way { position: relative; padding: 18px 18px 14px; border-radius: 20px; border: 1px solid var(--line); background: var(--paper); }
+body.glass .pay-way { background: rgba(255,255,255,.07); border-color: var(--g-line); }
+.pay-way h3 { font-size: 1.05rem; margin: 0 0 4px; }
+.pay-way .bank-row { border-bottom: 0; padding-bottom: 4px; }
+.pay-way .big-num { font-size: 1.5rem; letter-spacing: .06em; color: var(--ink); }
+body.glass .pay-way .big-num { color: #fff; }
+.pw-tag { position: absolute; top: 14px; inset-inline-end: 14px; font-size: .75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--green); color: #fff; }

@@ -14,14 +14,28 @@
   <div class="panel" style="margin-bottom:18px">
     <h2>١. حوّل المبلغ</h2>
     <div class="amount-box"><span>المبلغ المطلوب</span><span class="price">{{ order.total|omr }}<small>ر.ع</small></span></div>
-    {% if bank.account_number or bank.iban %}
-    <div class="bank">
-      {% if bank.bank_name %}<div class="bank-row"><span>البنك</span><b>{{ bank.bank_name }}</b></div>{% endif %}
-      {% if bank.account_name %}<div class="bank-row"><span>اسم صاحب الحساب</span><b>{{ bank.account_name }}</b></div>{% endif %}
-      {% if bank.account_number %}<div class="bank-row"><span>رقم الحساب</span><b class="num">{{ bank.account_number }}</b><button type="button" class="copy" data-copy="{{ bank.account_number }}">نسخ</button></div>{% endif %}
-      {% if bank.iban %}<div class="bank-row"><span>IBAN</span><b class="num">{{ bank.iban }}</b><button type="button" class="copy" data-copy="{{ bank.iban }}">نسخ</button></div>{% endif %}
+    {% if bank.transfer_phone or bank.account_number %}
+    <div class="pay-ways">
+      {% if bank.transfer_phone %}
+      <div class="pay-way">
+        <span class="pw-tag">الأسهل</span>
+        <h3>التحويل برقم الهاتف</h3>
+        <p class="muted">من تطبيق بنكك اختر «تحويل برقم الهاتف» واكتب:</p>
+        <div class="bank-row"><b class="num big-num">{{ bank.transfer_phone }}</b><button type="button" class="copy" data-copy="{{ bank.transfer_phone }}">نسخ</button></div>
+        {% if bank.account_name %}<p class="hint">الاسم اللي بيطلع لك: {{ bank.account_name }}</p>{% endif %}
+      </div>
+      {% endif %}
+      {% if bank.account_number %}
+      <div class="pay-way">
+        <h3>{% if bank.transfer_phone %}أو {% endif %}التحويل على رقم الحساب</h3>
+        <div class="bank">
+          {% if bank.bank_name %}<div class="bank-row"><span>البنك</span><b>{{ bank.bank_name }}</b></div>{% endif %}
+          {% if bank.account_name %}<div class="bank-row"><span>اسم صاحب الحساب</span><b>{{ bank.account_name }}</b></div>{% endif %}
+          <div class="bank-row"><span>رقم الحساب</span><b class="num">{{ bank.account_number }}</b><button type="button" class="copy" data-copy="{{ bank.account_number }}">نسخ</button></div>
+        </div>
+      </div>
+      {% endif %}
     </div>
-    <div class="ref-note"><span>اكتب في <b>ملاحظة التحويل</b> رقم طلبك:</span><b class="num">{{ code }}</b><button type="button" class="copy" data-copy="{{ code }}">نسخ</button></div>
     {% else %}
     <p class="notice">بيانات الحساب البنكي بنرسلها لك على واتساب. اضغط الزر تحت وراسلنا برقم طلبك.</p>
     {% endif %}

@@ -67,7 +67,7 @@ DEFAULT_SETTINGS = {
     "bank_name": "",
     "account_name": "",
     "account_number": "",
-    "iban": "",
+    "transfer_phone": "",                             # رقم الهاتف المسجّل للتحويل من تطبيق البنك
     "delivery_default": "2000",                       # بالبيسة
     "delivery_fees": json.dumps({"مسقط": 1500}, ensure_ascii=False),
     "free_over": "20000",                             # توصيل مجاني فوق ٢٠ ر.ع (٠ = بدون)
@@ -427,7 +427,7 @@ def order_done(code):
     order, items = load_order(oid)
     if not order:
         abort(404)
-    bank = {k: setting(k) for k in ("bank_name", "account_name", "account_number", "iban")}
+    bank = {k: setting(k) for k in ("bank_name", "account_name", "account_number", "transfer_phone")}
     wa = wa_link(setting("whatsapp"), receipt_message(order, items)) if setting("whatsapp") else ""
     return render_template("order_done.html", order=order, items=items, code=order_code(oid), bank=bank, wa=wa)
 
@@ -840,7 +840,7 @@ def admin_settings():
     if request.method == "POST":
         f = request.form
         conn = db()
-        for key in ("whatsapp", "bank_name", "account_name", "account_number", "iban"):
+        for key in ("whatsapp", "bank_name", "account_name", "account_number", "transfer_phone"):
             conn.execute("UPDATE settings SET value = ? WHERE key = ?", (f.get(key, "").strip(), key))
 
         def baisa(v):
