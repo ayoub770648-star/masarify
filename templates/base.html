@@ -14,10 +14,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Readex+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=12">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=14">
 <script>document.documentElement.classList.add('js')</script>
 </head>
-<body class="{% block body_class %}{% endblock %}">
+<body class="glass {% block body_class %}{% endblock %}">
+<div class="glass-bg" aria-hidden="true"></div>
 {% block header %}
 <header class="site">
   <div class="wrap">
@@ -68,8 +69,15 @@
   <div class="drawer-body">{% set _cart = cart_lines() %}{% with lines=_cart[0], subtotal=_cart[1] %}{% include "_drawer.html" %}{% endwith %}</div>
 </aside>
 <div class="toast" id="toast" role="status" aria-live="polite">{{ icon('check') }}<span></span></div>
+<nav class="dock" aria-label="تنقّل سريع">
+  <a href="{{ url_for('home') }}" class="{{ 'on' if request.endpoint == 'home' }}">{{ icon('home') }}<span>الرئيسية</span></a>
+  <a href="{{ url_for('home') }}#shop">{{ icon('leaf') }}<span>المتجر</span></a>
+  <a href="{{ url_for('cart') }}" data-open-cart="{{ url_for('cart_drawer') }}" class="dock-cart {{ 'on' if request.endpoint in ('cart', 'checkout') }}">{{ icon('bag') }}<span>السلة</span><i class="badge-count" data-cart-count {% if not cart_count %}hidden{% endif %}>{{ cart_count }}</i></a>
+  <a href="{{ url_for('track') }}" class="{{ 'on' if request.endpoint == 'track' }}">{{ icon('truck') }}<span>تتبّع</span></a>
+  {% if store_wa %}<a href="https://wa.me/{{ store_wa }}" target="_blank" rel="noopener" class="dock-wa">{{ icon('wa') }}<span>واتساب</span></a>{% endif %}
+</nav>
 {% endblock %}
-<script src="{{ url_for('static', filename='app.js') }}?v=12" defer></script>
+<script src="{{ url_for('static', filename='app.js') }}?v=14" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
