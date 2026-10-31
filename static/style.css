@@ -914,3 +914,11 @@ footer.site .foot-title { color: #fff; margin: 0 0 14px; font: 600 1rem var(--bo
   body.glass { --g-blur: blur(14px) saturate(150%); }
 }
 @media (prefers-reduced-motion: reduce) { .hero-copy > *, .hero-visual { animation: none; } }
+
+/* منع إزاحة الصفحة عند تحميل الخط: الشريط العلوي عائم في الرئيسية، وارتفاعه ثابت في كل الصفحات */
+body.glass.home header.site, body.glass.home header.site:not(.solid) { position: fixed; top: env(safe-area-inset-top, 0px); inset-inline: 0; }
+header.site .wrap { min-height: 66px; }
+.logo > div { height: 46px; display: flex; flex-direction: column; justify-content: center; }
+.logo b { line-height: 1; height: 1.05em; display: block; overflow: visible; }
+@media (min-width: 961px) { .hero .seals { flex-wrap: nowrap; } .hero .seal-card { flex: 1 1 0; min-width: 0; } .hero .seal-card .txt b { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
+html { scrollbar-gutter: stable; }   /* مكان شريط التمرير محجوز من البداية حتى ما تتحرك الصفحة لما يظهر */
