@@ -13,8 +13,8 @@
 <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Readex+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=18">
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Readex+Pro:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=19">
 <script>document.documentElement.classList.add('js')</script>
 </head>
 <body class="glass {% block body_class %}{% endblock %}">
@@ -48,13 +48,13 @@
         <p>سمن عُماني أصلي ١٠٠٪ من أرض عُمان. ميه بالميه ولذيذ، والريحة خيال.</p>
       </div>
       <div>
-        <h4>المتجر</h4>
+        <h2 class="foot-title">المتجر</h2>
         <a href="{{ url_for('home') }}#shop">المنتجات</a>
         <a href="{{ url_for('home') }}#how">طريقة الطلب</a>
         <a href="{{ url_for('cart') }}">السلة</a>
       </div>
       <div>
-        <h4>خدمة العملاء</h4>
+        <h2 class="foot-title">خدمة العملاء</h2>
         <a href="{{ url_for('track') }}">تتبّع طلبك</a>
         <a href="{{ url_for('home') }}#faq">الأسئلة المتكررة</a>
         {% if store_wa %}<a href="https://wa.me/{{ store_wa }}" target="_blank" rel="noopener">واتساب المتجر</a>{% endif %}
@@ -77,7 +77,7 @@
   {% if store_wa %}<a href="https://wa.me/{{ store_wa }}" target="_blank" rel="noopener" class="dock-wa">{{ icon('wa') }}<span>واتساب</span></a>{% endif %}
 </nav>
 {% endblock %}
-<script src="{{ url_for('static', filename='app.js') }}?v=18" defer></script>
+<script src="{{ url_for('static', filename='app.js') }}?v=19" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

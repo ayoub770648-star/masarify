@@ -119,7 +119,7 @@
 
   /* جزيئات ذهبية تصعد في الواجهة مثل لمعة السمن */
   var cv = $('canvas.sparks');
-  if (cv && cv.getContext) {
+  if (cv && cv.getContext && !matchMedia('(max-width: 760px), (pointer: coarse)').matches) {
     var ctx = cv.getContext('2d'), W, H, parts = [], running = true;
     var size = function () {
       var dpr = Math.min(devicePixelRatio || 1, 2), r = cv.getBoundingClientRect();

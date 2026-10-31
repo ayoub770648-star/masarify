@@ -235,8 +235,10 @@ def csrf_token():
 
 @app.before_request
 def check_csrf():
-    if request.method == "POST" and request.form.get("csrf") != session.get("csrf"):
-        abort(400)
+    if request.method == "POST":
+        token, expected = request.form.get("csrf"), session.get("csrf")
+        if not token or not expected or not secrets.compare_digest(token, expected):   # الاثنين لازم موجودين ومتطابقين
+            abort(400)
 
 
 # ----------------------------------------------------------------------
