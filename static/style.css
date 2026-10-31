@@ -508,3 +508,8 @@ tr.click:hover td { background: #fbf3e2; }
 .receipt-view img { width: 100%; max-height: 560px; object-fit: contain; border-radius: 16px; background: var(--cream); border: 1px solid var(--line); }
 .receipt-flag { display: inline-flex; align-items: center; gap: 4px; font-size: .78rem; color: #8a6100; font-weight: 600; }
 .receipt-flag svg { width: 14px; height: 14px; }
+.dup-alert { background: #fdecef; border: 1.5px solid #f2a9b6; color: #8a1630; border-radius: 16px; padding: 14px 16px; margin-bottom: 14px; display: grid; gap: 6px; }
+.dup-alert b { font-size: 1rem; }
+.dup-alert a { color: #8a1630; font-weight: 700; }
+.dup-alert p { font-size: .88rem; }
+.receipt-flag.dup { color: var(--bad); }

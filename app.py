@@ -1,5 +1,7 @@
+import hashlib
 import json
 import os
+import re
 import secrets
 import shutil
 import sqlite3
@@ -114,7 +116,7 @@ def init_db():
     """)
     # أعمدة الإيصال (تُضاف لقواعد البيانات القديمة بدون ما تضيع الطلبات)
     cols = {r[1] for r in conn.execute("PRAGMA table_info(orders)")}
-    for col in ("receipt", "receipt_at", "sender_name"):
+    for col in ("receipt", "receipt_at", "sender_name", "receipt_hash", "transfer_ref"):
         if col not in cols:
             conn.execute(f"ALTER TABLE orders ADD COLUMN {col} TEXT DEFAULT ''")
     for k, v in DEFAULT_SETTINGS.items():
@@ -391,6 +393,25 @@ def order_done(code):
     return render_template("order_done.html", order=order, items=items, code=order_code(oid), bank=bank, wa=wa)
 
 
+def clean_ref(ref):
+    return re.sub(r"[^0-9A-Za-z]", "", ref or "").upper()
+
+
+def receipt_conflicts(order):
+    """طلبات ثانية لها نفس الإيصال: نفس رقم العملية أو نفس الملف بالضبط"""
+    if not order.get("receipt"):
+        return []
+    found = []
+    rows = db().execute("SELECT id, status, receipt_hash, transfer_ref FROM orders "
+                        "WHERE id != ? AND receipt != ''", (order["id"],)).fetchall()
+    for r in rows:
+        if order.get("transfer_ref") and r["transfer_ref"] == order["transfer_ref"]:
+            found.append((r["id"], r["status"], "نفس رقم العملية"))
+        elif order.get("receipt_hash") and r["receipt_hash"] == order["receipt_hash"]:
+            found.append((r["id"], r["status"], "نفس ملف الإيصال"))
+    return found
+
+
 @app.route("/order/<code>/receipt", methods=["POST"])
 def upload_receipt(code):
     """الزبون يرفق صورة الإيصال، فتنربط بالطلب وتتغير حالته إلى «تم إرسال الإيصال»"""
@@ -409,11 +430,26 @@ def upload_receipt(code):
     if ext not in ALLOWED_RECEIPTS:
         flash("الإيصال لازم يكون صورة (JPG أو PNG) أو ملف PDF")
         return redirect(back)
+    ref = clean_ref(request.form.get("transfer_ref"))
+    if len(ref) < 4:
+        flash("اكتب رقم العملية (Reference) اللي في الإيصال")
+        return redirect(back)
+    data = file.read()
+    digest = hashlib.sha256(data).hexdigest()
+    # نفس رقم العملية أو نفس الملف على طلب ثاني = نفس التحويل، فما نقبله مرتين
+    taken = db().execute("SELECT id FROM orders WHERE id != ? AND receipt != '' AND (transfer_ref = ? OR receipt_hash = ?)",
+                         (oid, ref, digest)).fetchone()
+    if taken:
+        flash(f"هذا الإيصال مستخدم في طلب ثاني ({order_code(taken['id'])}). كل طلب يحتاج تحويل خاص فيه. "
+              "إذا تبي تدفع طلبين بتحويل واحد، راسلنا على واتساب.")
+        return redirect(back)
     name = f"{order_code(oid)}-{secrets.token_hex(6)}.{ext}"
-    file.save(os.path.join(RECEIPT_DIR, name))
+    with open(os.path.join(RECEIPT_DIR, name), "wb") as fh:
+        fh.write(data)
     new_status = RECEIPT if order["status"] == PENDING else order["status"]
-    db().execute("UPDATE orders SET receipt = ?, receipt_at = ?, sender_name = ?, status = ? WHERE id = ?",
-                 (name, now_oman(), request.form.get("sender_name", "").strip()[:80], new_status, oid))
+    db().execute("""UPDATE orders SET receipt = ?, receipt_at = ?, sender_name = ?, status = ?,
+                    receipt_hash = ?, transfer_ref = ? WHERE id = ?""",
+                 (name, now_oman(), request.form.get("sender_name", "").strip()[:80], new_status, digest, ref, oid))
     db().commit()
     flash("استلمنا الإيصال، بنراجع التحويل ونأكد طلبك قريباً")
     return redirect(back)
@@ -474,9 +510,10 @@ def admin_orders():
         params.append(status)
     if q:
         oid = code_to_id(q)
-        sql += " AND (name LIKE ? OR phone LIKE ? OR id = ?)"
-        params += [f"%{q}%", f"%{q}%", oid or -1]
+        sql += " AND (name LIKE ? OR phone LIKE ? OR id = ? OR transfer_ref LIKE ?)"
+        params += [f"%{q}%", f"%{q}%", oid or -1, f"%{clean_ref(q)}%"]
     orders = db().execute(sql + " ORDER BY id DESC LIMIT 300", params).fetchall()
+    dup_ids = {o["id"] for o in orders if o["receipt"] and receipt_conflicts(dict(o))}
     counts = {s: db().execute("SELECT COUNT(*) FROM orders WHERE status = ?", (s,)).fetchone()[0] for s in STATUSES}
     today = datetime.now(TZ).strftime("%Y-%m-%d")
     stats = {
@@ -485,7 +522,8 @@ def admin_orders():
                               (PENDING, CANCELLED)).fetchone()[0],
     }
     return render_template("admin/orders.html", orders=orders, counts=counts, status=status, q=q,
-                           statuses=STATUSES, stats=stats, code=order_code, setup_missing=not setting("whatsapp"))
+                           statuses=STATUSES, stats=stats, code=order_code, setup_missing=not setting("whatsapp"),
+                           dup_ids=dup_ids)
 
 
 @app.route("/admin/order/<int:oid>", methods=["GET", "POST"])
@@ -514,6 +552,7 @@ def admin_order(oid):
     customer_msg = (f"مرحباً {order['name']}، معك {STORE_NAME}. بخصوص طلبك رقم {code}: "
                     f"حالته الآن «{order['status']}». شكراً لثقتك.")
     return render_template("admin/order.html", order=order, items=items, code=code, statuses=STATUSES,
+                           conflicts=receipt_conflicts(order), code_of=order_code,
                            wa_customer=wa_link(order["phone"], customer_msg))
 
 

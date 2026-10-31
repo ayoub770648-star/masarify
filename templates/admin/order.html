@@ -20,6 +20,13 @@
       </div>
       <div class="panel" style="margin-bottom:18px">
         <h2>إيصال التحويل</h2>
+        {% if conflicts %}
+        <div class="dup-alert">
+          <b>⚠️ انتبه: هذا الإيصال يشبه إيصال طلب ثاني</b>
+          {% for oid, st, why in conflicts %}<div><a href="{{ url_for('admin_order', oid=oid) }}" class="num">{{ code_of(oid) }}</a> · {{ why }} · <span class="status s-{{ STATUS_KEY[st] }}">{{ st }}</span></div>{% endfor %}
+          <p>قارن الإيصالين وتأكد من كشف حسابك قبل ما تأكد أي واحد منهم.</p>
+        </div>
+        {% endif %}
         {% if order.receipt %}
         <div class="receipt-view">
           {% if order.receipt.lower().endswith('.pdf') %}
@@ -29,6 +36,7 @@
           {% endif %}
           <div class="bank">
             <div class="bank-row"><span>وقت الإرسال</span><b class="num">{{ order.receipt_at }}</b></div>
+            {% if order.transfer_ref %}<div class="bank-row"><span>رقم العملية</span><b class="num">{{ order.transfer_ref }}</b></div>{% endif %}
             {% if order.sender_name %}<div class="bank-row"><span>اسم المحوِّل</span><b>{{ order.sender_name }}</b></div>{% endif %}
             <div class="bank-row"><span>المبلغ المطلوب</span><b class="price">{{ order.total|omr }} ر.ع</b></div>
           </div>
@@ -38,7 +46,7 @@
             <input type="hidden" name="admin_note" value="{{ order.admin_note }}">
             <button class="btn btn-green btn-block btn-lg" type="submit">✓ تأكيد استلام التحويل</button>
           </form>
-          <p class="hint">تأكد إن المبلغ وصل حسابك قبل ما تأكد.</p>
+          <p class="hint">الإيصال صورة وممكن تتزوّر. تأكد إن المبلغ ورقم العملية موجودين فعلاً في كشف حسابك قبل ما تأكد.</p>
           {% endif %}
         </div>
         {% else %}

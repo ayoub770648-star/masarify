@@ -12,7 +12,7 @@
   <div class="panel">
     <form class="searchbar" method="get">
       {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
-      <input type="text" name="q" value="{{ q }}" placeholder="ابحث برقم الطلب أو الاسم أو الهاتف">
+      <input type="text" name="q" value="{{ q }}" placeholder="ابحث برقم الطلب أو الاسم أو الهاتف أو رقم العملية">
       <button class="btn btn-green" type="submit">بحث</button>
     </form>
     <div class="tabs">
@@ -21,7 +21,7 @@
     </div>
     <div class="table-wrap">
       <table>
-        <tr><th>الطلب</th><th>التاريخ</th><th>العميل</th><th>الولاية</th><th>الإجمالي</th><th>الحالة</th></tr>
+        <tr><th>الطلب</th><th>التاريخ</th><th>العميل</th><th>الولاية</th><th>الإجمالي</th><th>رقم العملية</th><th>الحالة</th></tr>
         {% for o in orders %}
         <tr class="click" onclick="location.href='{{ url_for('admin_order', oid=o.id) }}'">
           <td><a class="num" href="{{ url_for('admin_order', oid=o.id) }}"><b>{{ code(o.id) }}</b></a></td>
@@ -29,10 +29,11 @@
           <td><b>{{ o.name }}</b><div class="muted num" style="font-size:.85rem">{{ o.phone }}</div></td>
           <td>{{ o.wilaya }}<div class="muted" style="font-size:.85rem">{{ o.governorate }}</div></td>
           <td class="price">{{ o.total|omr }}</td>
-          <td><span class="status s-{{ STATUS_KEY[o.status] }}">{{ o.status }}</span>{% if o.receipt %}<div class="receipt-flag" style="margin-top:4px">📎 فيه إيصال</div>{% endif %}</td>
+          <td class="num muted" style="font-size:.85rem">{{ o.transfer_ref or '—' }}</td>
+          <td><span class="status s-{{ STATUS_KEY[o.status] }}">{{ o.status }}</span>{% if o.id in dup_ids %}<div class="receipt-flag dup" style="margin-top:4px">⚠️ إيصال مكرر</div>{% elif o.receipt %}<div class="receipt-flag" style="margin-top:4px">📎 فيه إيصال</div>{% endif %}</td>
         </tr>
         {% else %}
-        <tr><td colspan="6" class="muted" style="text-align:center;padding:36px">لا توجد طلبات{% if status or q %} بهذا الفلتر{% else %} بعد{% endif %}</td></tr>
+        <tr><td colspan="7" class="muted" style="text-align:center;padding:36px">لا توجد طلبات{% if status or q %} بهذا الفلتر{% else %} بعد{% endif %}</td></tr>
         {% endfor %}
       </table>
     </div>

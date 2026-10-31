@@ -58,6 +58,9 @@
     <b data-file-label>اضغط هنا واختر صورة الإيصال</b>
     <small>صورة من تطبيق البنك (Screenshot) أو ملف PDF</small>
   </label>
+  <div class="field" style="margin:14px 0 0"><label class="f" for="ref-{{ order.id }}">رقم العملية (Reference)</label>
+    <input type="text" id="ref-{{ order.id }}" name="transfer_ref" class="ltr" required minlength="4" maxlength="40" placeholder="مثل: FT26305ABC12" autocomplete="off">
+    <p class="hint">تلقاه في الإيصال باسم رقم العملية أو المرجع أو Reference No.</p></div>
   <div class="field" style="margin:14px 0 0"><label class="f" for="sn-{{ order.id }}">اسم صاحب الحساب اللي حوّل <span class="muted">(اختياري)</span></label>
     <input type="text" id="sn-{{ order.id }}" name="sender_name" placeholder="مثلاً: سالم الحارثي" maxlength="80"></div>
   <button class="btn btn-gold btn-block btn-lg" type="submit" style="margin-top:14px">{{ icon('check') }}أرسل الإيصال</button>
