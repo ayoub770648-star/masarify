@@ -38,6 +38,7 @@
       {% for i in items %}<div><span>{{ i.product_name }} · {{ i.variant_label }} × {{ i.qty }}</span></div>{% endfor %}
       <div class="total"><span>الإجمالي</span><span class="price">{{ order.total|omr }}<small>ر.ع</small></span></div>
     </div>
+    <a class="btn btn-line" style="margin-top:16px" href="{{ url_for('invoice', code='AM-' ~ (1000 + order.id)) }}" target="_blank">🧾 الفاتورة</a>
     {% if wa_store %}<a class="btn btn-wa" style="margin-top:16px" href="https://wa.me/{{ wa_store }}" target="_blank" rel="noopener">{{ icon('wa') }}راسلنا على واتساب</a>{% endif %}
   </div>
   {% endif %}

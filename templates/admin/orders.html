@@ -14,6 +14,7 @@
       {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
       <input type="text" name="q" value="{{ q }}" placeholder="ابحث برقم الطلب أو الاسم أو الهاتف أو رقم العملية">
       <button class="btn btn-green" type="submit">بحث</button>
+      <a class="btn btn-line" href="{{ url_for('admin_export', status=status or None) }}">⬇ تصدير Excel</a>
     </form>
     <div class="tabs">
       <a href="{{ url_for('admin_orders', q=q or None) }}" class="{{ 'on' if not status }}">الكل</a>

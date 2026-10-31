@@ -7,6 +7,7 @@
     {% if session.admin %}
     <nav aria-label="لوحة التحكم">
       <a href="{{ url_for('admin_orders') }}" class="{{ 'on' if request.endpoint in ('admin_orders', 'admin_order') }}">الطلبات</a>
+      <a href="{{ url_for('admin_stats') }}" class="{{ 'on' if request.endpoint == 'admin_stats' }}">الإحصائيات</a>
       <a href="{{ url_for('admin_products') }}" class="{{ 'on' if request.endpoint in ('admin_products', 'admin_product') }}">المنتجات</a>
       <a href="{{ url_for('admin_settings') }}" class="{{ 'on' if request.endpoint == 'admin_settings' }}">الإعدادات</a>
       <a href="{{ url_for('home') }}" target="_blank">المتجر ↗</a>

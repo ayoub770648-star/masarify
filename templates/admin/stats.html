@@ -1,0 +1,85 @@
+{% extends "admin/layout.html" %}
+{% block content %}
+{% set W, H, PR, PL, PT, PB = 720, 250, 52, 6, 14, 30 %}
+{% set plot_w = W - PR - PL %}{% set plot_h = H - PT - PB %}{% set slot = plot_w / days|length %}
+<div class="wrap page">
+  <h1 class="page-title">الإحصائيات</h1>
+
+  <div class="kpis">
+    <div class="kpi kpi-main"><span>المبيعات المؤكدة · آخر ٣٠ يوم</span><b>{{ kpi.rev|omr }} <small class="muted">ر.ع</small></b></div>
+    <div class="kpi"><span>طلبات مؤكدة · ٣٠ يوم</span><b>{{ kpi.orders }}</b></div>
+    <div class="kpi"><span>متوسط قيمة الطلب</span><b>{{ kpi.avg|omr }} <small class="muted">ر.ع</small></b></div>
+    <a class="kpi warn" href="{{ url_for('admin_orders') }}" style="text-decoration:none"><span>تنتظر التحويل أو المراجعة</span><b>{{ kpi.waiting }}</b></a>
+  </div>
+
+  <section class="panel chart-card">
+    <header class="chart-head"><h2>المبيعات اليومية</h2><span class="muted">آخر ٣٠ يوم · الطلبات المؤكدة فقط · ر.ع</span></header>
+    <div class="chart-wrap">
+      <svg class="col-chart" viewBox="0 0 {{ W }} {{ H }}" role="img" aria-label="أعمدة المبيعات اليومية لآخر ٣٠ يوم">
+        {% for t in ticks %}{% set y = PT + plot_h - plot_h * loop.index0 / 4 %}
+        <line x1="{{ PL }}" x2="{{ W - PR }}" y1="{{ y }}" y2="{{ y }}" class="{{ 'base' if loop.first else 'grid' }}"/>
+        <text x="{{ W - 4 }}" y="{{ y + 4 }}" class="tick" text-anchor="end">{{ (t / 1000)|round(1)|string|replace('.0', '') }}</text>
+        {% endfor %}
+        {% for d in days %}
+          {% set x = PL + plot_w - (loop.index0 + 1) * slot + 1 %}{% set w = slot - 2 %}
+          {% set h = (plot_h * d.h)|round(1) %}{% set y0 = PT + plot_h %}{% set r = [4, h, w / 2]|min %}
+          <g class="col" data-tip="{{ d.date.strftime('%d/%m') }} · {{ d.rev|omr }} ر.ع · {{ d.n }} طلب" tabindex="0">
+            <rect class="hit" x="{{ x - 1 }}" y="{{ PT }}" width="{{ slot }}" height="{{ plot_h }}"/>
+            {% if h > 0 %}<path d="M{{ x }} {{ y0 }} V{{ y0 - h + r }} Q{{ x }} {{ y0 - h }} {{ x + r }} {{ y0 - h }} H{{ x + w - r }} Q{{ x + w }} {{ y0 - h }} {{ x + w }} {{ y0 - h + r }} V{{ y0 }} Z"/>{% endif %}
+          </g>
+          {% if loop.index0 % 5 == 0 or loop.last %}<text x="{{ x + w / 2 }}" y="{{ H - 8 }}" class="tick" text-anchor="middle">{{ d.date.strftime('%d/%m') }}</text>{% endif %}
+        {% endfor %}
+      </svg>
+      <div class="chart-tip" role="status" aria-live="polite" hidden></div>
+    </div>
+    <details class="as-table"><summary>عرض كجدول</summary>
+      <table><tr><th>اليوم</th><th>المبيعات (ر.ع)</th><th>الطلبات</th></tr>
+        {% for d in days|reverse %}{% if d.n %}<tr><td class="num">{{ d.date.strftime('%d/%m') }}</td><td class="num">{{ d.rev|omr }}</td><td class="num">{{ d.n }}</td></tr>{% endif %}{% else %}{% endfor %}
+      </table>
+    </details>
+  </section>
+
+  <div class="chart-grid">
+    <section class="panel chart-card">
+      <header class="chart-head"><h2>الطلبات حسب المحافظة</h2><span class="muted">بدون الملغية</span></header>
+      {% for r in gov %}
+      <div class="hbar"><span class="lbl">{{ r.g }}</span><span class="track"><i style="width:{{ (r.n * 100 / gov_max)|round(1) }}%"></i></span><span class="val num">{{ r.n }}</span></div>
+      {% else %}<p class="muted">ما في طلبات بعد.</p>{% endfor %}
+    </section>
+    <section class="panel chart-card">
+      <header class="chart-head"><h2>الأكثر مبيعاً</h2><span class="muted">عدد الغراش · بدون الملغية</span></header>
+      {% for r in sizes %}
+      <div class="hbar"><span class="lbl">{{ r.v }}<small class="muted"> · {{ r.p }}</small></span><span class="track"><i style="width:{{ (r.q * 100 / size_max)|round(1) }}%"></i></span><span class="val num">{{ r.q }}</span></div>
+      {% else %}<p class="muted">ما في مبيعات بعد.</p>{% endfor %}
+    </section>
+  </div>
+
+  <section class="panel chart-card">
+    <header class="chart-head"><h2>حالات الطلبات</h2><span class="muted">كل الطلبات</span></header>
+    {% for st, n in status %}
+    <a class="hbar link" href="{{ url_for('admin_orders', status=st) }}"><span class="lbl"><span class="status s-{{ STATUS_KEY[st] }}">{{ st }}</span></span><span class="track"><i style="width:{{ (n * 100 / status_max)|round(1) }}%"></i></span><span class="val num">{{ n }}</span></a>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  // تلميح عند المرور أو اللمس على أي عمود
+  (function () {
+    var wrap = document.querySelector('.chart-wrap'), tip = wrap && wrap.querySelector('.chart-tip');
+    if (!tip) return;
+    function show(g) {
+      tip.textContent = g.dataset.tip; tip.hidden = false;
+      var r = g.getBoundingClientRect(), w = wrap.getBoundingClientRect();
+      tip.style.left = Math.min(Math.max(r.left - w.left + r.width / 2, 70), w.width - 70) + 'px';
+      wrap.querySelectorAll('.col.on').forEach(function (x) { x.classList.remove('on'); }); g.classList.add('on');
+    }
+    wrap.querySelectorAll('.col').forEach(function (g) {
+      g.addEventListener('mouseenter', function () { show(g); });
+      g.addEventListener('focus', function () { show(g); });
+      g.addEventListener('touchstart', function () { show(g); }, { passive: true });
+    });
+    wrap.addEventListener('mouseleave', function () { tip.hidden = true; wrap.querySelectorAll('.col.on').forEach(function (x) { x.classList.remove('on'); }); });
+  })();
+</script>
+{% endblock %}

@@ -40,6 +40,7 @@
       <div><span>التوصيل إلى {{ order.wilaya }}، {{ order.governorate }}</span><span class="price">{% if order.delivery %}{{ order.delivery|omr }}{% else %}مجاني{% endif %}</span></div>
       <div class="total"><span>الإجمالي</span><span class="price">{{ order.total|omr }}<small>ر.ع</small></span></div>
     </div>
+    <a class="btn btn-line" style="margin-top:16px" href="{{ url_for('invoice', code=code) }}" target="_blank">🧾 الفاتورة (PDF)</a>
     <p class="hint" style="margin-top:14px">نبدأ تجهيز طلبك أول ما نستلم التحويل، وتقدر تتابعه من <a href="{{ url_for('track', code=code) }}">تتبّع طلبك</a>.</p>
   </div>
 </div>

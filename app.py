@@ -1,17 +1,19 @@
 import hashlib
+import io
 import json
 import os
 import re
 import secrets
 import shutil
+import time
 import sqlite3
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import wraps
 from zoneinfo import ZoneInfo
 
 from flask import (Flask, abort, flash, g, jsonify, redirect, render_template, request,
-                   send_from_directory, session, url_for)
+                   send_file, send_from_directory, session, url_for)
 from werkzeug.utils import secure_filename
 
 # ----------------------------------------------------------------------
@@ -41,6 +43,7 @@ SHIPPED = "خرج للتوصيل"
 DELIVERED = "تم التسليم"
 CANCELLED = "ملغي"
 STATUSES = [PENDING, RECEIPT, PAID, PREPARING, SHIPPED, DELIVERED, CANCELLED]
+CONFIRMED = (PAID, PREPARING, SHIPPED, DELIVERED)
 STATUS_KEY = {PENDING: "pending", RECEIPT: "receipt", PAID: "paid", PREPARING: "preparing",
               SHIPPED: "shipped", DELIVERED: "delivered", CANCELLED: "cancelled"}
 
@@ -73,6 +76,37 @@ DEFAULT_SETTINGS = {
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 app.config["MAX_CONTENT_LENGTH"] = 6 * 1024 * 1024
+# الكوكي عبر HTTPS فقط على Railway، ولا تُرسل من مواقع ثانية
+app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax",
+                  SESSION_COOKIE_SECURE=bool(os.environ.get("RAILWAY_ENVIRONMENT")))
+
+
+@app.after_request
+def security_headers(resp):
+    resp.headers.setdefault("X-Frame-Options", "DENY")                  # ما ينعرض المتجر داخل موقع ثاني
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    return resp
+
+
+# حد للمحاولات الخاطئة (دخول الإدارة وتتبّع الطلب) حتى ما ينخمّن الرمز بالتكرار
+_failures = {}
+
+
+def too_many(kind, limit=5, window=15 * 60):
+    key = (kind, request.headers.get("X-Forwarded-For", request.remote_addr or "").split(",")[0].strip())
+    now = time.time()
+    _failures[key] = [t for t in _failures.get(key, []) if now - t < window]
+    return len(_failures[key]) >= limit, key
+
+
+def record_failure(key):
+    _failures.setdefault(key, []).append(time.time())
+
+
+def safe_back(url, fallback):
+    """يرجّع للصفحة اللي جا منها الزبون، بس داخل المتجر فقط"""
+    return url if url and url.startswith("/") and not url.startswith("//") and "\\" not in url else fallback
 
 
 # ----------------------------------------------------------------------
@@ -422,7 +456,7 @@ def upload_receipt(code):
     order, _ = load_order(oid)
     if not order:
         abort(404)
-    back = request.form.get("back") or url_for("order_done", code=order_code(oid))
+    back = safe_back(request.form.get("back"), url_for("order_done", code=order_code(oid)))
     file = request.files.get("receipt")
     ext = file.filename.rsplit(".", 1)[-1].lower() if file and "." in file.filename else ""
     if not file or not file.filename:
@@ -456,10 +490,30 @@ def upload_receipt(code):
     return redirect(back)
 
 
+@app.route("/order/<code>/invoice")
+def invoice(code):
+    """فاتورة الطلب: صفحة مهيأة للطباعة وحفظها PDF (للزبون صاحب الطلب أو صاحب المتجر)"""
+    oid = code_to_id(code)
+    if oid is None or not (session.get("admin") or oid in session.get("my_orders", [])):
+        abort(403)
+    order, items = load_order(oid)
+    if not order:
+        abort(404)
+    paid = order["status"] in CONFIRMED
+    return render_template("invoice.html", order=order, items=items, code=order_code(oid), paid=paid,
+                           cancelled=order["status"] == CANCELLED, issued=now_oman(),
+                           store_wa=clean_phone(setting("whatsapp")))
+
+
 @app.route("/track", methods=["GET", "POST"])
 def track():
     order, items, code = None, [], request.values.get("code", "")
     if request.method == "POST":
+        blocked, key = too_many("track", limit=10)
+        if blocked:
+            flash("محاولات كثيرة. انتظر ربع ساعة وحاول مرة ثانية، أو راسلنا على واتساب.")
+            return render_template("track.html", order=None, items=[], code=code,
+                                   steps=STATUSES[:-1], wa_store=clean_phone(setting("whatsapp")))
         oid = code_to_id(code)
         found, found_items = load_order(oid) if oid else (None, [])
         # رقم الطلب + آخر ٤ أرقام من الهاتف، حتى لا يطّلع أحد على طلب غيره
@@ -467,6 +521,7 @@ def track():
             order, items = found, found_items
             session["my_orders"] = (session.get("my_orders", []) + [oid])[-20:]   # يقدر يرفق الإيصال من هنا
         else:
+            record_failure(key)
             flash("ما لقينا طلب بهذا الرقم والهاتف. تأكد من رقم الطلب (مثل AM-1001) ورقم الهاتف اللي طلبت فيه.")
     return render_template("track.html", order=order, items=items, code=code,
                            steps=STATUSES[:-1], wa_store=clean_phone(setting("whatsapp")))
@@ -487,10 +542,16 @@ def admin_required(f):
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
-        if ADMIN_PASSWORD and secrets.compare_digest(request.form.get("password", ""), ADMIN_PASSWORD):
+        blocked, key = too_many("admin")
+        if blocked:
+            flash("محاولات خاطئة كثيرة. انتظر ربع ساعة وحاول مرة ثانية.")
+        elif ADMIN_PASSWORD and secrets.compare_digest(request.form.get("password", ""), ADMIN_PASSWORD):
+            session.clear()
             session["admin"] = True
             return redirect(url_for("admin_orders"))
-        flash("كلمة المرور غير صحيحة")
+        else:
+            record_failure(key)
+            flash("كلمة المرور غير صحيحة")
     return render_template("admin/login.html", locked=not ADMIN_PASSWORD)
 
 
@@ -555,6 +616,151 @@ def admin_order(oid):
     return render_template("admin/order.html", order=order, items=items, code=code, statuses=STATUSES,
                            conflicts=receipt_conflicts(order), code_of=order_code,
                            wa_customer=wa_link(order["phone"], customer_msg))
+
+
+@app.route("/admin/stats")
+@admin_required
+def admin_stats():
+    """لوحة المبيعات: آخر ٣٠ يوم، المحافظات، الأحجام، وحالات الطلبات"""
+    today = datetime.now(TZ).date()
+    start = today - timedelta(days=29)
+    q = ",".join("?" * len(CONFIRMED))
+    rows = db().execute(f"SELECT substr(created_at, 1, 10) AS d, SUM(total) AS rev, COUNT(*) AS n FROM orders "
+                        f"WHERE status IN ({q}) AND created_at >= ? GROUP BY d", (*CONFIRMED, start.isoformat())).fetchall()
+    by_day = {r["d"]: (r["rev"], r["n"]) for r in rows}
+    days = []
+    for i in range(30):
+        d = start + timedelta(days=i)
+        rev, n = by_day.get(d.isoformat(), (0, 0))
+        days.append({"date": d, "rev": rev or 0, "n": n})
+    peak = max([d["rev"] for d in days] + [1])
+    # مقياس محور مدوّر لأعلى (١، ٢، ٥ × ١٠ⁿ بالريال) حتى تكون خطوط الشبكة أرقام سهلة
+    peak_omr = peak / 1000
+    step = 1
+    for m in (1, 2, 5, 10, 20, 50, 100, 200, 500, 1000):
+        if peak_omr / m <= 4:
+            step = m
+            break
+    top = max(step * 4, step * -(-peak_omr // step)) * 1000
+    ticks = [int(top / 4 * k) for k in range(5)]
+    for d in days:
+        d["h"] = d["rev"] / top if top else 0
+
+    gov = db().execute("SELECT governorate AS g, COUNT(*) AS n, SUM(total) AS rev FROM orders WHERE status != ? "
+                       "GROUP BY g ORDER BY n DESC, rev DESC", (CANCELLED,)).fetchall()
+    sizes = db().execute("SELECT i.product_name AS p, i.variant_label AS v, SUM(i.qty) AS q, SUM(i.qty * i.price) AS rev "
+                         "FROM order_items i JOIN orders o ON o.id = i.order_id WHERE o.status != ? "
+                         "GROUP BY p, v ORDER BY q DESC", (CANCELLED,)).fetchall()
+    status = [(st, db().execute("SELECT COUNT(*) FROM orders WHERE status = ?", (st,)).fetchone()[0]) for st in STATUSES]
+    month = [d for d in days]
+    kpi = {
+        "rev": sum(d["rev"] for d in month),
+        "orders": db().execute(f"SELECT COUNT(*) FROM orders WHERE status IN ({q}) AND created_at >= ?",
+                               (*CONFIRMED, start.isoformat())).fetchone()[0],
+        "waiting": db().execute("SELECT COUNT(*) FROM orders WHERE status IN (?, ?)", (PENDING, RECEIPT)).fetchone()[0],
+    }
+    kpi["avg"] = kpi["rev"] // kpi["orders"] if kpi["orders"] else 0
+    return render_template("admin/stats.html", days=days, ticks=ticks, kpi=kpi, gov=gov, sizes=sizes, status=status,
+                           gov_max=max([r["n"] for r in gov] + [1]), size_max=max([r["q"] for r in sizes] + [1]),
+                           status_max=max([n for _, n in status] + [1]))
+
+
+def orders_workbook(orders, items_by_order):
+    """ملف Excel للطلبات: ورقة الطلبات مع صف إجمالي بمعادلات، وورقة تفاصيل الأصناف"""
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+    from openpyxl.utils import get_column_letter
+
+    wb = Workbook()
+    head_font = Font(name="Arial", bold=True, color="FFFFFF")
+    head_fill = PatternFill("solid", fgColor="2A1A0E")
+    body_font = Font(name="Arial")
+    bold = Font(name="Arial", bold=True)
+    thin = Border(bottom=Side(style="thin", color="E7D9BD"))
+    money = '#,##0.000;-#,##0.000;"-"'
+
+    def sheet(ws, headers, widths):
+        ws.sheet_view.rightToLeft = True
+        ws.append(headers)
+        for col, w in enumerate(widths, 1):
+            ws.column_dimensions[get_column_letter(col)].width = w
+            c = ws.cell(row=1, column=col)
+            c.font, c.fill = head_font, head_fill
+            c.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+        ws.row_dimensions[1].height = 30
+        ws.freeze_panes = "A2"
+
+    ws = wb.active
+    ws.title = "الطلبات"
+    sheet(ws, ["رقم الطلب", "التاريخ", "العميل", "الهاتف", "المحافظة", "الولاية", "العنوان", "المنتجات",
+               "المجموع (ر.ع)", "التوصيل (ر.ع)", "الإجمالي (ر.ع)", "الحالة", "رقم العملية"],
+          [12, 17, 20, 14, 14, 14, 30, 38, 14, 14, 14, 18, 18])
+    for o in orders:
+        items = "، ".join(f"{i['variant_label']} × {i['qty']}" for i in items_by_order.get(o["id"], []))
+        r = ws.max_row + 1
+        ws.append([order_code(o["id"]), o["created_at"], o["name"], o["phone"], o["governorate"], o["wilaya"],
+                   o["address"], items, o["subtotal"] / 1000, o["delivery"] / 1000, None, o["status"], o["transfer_ref"] or ""])
+        ws.cell(row=r, column=11, value=f"=I{r}+J{r}")           # الإجمالي = المجموع + التوصيل
+        for col in range(1, 14):
+            c = ws.cell(row=r, column=col)
+            c.font, c.border = body_font, thin
+            c.alignment = Alignment(vertical="top", wrap_text=col in (7, 8))
+        for col in (9, 10, 11):
+            ws.cell(row=r, column=col).number_format = money
+        ws.cell(row=r, column=4).number_format = "@"
+    last = ws.max_row
+    ws.auto_filter.ref = f"A1:M{max(last, 2)}"
+    total = last + 2
+    ws.cell(row=total, column=8, value="الإجمالي").font = bold
+    for col in (9, 10, 11):
+        L = get_column_letter(col)
+        c = ws.cell(row=total, column=col, value=f"=SUBTOTAL(9,{L}2:{L}{last})" if last >= 2 else 0)
+        c.font, c.number_format = bold, money
+    ws.cell(row=total + 1, column=1, value=f"المبالغ بالريال العماني (١ ر.ع = ١٠٠٠ بيسة). المصدر: طلبات متجر {STORE_NAME}، "
+                                          f"صُدّر {now_oman()}. صف الإجمالي يتبع الفلتر.").font = Font(name="Arial", italic=True, color="7D6A55")
+
+    wi = wb.create_sheet("الأصناف")
+    sheet(wi, ["رقم الطلب", "التاريخ", "الحالة", "المنتج", "الحجم", "الكمية", "سعر الوحدة (ر.ع)", "المبلغ (ر.ع)"],
+          [12, 17, 18, 22, 26, 10, 16, 14])
+    for o in orders:
+        for i in items_by_order.get(o["id"], []):
+            r = wi.max_row + 1
+            wi.append([order_code(o["id"]), o["created_at"], o["status"], i["product_name"], i["variant_label"],
+                       i["qty"], i["price"] / 1000, None])
+            wi.cell(row=r, column=8, value=f"=F{r}*G{r}")
+            for col in range(1, 9):
+                wi.cell(row=r, column=col).font = body_font
+            for col in (7, 8):
+                wi.cell(row=r, column=col).number_format = money
+    li = wi.max_row
+    wi.auto_filter.ref = f"A1:H{max(li, 2)}"
+    t = li + 2
+    wi.cell(row=t, column=5, value="الإجمالي").font = bold
+    for col, L in ((6, "F"), (8, "H")):
+        c = wi.cell(row=t, column=col, value=f"=SUBTOTAL(9,{L}2:{L}{li})" if li >= 2 else 0)
+        c.font = bold
+        if col == 8:
+            c.number_format = money
+    buf = io.BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf
+
+
+@app.route("/admin/export.xlsx")
+@admin_required
+def admin_export():
+    status = request.args.get("status", "")
+    if status in STATUSES:
+        orders = db().execute("SELECT * FROM orders WHERE status = ? ORDER BY id", (status,)).fetchall()
+    else:
+        orders = db().execute("SELECT * FROM orders ORDER BY id").fetchall()
+    items_by_order = {}
+    for i in db().execute("SELECT * FROM order_items ORDER BY id").fetchall():
+        items_by_order.setdefault(i["order_id"], []).append(i)
+    name = f"orders-{datetime.now(TZ).strftime('%Y-%m-%d')}" + (f"-{STATUS_KEY[status]}" if status in STATUSES else "") + ".xlsx"
+    return send_file(orders_workbook(orders, items_by_order), as_attachment=True, download_name=name,
+                     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 
 @app.route("/admin/products")

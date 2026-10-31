@@ -1,0 +1,89 @@
+{% from "_macros.html" import logo_mark with context %}
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فاتورة {{ code }} | {{ store_name }}</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* فاتورة A4: نفس هوية المتجر، وتتحول لأبيض وأسود نظيف عند الطباعة */
+  :root { --ink: #2a1a0e; --text: #4b3626; --muted: #7d6a55; --line: #e7d9bd; --cream: #f8f1e2; --gold: #b5761a; --red: #a3202a; --green: #1f5a37; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #efe6d3; color: var(--text); font: 400 14px/1.7 "Readex Pro", Tahoma, sans-serif; }
+  .bar { position: sticky; top: 0; display: flex; gap: 10px; justify-content: center; padding: 12px 16px; background: #2a1a0e; }
+  .bar button, .bar a { font: 600 14px "Readex Pro", sans-serif; border: 0; border-radius: 999px; padding: 10px 22px; cursor: pointer; text-decoration: none; }
+  .bar button { background: linear-gradient(180deg, #ffdc8c, #e3a83c); color: #160a00; }
+  .bar a { background: transparent; color: #f3e6cc; box-shadow: inset 0 0 0 1.5px rgba(255,214,150,.35); }
+  .sheet { width: 210mm; min-height: 297mm; margin: 24px auto; background: #fff; padding: 18mm 16mm; position: relative; box-shadow: 0 20px 60px -30px rgba(0,0,0,.5); }
+  .sheet::before { content: ""; position: absolute; inset: 0 0 auto; height: 8px; background: linear-gradient(90deg, var(--red) 0 33%, #fff 33% 66%, var(--green) 66%); }
+  header.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; padding-bottom: 18px; border-bottom: 2px solid var(--ink); }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .mark { width: 52px; height: 52px; }
+  .brand b { display: block; font: 700 34px/1 "Aref Ruqaa", serif; color: var(--ink); }
+  .brand span { font-size: 12px; color: var(--muted); }
+  .doc { text-align: left; }
+  .doc h1 { margin: 0; font: 700 24px "Readex Pro", sans-serif; color: var(--ink); letter-spacing: .02em; }
+  .doc .code { font: 700 18px "Readex Pro", sans-serif; direction: ltr; color: var(--gold); }
+  .doc small { display: block; color: var(--muted); }
+  .stamp { display: inline-block; margin-top: 8px; padding: 4px 14px; border: 2px solid currentColor; border-radius: 6px; font-weight: 700; transform: rotate(-4deg); }
+  .stamp.paid { color: var(--green); } .stamp.due { color: #a45a00; } .stamp.void { color: var(--red); }
+  .parties { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 22px 0; }
+  .parties div { background: var(--cream); border-radius: 10px; padding: 14px 16px; }
+  .parties h2 { margin: 0 0 6px; font-size: 12px; color: var(--muted); font-weight: 600; }
+  .parties p { margin: 0; color: var(--ink); }
+  table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+  th { text-align: start; font-size: 12px; color: var(--muted); font-weight: 600; padding: 10px 8px; border-bottom: 1.5px solid var(--ink); }
+  td { padding: 12px 8px; border-bottom: 1px solid var(--line); color: var(--ink); }
+  td.num, th.num { text-align: left; direction: ltr; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .totals { width: 280px; margin-inline-start: auto; margin-top: 16px; }
+  .totals div { display: flex; justify-content: space-between; padding: 6px 8px; }
+  .totals .grand { border-top: 2px solid var(--ink); margin-top: 6px; padding-top: 10px; font-weight: 700; font-size: 17px; color: var(--ink); }
+  .totals .grand span:last-child { color: var(--red); }
+  .note { margin-top: 26px; padding: 14px 16px; border: 1px dashed var(--line); border-radius: 10px; font-size: 13px; }
+  footer.bottom { position: absolute; inset: auto 16mm 14mm; display: flex; justify-content: space-between; gap: 12px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+  @media (max-width: 820px) { .sheet { width: auto; min-height: 0; margin: 12px; padding: 22px 16px 90px; } .parties { grid-template-columns: 1fr; } .totals { width: 100%; } }
+  @page { size: A4; margin: 0; }
+  @media print {
+    body { background: #fff; }
+    .bar { display: none; }
+    .sheet { margin: 0; box-shadow: none; width: 210mm; min-height: 297mm; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="bar"><button type="button" onclick="window.print()">⬇ حفظ PDF / طباعة</button><a href="javascript:history.back()">رجوع</a></div>
+<main class="sheet">
+  <header class="top">
+    <div class="brand">{{ logo_mark() }}<div><b>{{ store_name }}</b><span>سمن عُماني أصلي · سلطنة عُمان</span></div></div>
+    <div class="doc">
+      <h1>فاتورة</h1>
+      <div class="code">{{ code }}</div>
+      <small>تاريخ الطلب: <span class="num" dir="ltr">{{ order.created_at }}</span></small>
+      {% if cancelled %}<span class="stamp void">ملغاة</span>{% elif paid %}<span class="stamp paid">مدفوعة</span>{% else %}<span class="stamp due">بانتظار الدفع</span>{% endif %}
+    </div>
+  </header>
+
+  <section class="parties">
+    <div><h2>فاتورة إلى</h2><p><b>{{ order.name }}</b></p><p dir="ltr" style="text-align:right">{{ order.phone }}</p><p>{{ order.address }}، {{ order.wilaya }}، {{ order.governorate }}</p></div>
+    <div><h2>الدفع</h2><p>تحويل بنكي</p>{% if order.transfer_ref %}<p>رقم العملية: <span dir="ltr">{{ order.transfer_ref }}</span></p>{% endif %}<p>الحالة: {{ order.status }}</p></div>
+  </section>
+
+  <table>
+    <tr><th>المنتج</th><th>الحجم</th><th class="num">الكمية</th><th class="num">سعر الوحدة (ر.ع)</th><th class="num">المبلغ (ر.ع)</th></tr>
+    {% for i in items %}<tr><td>{{ i.product_name }}</td><td>{{ i.variant_label }}</td><td class="num">{{ i.qty }}</td><td class="num">{{ i.price|omr }}</td><td class="num">{{ (i.price * i.qty)|omr }}</td></tr>{% endfor %}
+  </table>
+  <div class="totals">
+    <div><span>المجموع</span><span class="num" dir="ltr">{{ order.subtotal|omr }}</span></div>
+    <div><span>التوصيل إلى {{ order.wilaya }}</span><span class="num" dir="ltr">{% if order.delivery %}{{ order.delivery|omr }}{% else %}مجاني{% endif %}</span></div>
+    <div class="grand"><span>الإجمالي</span><span dir="ltr">{{ order.total|omr }} ر.ع</span></div>
+  </div>
+
+  <div class="note">شكراً لثقتك في {{ store_name }}. المبالغ بالريال العماني.{% if store_wa %} للاستفسار: واتساب <span dir="ltr">+{{ store_wa }}</span>{% endif %}</div>
+  <footer class="bottom"><span>{{ store_name }} · سمن عُماني أصلي ١٠٠٪ من أرض عُمان</span><span>صدرت <span dir="ltr">{{ issued }}</span></span></footer>
+</main>
+</body>
+</html>
