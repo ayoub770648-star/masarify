@@ -86,6 +86,8 @@ def security_headers(resp):
     resp.headers.setdefault("X-Frame-Options", "DENY")                  # ما ينعرض المتجر داخل موقع ثاني
     resp.headers.setdefault("X-Content-Type-Options", "nosniff")
     resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    if app.config["SESSION_COOKIE_SECURE"]:                              # على Railway: المتصفح يفتح المتجر عبر HTTPS دائماً
+        resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000")
     return resp
 
 
