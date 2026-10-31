@@ -27,7 +27,7 @@
     <div class="hero-visual" data-depth="0.12">
       <div class="arch-photo">
         <div class="frame"></div>
-        <div class="photo"><img src="{{ url_for('static', filename='img/hero-kitchen.webp') }}" srcset="{{ url_for('static', filename='img/hero-kitchen-480.webp') }} 480w, {{ url_for('static', filename='img/hero-kitchen-720.webp') }} 720w, {{ url_for('static', filename='img/hero-kitchen.webp') }} 921w" sizes="(max-width: 960px) 84vw, 440px" width="921" height="1152" alt="غرشتين سمن عُماني أصلي على صينية خشب منحوتة في مطبخ عماني قديم مع التمر والزعفران والدلة" fetchpriority="high"></div>
+        <div class="photo"><img src="{{ url_for('static', filename='img/hero-kitchen.webp') }}?v=2" srcset="{{ url_for('static', filename='img/hero-kitchen-480.webp') }}?v=2 480w, {{ url_for('static', filename='img/hero-kitchen-720.webp') }}?v=2 720w, {{ url_for('static', filename='img/hero-kitchen.webp') }}?v=2 921w" sizes="(max-width: 960px) 84vw, 440px" width="921" height="1152" alt="غرشتين سمن عُماني أصلي على صينية خشب منحوتة في مطبخ عماني قديم مع التمر والزعفران والدلة" fetchpriority="high"></div>
       </div>
       <div class="badge-round" data-depth="0.3"><div><b>١٠٠٪</b><small>أصلي</small></div></div>
       <span class="tag" data-depth="0.25">الريحة خيال ♡</span>
@@ -44,7 +44,7 @@
 <section class="block" id="shop">
   <div class="wrap showcase">
     <div class="showcase-photo reveal">
-      <figure class="main"><img src="{{ url_for('static', filename='img/product-single.webp') }}" srcset="{{ url_for('static', filename='img/product-single-480.webp') }} 480w, {{ url_for('static', filename='img/product-single-720.webp') }} 720w, {{ url_for('static', filename='img/product-single.webp') }} 921w" sizes="(max-width: 960px) 90vw, 520px" alt="{{ p.name }}" loading="lazy" width="921" height="1152"></figure>
+      <figure class="main"><img src="{{ url_for('static', filename='img/product-single.webp') }}?v=2" srcset="{{ url_for('static', filename='img/product-single-480.webp') }}?v=2 480w, {{ url_for('static', filename='img/product-single-720.webp') }}?v=2 720w, {{ url_for('static', filename='img/product-single.webp') }}?v=2 921w" sizes="(max-width: 960px) 90vw, 520px" alt="{{ p.name }}" loading="lazy" width="921" height="1152"></figure>
       <figure class="inset"><img src="{{ url_for('static', filename='img/close-label.webp') }}" alt="ملصق سمن عُماني أصلي" loading="lazy"></figure>
       <span class="ribbon-tag">من أرض عُمان ♡</span>
     </div>

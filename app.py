@@ -159,9 +159,10 @@ def init_db():
     for k, v in DEFAULT_SETTINGS.items():
         conn.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (k, v))
     # أول تشغيل: السمن العماني بحجمين وأسعار إعلان المتجر، مع صورة الغراش الحقيقية
+    # الصورة تنسخ لمجلد الرفع باسم فيه رقم نسخة، نغيّره كل ما تتحدث صورة الغرشة عشان المتصفحات ما تعرض القديمة
+    seed_src, image = os.path.join(BASE_DIR, "static", "img", "product-single.webp"), "product-single-2.webp"
     if conn.execute("SELECT COUNT(*) FROM products").fetchone()[0] == 0:
-        image = "product-single.webp"
-        shutil.copyfile(os.path.join(BASE_DIR, "static", "img", image), os.path.join(UPLOAD_DIR, image))
+        shutil.copyfile(seed_src, os.path.join(UPLOAD_DIR, image))
         pid = conn.execute(
             "INSERT INTO products (name, tagline, description, image, sort) VALUES (?, ?, ?, ?, 0)",
             ("سمن عُماني أصلي", "ميه بالميه ولذيذ، والريحة خيال",
@@ -170,6 +171,10 @@ def init_db():
         ).lastrowid
         for i, (label, price) in enumerate([("غرشة كبيرة (فيمتو أو تانج)", 5000), ("غرشة صغيرة", 3000)]):
             conn.execute("INSERT INTO variants (product_id, label, price, sort) VALUES (?, ?, ?, ?)", (pid, label, price, i))
+    # متجر قائم بصورة الغرشة القديمة: بدّلها بالجديدة (الصور اللي رفعها التاجر بنفسه ما تنلمس)
+    elif conn.execute("SELECT 1 FROM products WHERE image = 'product-single.webp'").fetchone():
+        shutil.copyfile(seed_src, os.path.join(UPLOAD_DIR, image))
+        conn.execute("UPDATE products SET image = ? WHERE image = 'product-single.webp'", (image,))
     conn.commit()
     conn.close()
 
