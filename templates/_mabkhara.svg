@@ -1,0 +1,16 @@
+<svg class="mabkhara" viewBox="0 0 120 160" aria-hidden="true">
+  <defs>
+    <linearGradient id="mbw" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5a3216"/><stop offset=".5" stop-color="#8b5a2b"/><stop offset="1" stop-color="#4a2a12"/></linearGradient>
+    <radialGradient id="ember" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffdf8a"/><stop offset=".6" stop-color="#ff8a2a"/><stop offset="1" stop-color="#a3202a" stop-opacity="0"/></radialGradient>
+  </defs>
+  <ellipse cx="60" cy="152" rx="50" ry="6" fill="#000" opacity=".35"/>
+  <path d="M26 150 L34 96 L86 96 L94 150 Z" fill="url(#mbw)"/>
+  <path d="M34 96 L60 116 L86 96 Z M30 128 L60 146 L90 128 Z" fill="#a3202a" opacity=".9"/>
+  <path d="M38 110 L60 124 L82 110 M34 138 L60 150" stroke="#e3a83c" stroke-width="2" fill="none"/>
+  <path d="M29 134 L45 104 L49 134 Z" fill="#1f5a37" opacity=".9"/><path d="M91 134 L75 104 L71 134 Z" fill="#1f5a37" opacity=".9"/>
+  <path d="M20 96 L100 96 L92 82 L28 82 Z" fill="#6b3f1c"/>
+  <path d="M20 96 L100 96" stroke="#e3a83c" stroke-width="2.5"/>
+  <ellipse cx="60" cy="82" rx="32" ry="7" fill="#2a1a10"/>
+  <ellipse cx="60" cy="80" rx="20" ry="4.5" fill="url(#ember)"/>
+  <circle cx="54" cy="79" r="2.2" fill="#ffe7ad"/><circle cx="64" cy="80" r="1.8" fill="#fff4cf"/>
+</svg>

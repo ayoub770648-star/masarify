@@ -513,3 +513,102 @@ tr.click:hover td { background: #fbf3e2; }
 .dup-alert a { color: #8a1630; font-weight: 700; }
 .dup-alert p { font-size: .88rem; }
 .receipt-flag.dup { color: var(--bad); }
+
+/* ======================================================================
+   الطابع التراثي العماني: سماء ليلية فوق قلعة، باب منحوت بمسامير نحاس،
+   مبخرة لبان بدخان حي، وشُرفات القلاع على حواف الأقسام
+   ====================================================================== */
+:root {
+  --crenel: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='18' viewBox='0 0 36 18'%3E%3Cpath d='M0 18V12h4V6h4V0h12v6h4v6h4v6z'/%3E%3C/svg%3E");
+  --studs: radial-gradient(circle at 50% 50%, #ffe39a 0 1.6px, #c9932f 2.4px, #6b430d 3.4px, transparent 3.8px);
+}
+.hero.heritage { background: radial-gradient(1100px 600px at 70% 30%, #2a1d3a 0%, transparent 60%), linear-gradient(180deg, #0c0814 0%, #1a1020 45%, #2a1a14 78%, #160d08 100%); min-height: min(100svh, 1000px); }
+.hero.heritage::before { display: none; }
+.hero.heritage::after { display: none; }
+.hero .sky { position: absolute; inset: 0; z-index: -3; width: 100%; height: 100%; }
+.moon { position: absolute; top: 13%; inset-inline-end: 9%; z-index: -3; width: 92px; height: 92px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 38%, #fff6dc, #f3dca0 55%, #c9a35c 100%); box-shadow: 0 0 60px 18px rgba(255,226,160,.25), 0 0 160px 60px rgba(255,210,122,.12); }
+.moon::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 62% 58%, rgba(150,110,50,.35) 0 9px, transparent 10px), radial-gradient(circle at 40% 68%, rgba(150,110,50,.25) 0 6px, transparent 7px), radial-gradient(circle at 66% 30%, rgba(150,110,50,.22) 0 5px, transparent 6px); }
+.fort-layer { position: absolute; inset: auto 0 0; z-index: -2; height: 46%; min-height: 260px; pointer-events: none; }
+.fort-layer .fort { width: 100%; height: 100%; display: block; }
+.fort .win { animation: flicker 4s ease-in-out infinite; }
+.fort .win:nth-of-type(3n) { animation-delay: -1.3s; } .fort .win:nth-of-type(3n+1) { animation-delay: -2.6s; }
+@keyframes flicker { 0%, 100% { opacity: .95; } 45% { opacity: .55; } 55% { opacity: .85; } }
+.hero.heritage .wrap { position: relative; padding-block: 120px 200px; }
+.hero.heritage .hero-copy { position: relative; z-index: 2; }
+.hero.heritage .lede { max-width: 34ch; }
+.shimmer { background: linear-gradient(100deg, #c07d17 0%, #ffe7ad 20%, #f2bd52 40%, #c07d17 60%, #ffe7ad 80%, #f2bd52 100%) 0 0 / 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shimmer 7s linear infinite; }
+@keyframes shimmer { to { background-position: -250% 0; } }
+
+/* المسرح: الباب المنحوت والغراش والمبخرة */
+.hero-stage { position: relative; display: grid; place-items: end center; min-height: 560px; z-index: 1; }
+.door { position: absolute; bottom: 30px; width: min(380px, 82%); aspect-ratio: 100/135; padding: 20px;
+  background: var(--studs) 0 0 / 22px 22px, linear-gradient(90deg, #3d2412, #6e4420 20%, #8b5a2b 50%, #6e4420 80%, #3d2412);
+  -webkit-mask: var(--arch) center/100% 100% no-repeat; mask: var(--arch) center/100% 100% no-repeat;
+  box-shadow: 0 50px 80px -30px rgba(0,0,0,.9); }
+.door::before { content: ""; position: absolute; inset: 14px; -webkit-mask: var(--arch) center/100% 100% no-repeat; mask: var(--arch) center/100% 100% no-repeat;
+  background: repeating-linear-gradient(90deg, rgba(0,0,0,.18) 0 2px, transparent 2px 9px), linear-gradient(180deg, #5a3416, #2c180b); }
+.door-arch { position: absolute; inset: 32px; -webkit-mask: var(--arch) center/100% 100% no-repeat; mask: var(--arch) center/100% 100% no-repeat;
+  background: radial-gradient(70% 55% at 50% 60%, rgba(255,214,130,.85), rgba(227,168,60,.45) 45%, rgba(60,30,10,.2) 80%), linear-gradient(180deg, #2a1a10, #4a2a12); }
+.door-arch::after { content: ""; position: absolute; inset: 0; background: var(--pattern) center/28px 14px; opacity: .18; mix-blend-mode: overlay; }
+.hero-stage .bottles { position: relative; z-index: 2; width: min(360px, 78%); height: auto; margin-bottom: 12px; filter: drop-shadow(0 30px 30px rgba(0,0,0,.55)) drop-shadow(0 0 40px rgba(255,190,90,.25)); animation: float 7s ease-in-out infinite; }
+@keyframes float { 50% { translate: 0 -12px; } }
+.burner { position: absolute; z-index: 3; bottom: 6px; inset-inline-start: 2%; width: 118px; }
+.burner .mabkhara { width: 100%; height: auto; display: block; filter: drop-shadow(0 14px 18px rgba(0,0,0,.6)); }
+.hero-stage canvas.smoke { position: absolute; z-index: 4; inset: -40% -20% 0; width: 140%; height: 140%; pointer-events: none; }
+.hero-stage .badge-round { position: absolute; z-index: 5; top: 16%; inset-inline-end: 0; width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center; text-align: center; background: var(--paper); color: var(--ink); box-shadow: 0 24px 40px -18px rgba(0,0,0,.8); }
+.hero-stage .badge-round::before { content: ""; position: absolute; inset: 7px; border-radius: 50%; border: 1.5px dashed var(--gold); animation: spin 30s linear infinite; }
+.hero-stage .badge-round b { font: 700 1.5rem/1 var(--display); color: var(--red); }
+.hero-stage .badge-round small { display: block; font-size: .7rem; color: var(--muted); font-weight: 600; }
+
+/* حواف الأقسام على شكل شُرفات القلاع */
+.crenel-top { position: relative; }
+.crenel-top::before { content: ""; position: absolute; inset: -17px 0 auto; height: 18px; background: inherit; background-color: var(--espresso);
+  -webkit-mask: var(--crenel) 0 100% / 36px 18px repeat-x; mask: var(--crenel) 0 100% / 36px 18px repeat-x; }
+.cta-band.crenel-top::before { background-color: var(--night); }
+
+/* واجهة المنتج في المتجر */
+.showcase-door { position: relative; display: grid; place-items: end center; min-height: 560px; }
+.showcase-door .door.small { width: min(400px, 92%); bottom: 0; }
+.showcase-door .bottles { position: relative; z-index: 2; width: min(330px, 74%); height: auto; margin-bottom: 26px; filter: drop-shadow(0 26px 26px rgba(0,0,0,.45)); transition: transform .8s var(--ease); }
+.showcase-door:hover .bottles { transform: translateY(-8px) scale(1.02); }
+.ribbon-tag { position: absolute; z-index: 3; bottom: 40px; inset-inline-start: 0; background: var(--green); color: #fff; font-weight: 700; padding: 9px 18px; border-radius: 999px; box-shadow: 0 14px 30px -12px rgba(0,0,0,.6); font-size: .9rem; }
+
+/* الشريط: زخرفة الفضة العمانية */
+.marquee { background: linear-gradient(90deg, #2a1a10, #4a2e18 30%, #2a1a10 60%, #4a2e18 90%, #2a1a10); color: var(--gold-2); border-block: 1px solid rgba(255,210,122,.35); position: relative; }
+.marquee::before, .marquee::after { content: ""; position: absolute; inset-inline: 0; height: 8px; background: var(--pattern) center/16px 8px repeat-x; opacity: .7; }
+.marquee::before { top: 2px; } .marquee::after { bottom: 2px; }
+.marquee span { padding-block: 20px; }
+
+@media (max-width: 960px) {
+  .hero.heritage .wrap { padding-block: 96px 170px; }
+  .hero-stage { min-height: 440px; order: -1; }
+  .door { width: min(290px, 74%); }
+  .hero-stage .bottles { width: min(250px, 62%); }
+  .burner { width: 84px; inset-inline-start: 4%; }
+  .hero-stage .badge-round { width: 88px; height: 88px; top: 8%; }
+  .moon { width: 64px; height: 64px; top: 9%; }
+  .fort-layer { height: 30%; min-height: 190px; }
+  .showcase-door { min-height: 460px; }
+}
+@media (prefers-reduced-motion: reduce) { .hero-stage .bottles, .shimmer, .fort .win { animation: none !important; } }
+
+/* ضبط المسرح: الغراش داخل الباب، القمر بعيد عن الختم، والقلعة تحت الأزرار */
+.door { width: min(430px, 94%); bottom: 18px; }
+.hero-stage .bottles { width: min(255px, 58%); margin-bottom: 44px; }
+.showcase-door .door.small { width: min(430px, 96%); }
+.showcase-door .bottles { width: min(250px, 58%); margin-bottom: 40px; }
+.moon { inset-inline-end: auto; left: 47%; top: 15%; }
+.fort-layer { height: 36%; }
+.burner { width: 132px; inset-inline-start: 0; bottom: 0; }
+.seal { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 1px; }
+.seal small { margin: 0; }
+@media (max-width: 960px) {
+  .door { width: min(320px, 84%); }
+  .hero-stage .bottles { width: min(190px, 48%); margin-bottom: 34px; }
+  .burner { width: 92px; }
+  .moon { left: auto; inset-inline-start: 6%; top: 84px; width: 54px; height: 54px; }
+  .fort-layer { height: 26%; }
+  .showcase-door .door.small { width: min(330px, 86%); }
+  .showcase-door .bottles { width: min(195px, 50%); }
+}
