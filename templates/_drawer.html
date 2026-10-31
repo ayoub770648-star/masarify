@@ -1,0 +1,35 @@
+{% from "_macros.html" import jar with context %}
+{% if lines %}
+<div class="items">
+  {% for l in lines %}
+  <div class="line">
+    <div class="thumb">{% if l.image %}<img src="{{ url_for('media', name=l.image) }}" alt="">{% else %}{{ jar() }}{% endif %}</div>
+    <div class="meta"><b>{{ l.name }}</b><small>{{ l.label }}</small></div>
+    <div class="side">
+      <form method="post" action="{{ url_for('cart_update') }}" class="qty" data-ajax="update">
+        <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="variant" value="{{ l.id }}">
+        <button name="qty" value="{{ l.qty - 1 }}" aria-label="أنقص">−</button>
+        <input type="number" value="{{ l.qty }}" readonly aria-label="الكمية">
+        <button name="qty" value="{{ l.qty + 1 }}" aria-label="زِد">+</button>
+      </form>
+      <span class="price">{{ l.total|omr }}<small>ر.ع</small></span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<footer>
+  <div class="sum">
+    <div class="total" style="border:0;padding:0"><span>المجموع</span><span class="price">{{ subtotal|omr }}<small>ر.ع</small></span></div>
+  </div>
+  {% if free_over %}
+    {% if subtotal >= free_over %}<p class="hint" style="color:var(--ok);font-weight:600;margin:0">طلبك يستاهل توصيل مجاني</p>
+    {% else %}<div class="progress"><span style="width:{{ (subtotal * 100 / free_over)|round|int }}%"></span></div>
+    <p class="hint" style="margin:0">باقي {{ (free_over - subtotal)|omr }} ر.ع على التوصيل المجاني</p>{% endif %}
+  {% endif %}
+  <a class="btn btn-gold btn-block btn-lg" href="{{ url_for('checkout') }}">إتمام الطلب</a>
+  <button type="button" class="btn btn-line btn-block" data-close-cart>أكمل التسوق</button>
+</footer>
+{% else %}
+<div class="items"><div class="empty">{{ jar() }}<b style="color:var(--ink)">السلة فاضية</b><p>اختر غرشتك وأضفها للسلة.</p>
+  <a class="btn btn-gold" href="{{ url_for('home') }}#shop" data-close-cart>تصفّح المتجر</a></div></div>
+{% endif %}

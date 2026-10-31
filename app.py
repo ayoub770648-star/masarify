@@ -8,7 +8,7 @@ from datetime import datetime
 from functools import wraps
 from zoneinfo import ZoneInfo
 
-from flask import (Flask, abort, flash, g, redirect, render_template, request,
+from flask import (Flask, abort, flash, g, jsonify, redirect, render_template, request,
                    send_from_directory, session, url_for)
 from werkzeug.utils import secure_filename
 
@@ -23,6 +23,9 @@ ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")    # بدونها تبقى
 STORE_NAME = os.environ.get("STORE_NAME", "أبو ميثه")
 TZ = ZoneInfo("Asia/Muscat")
 ALLOWED_IMAGES = {"jpg", "jpeg", "png", "webp"}
+# صور إضافية للمعرض: لقطات مقرّبة من صورة المنتج الأصلية
+EXTRA_GALLERY = {"ghee-bottles.jpg": [("img/detail-label.jpg", "الملصق"), ("img/bottle-tall.jpg", "الغرشة"),
+                                      ("img/detail-caps.jpg", "اللون الذهبي")]}
 
 # حالات الطلب بالترتيب
 PENDING = "بانتظار التحويل"
@@ -174,7 +177,8 @@ def omr(baisa):
 @app.context_processor
 def common():
     return {"store_name": STORE_NAME, "cart_count": sum(session.get("cart", {}).values()),
-            "STATUS_KEY": STATUS_KEY, "csrf": csrf_token(), "free_over": int(setting("free_over") or 0)}
+            "STATUS_KEY": STATUS_KEY, "csrf": csrf_token(), "free_over": int(setting("free_over") or 0),
+            "store_wa": clean_phone(setting("whatsapp")) if setting("whatsapp") else ""}
 
 
 def csrf_token():
@@ -209,18 +213,44 @@ def cart_lines():
     return lines, sum(line["total"] for line in lines)
 
 
+def wants_json():
+    return request.headers.get("X-Requested-With") == "fetch"
+
+
+def cart_json(message=""):
+    """رد السلة الجانبية: العدد وHTML المحتوى"""
+    lines, subtotal = cart_lines()
+    return jsonify(count=sum(session.get("cart", {}).values()), message=message,
+                   html=render_template("_drawer.html", lines=lines, subtotal=subtotal))
+
+
+app.jinja_env.globals["cart_lines"] = cart_lines
+
+
+@app.route("/cart/drawer")
+def cart_drawer():
+    return cart_json()
+
+
 @app.route("/cart/add", methods=["POST"])
 def cart_add():
     vid = request.form.get("variant", "")
     qty = max(1, min(50, int(request.form.get("qty", "1") or 1)))
     if not db().execute("SELECT 1 FROM variants WHERE id = ? AND active = 1", (vid,)).fetchone():
+        if wants_json():
+            return jsonify(error="اختر الحجم أولاً"), 400
         flash("اختر الحجم أولاً")
         return redirect(request.referrer or url_for("home"))
     cart = session.get("cart", {})
     cart[vid] = min(50, cart.get(vid, 0) + qty)
     session["cart"] = cart
+    go = request.form.get("go")
+    if go == "checkout":
+        return redirect(url_for("checkout"))
+    if wants_json():
+        return cart_json("أُضيف إلى السلة")
     flash("أُضيف إلى السلة")
-    return redirect(url_for("cart") if request.form.get("go") == "cart" else (request.referrer or url_for("home")))
+    return redirect(url_for("cart") if go == "cart" else (request.referrer or url_for("home")))
 
 
 @app.route("/cart/update", methods=["POST"])
@@ -233,6 +263,8 @@ def cart_update():
     else:
         cart[vid] = min(50, qty)
     session["cart"] = cart
+    if wants_json():
+        return cart_json()
     return redirect(url_for("cart"))
 
 
@@ -259,7 +291,9 @@ def products_with_variants(only_active=True):
 
 @app.route("/")
 def home():
-    return render_template("home.html", products=products_with_variants())
+    products = products_with_variants()
+    extras = [(url_for("static", filename=f), cap) for f, cap in EXTRA_GALLERY.get(products[0]["image"], [])] if products else []
+    return render_template("home.html", products=products, extras=extras)
 
 
 @app.route("/p/<int:pid>")
@@ -267,7 +301,9 @@ def product(pid):
     p = next((p for p in products_with_variants() if p["id"] == pid), None)
     if not p:
         abort(404)
-    return render_template("product.html", p=p)
+    gallery = ([(url_for("media", name=p["image"]), p["name"])] if p["image"] else []) + \
+              [(url_for("static", filename=f), cap) for f, cap in EXTRA_GALLERY.get(p["image"], [])]
+    return render_template("product.html", p=p, gallery=gallery)
 
 
 @app.route("/checkout", methods=["GET", "POST"])

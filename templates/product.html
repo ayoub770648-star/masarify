@@ -1,50 +1,48 @@
 {% extends "base.html" %}
-{% from "_macros.html" import media, icon with context %}
+{% from "_macros.html" import jar, icon with context %}
 {% block title %}{{ p.name }} | {{ store_name }}{% endblock %}
 {% block content %}
-<div class="wrap product-page">
-  <div class="media">{{ media(p) }}</div>
-  <div>
-    <h1>{{ p.name }}</h1>
-    {% if p.tagline %}<p class="tagline">{{ p.tagline }}</p>{% endif %}
-    {% if p.description %}<p class="desc">{{ p.description }}</p>{% endif %}
-    <form method="post" action="{{ url_for('cart_add') }}">
-      <input type="hidden" name="csrf" value="{{ csrf }}">
-      <div class="sizes" role="radiogroup" aria-label="الحجم">
-        {% for v in p.variants %}
-        {% set out = v.stock is not none and v.stock <= 0 %}
-        <input type="radio" name="variant" id="v{{ v.id }}" value="{{ v.id }}" {% if out %}disabled{% endif %}>
-        <label for="v{{ v.id }}"><b>{{ v.label }}</b><span class="price">{{ v.price|omr }}<small>ر.ع</small></span>{% if out %}<small class="muted">نفدت الكمية</small>{% endif %}</label>
-        {% endfor %}
-      </div>
-      <div class="buy-row">
-        <div class="qty">
-          <button type="button" data-step="-1" aria-label="أنقص">−</button>
-          <input type="number" name="qty" id="qty" value="1" min="1" max="50" aria-label="الكمية">
-          <button type="button" data-step="1" aria-label="زِد">+</button>
+<div class="wrap">
+  <div class="crumbs"><a href="{{ url_for('home') }}">الرئيسية</a> / <a href="{{ url_for('home') }}#shop">المتجر</a> / {{ p.name }}</div>
+  <div class="product-page">
+    <div class="pgallery">
+      <div class="main">{% if gallery %}<img src="{{ gallery[0][0] }}" alt="{{ gallery[0][1] }}">{% else %}{{ jar() }}{% endif %}</div>
+      {% if gallery|length > 1 %}
+      <div class="thumbs">{% for src, cap in gallery %}<button type="button" class="{{ 'on' if loop.first }}" data-src="{{ src }}" data-alt="{{ cap }}" aria-label="{{ cap }}"><img src="{{ src }}" alt=""></button>{% endfor %}</div>
+      {% endif %}
+    </div>
+    <div data-mbar-after>
+      <span class="kicker" style="color:var(--gold-deep)">من أرض عُمان</span>
+      <h1 style="margin-top:8px">{{ p.name }}</h1>
+      {% if p.tagline %}<p class="tag-line">{{ p.tagline }}</p>{% endif %}
+      <span class="rating-free">{{ icon('shield') }} أصلي ١٠٠٪</span>
+      {% if p.description %}<p class="desc">{{ p.description }}</p>{% endif %}
+      <form method="post" action="{{ url_for('cart_add') }}" data-ajax="add" id="buy">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <div class="sizes" role="radiogroup" aria-label="اختر الحجم">
+          {% for v in p.variants %}{% set out = v.stock is not none and v.stock <= 0 %}
+          <input type="radio" name="variant" id="v{{ v.id }}" value="{{ v.id }}" {% if out %}disabled{% endif %}>
+          <label for="v{{ v.id }}"><span class="seal">{{ (v.price // 1000) if v.price % 1000 == 0 else v.price|omr }}<small>ريال</small></span><span><b>{{ v.label }}</b><small>{% if out %}نفدت الكمية{% else %}{{ v.price|omr }} ر.ع{% endif %}</small></span></label>
+          {% endfor %}
         </div>
-        <button class="btn btn-gold" type="submit" name="go" value="cart">اطلب الآن</button>
-        <button class="btn btn-line" type="submit">أضف للسلة</button>
+        <div class="buy-row">
+          <div class="qty"><button type="button" data-step="-1" aria-label="أنقص">−</button><input type="number" name="qty" value="1" min="1" max="50" aria-label="الكمية"><button type="button" data-step="1" aria-label="زِد">+</button></div>
+          <button class="btn btn-gold btn-lg" type="submit">{{ icon('bag') }}أضف للسلة</button>
+          <button class="btn btn-line btn-lg" type="submit" name="go" value="checkout">اطلب الحين</button>
+        </div>
+      </form>
+      <div class="assure">
+        <span>{{ icon('truck') }}التوصيل لكل المحافظات</span>
+        <span>{{ icon('bank') }}الدفع بالتحويل البنكي</span>
+        <span>{{ icon('wa') }}تأكيد على واتساب</span>
       </div>
-    </form>
-    <div class="assure">
-      <span>{{ icon('truck') }}التوصيل لكل محافظات السلطنة{% if free_over %}، ومجاناً فوق {{ free_over|omr }} ر.ع{% endif %}</span>
-      <span>{{ icon('bank') }}الدفع بالتحويل البنكي بعد تأكيد الطلب</span>
-      <span>{{ icon('wa') }}أرسل الإيصال على واتساب برسالة جاهزة</span>
+      <div class="details">
+        <details open><summary>المميزات</summary><p>طعم لذيذ · جودة عالية · مناسب لجميع الأكلات · أصلي ١٠٠٪ من أرض عُمان.</p></details>
+        <details><summary>التوصيل</summary><p>نوصل لكل محافظات السلطنة، والرسوم تطلع لك حسب محافظتك قبل تأكيد الطلب{% if free_over %}، ومجاناً للطلبات فوق {{ free_over|omr }} ر.ع{% endif %}.</p></details>
+        <details><summary>الدفع</summary><p>بالتحويل البنكي بعد تأكيد الطلب، وترسل صورة الإيصال على واتساب برسالة جاهزة فيها رقم طلبك.</p></details>
+      </div>
     </div>
   </div>
 </div>
-{% endblock %}
-{% block scripts %}
-<script>
-  // اختيار الحجم الأوسط افتراضياً (الأكثر طلباً عادة)، والأول إن لم يتوفر
-  (function () {
-    var opts = [].slice.call(document.querySelectorAll('.sizes input:not(:disabled)'));
-    if (opts.length) (opts[Math.floor((opts.length - 1) / 2)] || opts[0]).checked = true;
-    var q = document.getElementById('qty');
-    document.querySelectorAll('[data-step]').forEach(function (b) {
-      b.addEventListener('click', function () { q.value = Math.max(1, Math.min(50, (+q.value || 1) + (+b.dataset.step))); });
-    });
-  })();
-</script>
+<div class="mbar"><div><b>{{ p.name }}</b><span>من {{ p.from_price|omr }} ر.ع</span></div><a class="btn btn-gold" href="#buy">اختر الحجم</a></div>
 {% endblock %}

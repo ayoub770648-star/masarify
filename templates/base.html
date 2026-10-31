@@ -1,52 +1,75 @@
-{% from "_macros.html" import icon with context %}
+{% from "_macros.html" import icon, logo_mark with context %}
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{% block title %}{{ store_name }} | سمن عُماني أصلي{% endblock %}</title>
-<meta name="description" content="{{ store_name }}: سمن عُماني أصلي من أرض عُمان، اطلب أونلاين وادفع بالتحويل البنكي، والتوصيل لكل محافظات السلطنة.">
-<meta name="theme-color" content="#1d4a36">
+<meta name="description" content="{{ store_name }}: سمن عُماني أصلي ١٠٠٪ من أرض عُمان. اطلب أونلاين، ادفع بالتحويل البنكي، والتوصيل لكل محافظات السلطنة.">
+<meta name="theme-color" content="#1c1109">
+<meta property="og:title" content="{{ store_name }} | سمن عُماني أصلي">
+<meta property="og:description" content="ميه بالميه ولذيذ، والريحة خيال. اطلب الحين والتوصيل لكل المحافظات.">
+<meta property="og:image" content="{{ url_for('static', filename='img/ghee-bottles.jpg', _external=True) }}">
 <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Readex+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+<script>document.documentElement.classList.add('js')</script>
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
 {% block header %}
-<div class="topnote">التوصيل لكل محافظات السلطنة{% if free_over %} · <b>توصيل مجاني للطلبات فوق {{ free_over|omr }} ر.ع</b>{% endif %}</div>
 <header class="site">
   <div class="wrap">
-    <a class="logo" href="{{ url_for('home') }}"><div><b>{{ store_name }}</b><span>سمن عُماني أصلي</span></div></a>
+    <a class="logo" href="{{ url_for('home') }}">{{ logo_mark() }}<div><b>{{ store_name }}</b><span>سمن عُماني أصلي</span></div></a>
     <nav class="main" aria-label="القائمة">
-      <a href="{{ url_for('home') }}#products">المنتجات</a>
+      <a href="{{ url_for('home') }}#shop">المتجر</a>
+      <a href="{{ url_for('home') }}#story">قصتنا</a>
       <a href="{{ url_for('home') }}#how">طريقة الطلب</a>
       <a href="{{ url_for('track') }}">تتبّع طلبك</a>
-      <a class="cart" href="{{ url_for('cart') }}">{{ icon('bag') }}<span>السلة</span>{% if cart_count %}<span class="badge-count">{{ cart_count }}</span>{% endif %}</a>
+      <a class="cart" href="{{ url_for('cart') }}" data-open-cart="{{ url_for('cart_drawer') }}">{{ icon('bag') }}<span>السلة</span><span class="badge-count" data-cart-count {% if not cart_count %}hidden{% endif %}>{{ cart_count }}</span></a>
     </nav>
   </div>
 </header>
 {% endblock %}
 <main>
   {% block flashes %}
-  {% with msgs = get_flashed_messages() %}{% if msgs %}<div class="wrap" style="padding-top:18px">{% for m in msgs %}<div class="flash" role="status">{{ m }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+  {% with msgs = get_flashed_messages() %}{% if msgs %}<div class="wrap" style="padding-top:22px">{% for m in msgs %}<div class="flash" role="status">{{ m }}</div>{% endfor %}</div>{% endif %}{% endwith %}
   {% endblock %}
   {% block content %}{% endblock %}
 </main>
 {% block footer %}
 <footer class="site">
   <div class="wrap">
-    <a class="logo" href="{{ url_for('home') }}"><div><b>{{ store_name }}</b><span>سمن عُماني أصلي</span></div></a>
-    <div>
-      <a href="{{ url_for('home') }}#products">المنتجات</a>
-      <a href="{{ url_for('track') }}">تتبّع طلبك</a>
-      <a href="{{ url_for('cart') }}">السلة</a>
+    <div class="cols">
+      <div>
+        <a class="logo" href="{{ url_for('home') }}">{{ logo_mark() }}<div><b>{{ store_name }}</b><span>سمن عُماني أصلي</span></div></a>
+        <p>سمن عُماني أصلي ١٠٠٪ من أرض عُمان. ميه بالميه ولذيذ، والريحة خيال.</p>
+      </div>
+      <div>
+        <h4>المتجر</h4>
+        <a href="{{ url_for('home') }}#shop">المنتجات</a>
+        <a href="{{ url_for('home') }}#how">طريقة الطلب</a>
+        <a href="{{ url_for('cart') }}">السلة</a>
+      </div>
+      <div>
+        <h4>خدمة العملاء</h4>
+        <a href="{{ url_for('track') }}">تتبّع طلبك</a>
+        <a href="{{ url_for('home') }}#faq">الأسئلة المتكررة</a>
+        {% if store_wa %}<a href="https://wa.me/{{ store_wa }}" target="_blank" rel="noopener">واتساب المتجر</a>{% endif %}
+      </div>
     </div>
-    <small>© {{ store_name }} · سلطنة عُمان</small>
+    <div class="bottom"><span>© {{ store_name }} · سلطنة عُمان</span><span>الدفع بالتحويل البنكي · التوصيل لكل المحافظات</span></div>
   </div>
 </footer>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="السلة" aria-hidden="true">
+  <header><h2>سلتك</h2><button type="button" class="close" data-close-cart aria-label="إغلاق">×</button></header>
+  <div class="drawer-body">{% set _cart = cart_lines() %}{% with lines=_cart[0], subtotal=_cart[1] %}{% include "_drawer.html" %}{% endwith %}</div>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite">{{ icon('check') }}<span></span></div>
 {% endblock %}
+<script src="{{ url_for('static', filename='app.js') }}?v=5" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
