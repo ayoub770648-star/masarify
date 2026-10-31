@@ -932,3 +932,143 @@ body.glass .pay-way { background: rgba(255,255,255,.07); border-color: var(--g-l
 .pay-way .big-num { font-size: 1.5rem; letter-spacing: .06em; color: var(--ink); }
 body.glass .pay-way .big-num { color: #fff; }
 .pw-tag { position: absolute; top: 14px; inset-inline-end: 14px; font-size: .75rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; background: var(--green); color: #fff; }
+
+/* ======================================================================
+   نموذج ٢٢ «لؤلؤ»: زجاج فاتح فوق صورة المطبخ بلون لؤلؤي، نص بني داكن،
+   برونزي ذهبي للأزرار والأسعار، وأحمر الختم كما هو
+   ====================================================================== */
+body.glass.pearl {
+  --p-ink: #23201b; --p-mute: rgba(35, 32, 27, .7); --p-acc: #6b5a3a; --p-acc-2: #8a7550; --p-seal: #a3202a;
+  --g-bg: rgba(255, 255, 255, .5); --g-bg-2: rgba(255, 255, 255, .62); --g-line: rgba(255, 255, 255, .8);
+  --g-hi: inset 0 1px 0 rgba(255, 255, 255, .95), inset 0 -1px 0 rgba(107, 90, 58, .06);
+  --g-text: var(--p-ink); --g-mute: var(--p-mute);
+  --g-shadow: 0 24px 50px -30px rgba(70, 55, 30, .35);
+  --gold-2: var(--p-acc); --gold: var(--p-acc);
+  --gold-text: linear-gradient(180deg, #8a7550 0%, #6b5a3a 55%, #4a3d26 100%);
+  background: #efebe5; color: var(--p-ink); color-scheme: light;
+}
+body.glass.pearl .glass-bg { background-image: url("img/pearl-bg.webp"); }
+body.glass.pearl .glass-bg::after { background: radial-gradient(120% 90% at 50% 0%, rgba(255, 255, 255, .15), rgba(239, 235, 229, .35) 70%); }
+@media (max-width: 760px) { body.glass.pearl .glass-bg { background-image: url("img/pearl-bg-m.webp"); } }
+body.glass.pearl ::selection { background: #6b5a3a; color: #fff; }
+
+/* العناوين والنصوص */
+body.glass.pearl :is(h1, h2, h3, .hero h1, .cta-band h2, .story .paper-card h2, .why-card h3, .seal-card .txt b, footer.site .foot-title, .b3-sizes button b) { color: var(--p-ink); }
+body.glass.pearl .hero h1 em, body.glass.pearl .shimmer { background: linear-gradient(100deg, #4a3d26 0%, #a08860 25%, #6b5a3a 50%, #4a3d26 75%, #a08860 100%) 0 0 / 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; }
+body.glass.pearl :is(.lede, .hero .lede, .story .paper-card p) { color: rgba(35, 32, 27, .82); }
+body.glass.pearl .lede b { color: var(--p-acc); }
+body.glass.pearl :is(.seal-card .txt span, footer.site, footer.site a, footer.site p, footer.site .bottom) { color: var(--p-mute); }
+body.glass.pearl footer.site a:hover { color: var(--p-acc); }
+body.glass.pearl .logo b { background: var(--gold-text); -webkit-background-clip: text; background-clip: text; color: transparent; }
+body.glass.pearl .logo span { color: var(--p-mute); }
+body.glass.pearl nav.main a:not(.cart) { color: var(--p-ink); }
+body.glass.pearl nav.main a:not(.cart):hover { color: var(--p-acc); }
+body.glass.pearl :where(a:not(.btn):not(.logo):not(.seal-card):not(.product-card)) { color: var(--p-acc); }
+
+/* الأزرار: برونزي بنص أبيض */
+body.glass.pearl .btn-gold, body.glass.pearl nav.main .cart {
+  color: #fff !important; background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,.35) 50%, transparent 65%) -150% 0/250% 100% no-repeat, linear-gradient(180deg, #8a7550, #6b5a3a 55%, #54462c);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 12px 28px -14px rgba(74, 61, 38, .8); }
+body.glass.pearl .btn-gold:hover { background-position: 150% 0, 0 0; }
+body.glass.pearl nav.main .cart span { color: #fff !important; }
+body.glass.pearl nav.main .cart .badge-count { background: #fff; color: var(--p-acc) !important; }
+body.glass.pearl .btn-line { color: var(--p-ink); background: rgba(255,255,255,.45); box-shadow: inset 0 0 0 1px rgba(107,90,58,.35); }
+body.glass.pearl .btn-line:hover { color: var(--p-acc); box-shadow: inset 0 0 0 1px var(--p-acc); }
+body.glass.pearl .btn-green { background: #1f5a37; color: #fff; }
+
+/* الحقول */
+body.glass.pearl :is(input[type=text], input[type=tel], input[type=password], input[type=number], select, textarea) { background: rgba(255,255,255,.7); color: var(--p-ink); border-color: rgba(107,90,58,.25); }
+body.glass.pearl input::placeholder, body.glass.pearl textarea::placeholder { color: rgba(35,32,27,.4); }
+body.glass.pearl select option { background: #fff; color: var(--p-ink); }
+body.glass.pearl :is(input, select, textarea):focus { border-color: var(--p-acc); box-shadow: 0 0 0 4px rgba(107,90,58,.15); }
+body.glass.pearl .qty { background: rgba(255,255,255,.6); border-color: rgba(107,90,58,.25); }
+body.glass.pearl .qty button, body.glass.pearl .qty input { color: var(--p-ink); }
+body.glass.pearl .qty button:hover { background: rgba(107,90,58,.08); }
+
+/* البطاقات الصغيرة والأحجام */
+body.glass.pearl .sizes input:checked + label { border-color: var(--p-acc); background: rgba(107,90,58,.1); box-shadow: 0 0 0 4px rgba(107,90,58,.12); }
+body.glass.pearl .sizes label::after { border-color: rgba(107,90,58,.35); }
+body.glass.pearl .sizes input:checked + label::after { background: radial-gradient(circle, var(--p-acc) 45%, transparent 50%); border-color: var(--p-acc); }
+body.glass.pearl .assure svg, body.glass.pearl .why-card svg { color: var(--p-acc); }
+body.glass.pearl .chip { background: rgba(255,255,255,.55); color: var(--p-mute); border-color: rgba(107,90,58,.2); }
+body.glass.pearl .why-card .big { background: var(--gold-text); -webkit-background-clip: text; background-clip: text; color: transparent; }
+body.glass.pearl .why-card::before { background: radial-gradient(closest-side, rgba(107,90,58,.14), transparent); }
+body.glass.pearl .step::before { background: rgba(255,255,255,.7); color: var(--p-acc); border-color: var(--p-acc); box-shadow: 0 0 0 6px rgba(255,255,255,.35), 0 0 20px -8px rgba(107,90,58,.5); }
+body.glass.pearl .steps::before { background: rgba(107,90,58,.25); }
+body.glass.pearl .marquee { color: var(--p-acc); }
+body.glass.pearl .faq summary::after { background: rgba(255,255,255,.6); border-color: rgba(107,90,58,.3); color: var(--p-acc); }
+body.glass.pearl .faq details[open] summary::after { background: var(--p-acc); color: #fff; border-color: var(--p-acc); }
+body.glass.pearl :is(.showcase-photo figure, .pgallery .main, .thumb) { background: rgba(255,255,255,.4); }
+body.glass.pearl .ribbon-tag, body.glass.pearl .hero-visual .tag { background: rgba(31,90,55,.88); color: #fff; }
+body.glass.pearl .hero-visual .badge-round { background: rgba(255,255,255,.55); color: var(--p-ink); border-color: rgba(255,255,255,.9); }
+body.glass.pearl .hero-visual .badge-round::before { border-color: rgba(107,90,58,.45); }
+body.glass.pearl .hero-visual .badge-round b { color: var(--p-seal); }
+body.glass.pearl .hero-visual .badge-round small { color: var(--p-mute); }
+body.glass.pearl .arch-photo { background: linear-gradient(160deg, rgba(255,255,255,.75), rgba(255,255,255,.35) 40%, rgba(255,255,255,.55)); border-color: rgba(255,255,255,.95); }
+body.glass.pearl .kicker::before { background: linear-gradient(270deg, transparent, var(--p-acc)); }
+
+/* السلة الجانبية والشريط العائم */
+body.glass.pearl .drawer { background: rgba(250, 247, 242, .82); color: var(--p-ink); border-inline-start-color: rgba(255,255,255,.9); }
+body.glass.pearl .drawer footer { background: rgba(255,255,255,.5); }
+body.glass.pearl .drawer .close { background: rgba(255,255,255,.7); color: var(--p-ink); border-color: rgba(107,90,58,.2); }
+body.glass.pearl .drawer .empty b { color: var(--p-ink) !important; }
+body.glass.pearl .scrim { background: rgba(60, 50, 35, .25); }
+body.glass.pearl .dock { background: rgba(255,255,255,.55); border-color: rgba(255,255,255,.9); box-shadow: inset 0 1px 0 #fff, 0 20px 44px -18px rgba(70,55,30,.45); }
+body.glass.pearl .dock a { color: rgba(35,32,27,.75) !important; }
+body.glass.pearl .dock a:hover { background: rgba(107,90,58,.1); color: var(--p-ink) !important; }
+body.glass.pearl .dock a.on { background: var(--p-acc); color: #fff !important; }
+body.glass.pearl .dock .dock-wa svg { color: #1f9d55; }
+body.glass.pearl .toast { background: var(--p-ink); color: #fff; }
+body.glass.pearl .toast svg { color: #e9d9b0; }
+
+/* صفحة الطلب والإيصال والتتبع */
+body.glass.pearl .amount-box { background: rgba(255,255,255,.55); color: var(--p-ink); border-color: rgba(255,255,255,.9); }
+body.glass.pearl .amount-box .price { color: var(--p-seal); }
+body.glass.pearl .amount-box .price small { color: var(--p-mute); }
+body.glass.pearl .pay-way .big-num, body.glass.pearl .code { color: var(--p-ink); }
+body.glass.pearl .code { background: rgba(255,255,255,.6); border-color: var(--p-acc); }
+body.glass.pearl .copy { background: rgba(255,255,255,.7); border-color: rgba(107,90,58,.3); color: var(--p-acc); }
+body.glass.pearl .copy.ok { background: rgba(31,90,55,.12); color: #1f5a37; }
+body.glass.pearl .ref-note { background: rgba(255,255,255,.5); border-color: var(--p-acc); }
+body.glass.pearl .ref-note b.num { color: var(--p-ink); }
+body.glass.pearl .drop { background: rgba(255,255,255,.45); border-color: rgba(107,90,58,.3); }
+body.glass.pearl .drop:hover, body.glass.pearl .drop.has-file { background: rgba(107,90,58,.08); border-color: var(--p-acc); }
+body.glass.pearl .drop-ico { background: rgba(107,90,58,.1); color: var(--p-acc); }
+body.glass.pearl .receipt-ok { background: rgba(31,90,55,.1); border-color: rgba(31,90,55,.3); }
+body.glass.pearl .receipt-ok b { color: #1f5a37; }
+body.glass.pearl .rating-free { background: rgba(31,90,55,.12); color: #1f5a37; border-color: rgba(31,90,55,.25); }
+body.glass.pearl .timeline .pin { background: rgba(255,255,255,.7); border-color: rgba(107,90,58,.3); }
+body.glass.pearl .timeline li::before { border-color: rgba(107,90,58,.2); }
+body.glass.pearl .timeline li.done .pin { background: #1f5a37; border-color: #1f5a37; }
+body.glass.pearl .timeline li.now .pin { border-color: var(--p-acc); box-shadow: 0 0 0 5px rgba(107,90,58,.15); }
+body.glass.pearl .timeline li.now .pin::after { background: var(--p-acc); }
+body.glass.pearl .done-hero .seal-ok { box-shadow: 0 0 0 10px rgba(255,255,255,.6), 0 20px 40px -14px rgba(31,90,55,.5); }
+body.glass.pearl .flash { background: rgba(255,255,255,.65); color: #5a3d0c; border-color: rgba(107,90,58,.3); }
+body.glass.pearl .notice, body.glass.pearl .setup { background: rgba(255,255,255,.55); color: #5a3d0c; }
+body.glass.pearl :is(.line, .bank-row, td, th, .details details, .sum .total) { border-color: rgba(107,90,58,.15); }
+body.glass.pearl .progress { background: rgba(107,90,58,.12); }
+body.glass.pearl .progress span { background: linear-gradient(90deg, #a08860, #6b5a3a); }
+
+/* لوحة التحكم */
+body.glass.pearl.admin .admin-bar nav a { color: var(--p-ink); }
+body.glass.pearl.admin .admin-bar nav a.on { background: var(--p-acc); color: #fff; }
+body.glass.pearl.admin .tabs a { color: var(--p-ink); }
+body.glass.pearl.admin .tabs a.on { background: var(--p-acc); color: #fff; }
+body.glass.pearl.admin .tabs a i { background: rgba(107,90,58,.12); }
+body.glass.pearl.admin tr.click:hover td { background: rgba(255,255,255,.4); }
+body.glass.pearl .col-chart .grid { stroke: rgba(107,90,58,.15); }
+body.glass.pearl .col-chart .base { stroke: rgba(107,90,58,.4); }
+body.glass.pearl .col-chart .tick { fill: var(--p-mute); }
+body.glass.pearl .col-chart .col path, body.glass.pearl .hbar .track i { fill: #8a7550; background: #8a7550; }
+body.glass.pearl .col-chart .col.on path { fill: #4a3d26; }
+body.glass.pearl .hbar .track { background: rgba(107,90,58,.1); }
+body.glass.pearl .chart-tip { background: var(--p-ink); color: #fff; }
+body.glass.pearl .receipt-flag { color: #8a6100; }
+body.glass.pearl .dup-alert { background: rgba(194,38,63,.1); color: #8a1630; border-color: rgba(194,38,63,.35); }
+body.glass.pearl .dup-alert a { color: #8a1630; }
+body.glass.pearl .admin-bar .logo span { color: var(--p-mute); }
+body.glass.pearl footer.site > .wrap { background: var(--g-bg); box-shadow: var(--g-hi), var(--g-shadow); }
+body.glass.pearl footer.site::before { opacity: .25; }
+body.glass.pearl footer.site .bottom { border-color: rgba(107,90,58,.18); }
+body.glass.pearl .cta-band p { color: var(--p-mute); }
+body.glass.pearl .btn-wa { background: #1f9d55; color: #fff; box-shadow: 0 14px 30px -16px #1f9d55; }

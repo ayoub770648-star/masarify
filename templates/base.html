@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{% block title %}{{ store_name }} | سمن عُماني أصلي{% endblock %}</title>
 <meta name="description" content="{{ store_name }}: سمن عُماني أصلي ١٠٠٪ من أرض عُمان. اطلب أونلاين، ادفع بالتحويل البنكي، والتوصيل لكل محافظات السلطنة.">
-<meta name="theme-color" content="#1c1109">
+<meta name="theme-color" content="#efebe5">
 <meta property="og:title" content="{{ store_name }} | سمن عُماني أصلي">
 <meta property="og:description" content="ميه بالميه ولذيذ، والريحة خيال. اطلب الحين والتوصيل لكل المحافظات.">
 <meta property="og:image" content="{{ url_for('static', filename='img/hero-kitchen.webp', _external=True) }}">
@@ -14,10 +14,10 @@
 <link rel="preload" href="{{ url_for('static', filename='fonts/ReadexPro-arabic.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="{{ url_for('static', filename='fonts/ArefRuqaa-arabic.woff2') }}" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="{{ url_for('static', filename='fonts/fonts.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=23">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=24">
 <script>document.documentElement.classList.add('js')</script>
 </head>
-<body class="glass {% block body_class %}{% endblock %}">
+<body class="glass pearl {% block body_class %}{% endblock %}">
 <div class="glass-bg" aria-hidden="true"></div>
 {% block header %}
 <header class="site">
