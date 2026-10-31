@@ -878,3 +878,24 @@ body.glass .receipt-flag.dup { color: #ff9aab; }
 body.glass .as-table summary, body.glass .re-upload summary { color: var(--g-mute); }
 body.glass .fees label { color: var(--g-text); }
 body.glass .lede, body.glass .hero .lede { color: rgba(255, 248, 235, .92); }
+
+/* أيقونات «+» في الأسئلة وتفاصيل المنتج: دائرة زجاجية وعلامة بيضاء */
+body.glass .faq summary::after { content: "+"; width: 34px; height: 34px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.35);
+  color: #fff; font-size: 1.3rem; font-weight: 400; box-shadow: inset 0 1px 0 rgba(255,255,255,.35); transition: transform .35s var(--ease), background .2s; }
+body.glass .faq summary:hover::after { background: rgba(255,255,255,.2); }
+body.glass .faq details[open] summary::after { transform: rotate(45deg); background: rgba(227,168,60,.3); border-color: rgba(255,210,122,.6); }
+body.glass .details summary::after { color: #fff; }
+/* عناصر صغيرة باقية بألوان الثيم الفاتح القديم */
+body.glass .copy { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.3); color: #fff; }
+body.glass .copy.ok { background: rgba(74,222,128,.25); border-color: rgba(74,222,128,.5); }
+body.glass .rating-free { background: rgba(31,90,55,.45); color: #c9f2d8; border: 1px solid rgba(255,255,255,.2); }
+body.glass .code { background: rgba(255,255,255,.12); border-color: rgba(255,210,122,.6); color: #fff; }
+body.glass .amount-box { background: rgba(20,12,5,.45); border: 1px solid var(--g-line); }
+body.glass .drop-ico { background: rgba(255,255,255,.12); color: var(--gold-2); }
+body.glass .drop:hover, body.glass .drop.has-file { background: rgba(227,168,60,.14); border-color: var(--gold-2); }
+body.glass .receipt-ok { background: rgba(31,90,55,.35); border-color: rgba(120,220,160,.4); }
+body.glass .receipt-ok b { color: #c9f2d8; }
+body.glass .receipt-ok span { color: var(--g-mute); }
+body.glass .timeline .pin { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.35); }
+body.glass .timeline li::before { border-color: rgba(255,255,255,.2); }
+body.glass .done-hero .seal-ok { box-shadow: 0 0 0 10px rgba(255,255,255,.12), 0 20px 40px -14px rgba(0,0,0,.6); }
