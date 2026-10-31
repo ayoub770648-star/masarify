@@ -865,3 +865,16 @@ body.glass .hero-visual .badge-round small { color: rgba(255,244,225,.85); }
 body.glass .hero-visual .tag { bottom: 7%; inset-inline-start: 4px; background: rgba(31,90,55,.75); border: 1px solid rgba(255,255,255,.3); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 @media (max-width: 960px) { body.glass .hero.photo .wrap { padding-top: 110px; } body.glass .arch-photo { width: min(320px, 84%); } body.glass .hero-visual .badge-round { width: 78px; height: 78px; } }
 body.glass .arch-photo .photo img { object-position: center 45%; }
+
+/* وضوح النصوص فوق الزجاج: كل نص غامق صار فاتح، والنص الثانوي أوضح */
+body.glass { --g-mute: rgba(255, 244, 225, .86); }
+body.glass .kicker, body.glass .kicker[style] { color: var(--gold-2) !important; }
+body.glass .kicker::before { background: linear-gradient(270deg, transparent, var(--gold-2)); }
+body.glass .story .paper-card p { color: rgba(255, 248, 235, .92); font-size: 1.1rem; }
+body.glass .drawer .empty, body.glass .drawer .empty p { color: var(--g-mute); }
+body.glass .drawer .empty b { color: var(--g-text) !important; }
+body.glass .receipt-flag { color: var(--gold-2); }
+body.glass .receipt-flag.dup { color: #ff9aab; }
+body.glass .as-table summary, body.glass .re-upload summary { color: var(--g-mute); }
+body.glass .fees label { color: var(--g-text); }
+body.glass .lede, body.glass .hero .lede { color: rgba(255, 248, 235, .92); }
