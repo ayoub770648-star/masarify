@@ -31,8 +31,8 @@ ALLOWED_IMAGES = {"jpg", "jpeg", "png", "webp"}
 ALLOWED_RECEIPTS = ALLOWED_IMAGES | {"heic", "pdf"}
 # صور إضافية للمعرض: لقطات مقرّبة من صورة المنتج الأصلية
 # صور إضافية لمعرض المنتج الأول (السمن): صورة الغراش الأربع ولقطات مقرّبة
-EXTRA_GALLERY = [("img/hero-group.webp", "الغراش"), ("img/close-label.webp", "الملصق"),
-                 ("img/close-smoke.webp", "دخان اللبان")]
+EXTRA_GALLERY = [("img/hero-kitchen.webp", "من المطبخ العماني"), ("img/hero-group.webp", "الغراش"),
+                 ("img/close-tray.webp", "السمن على الصينية"), ("img/close-label.webp", "الملصق")]
 
 # حالات الطلب بالترتيب
 PENDING = "بانتظار التحويل"
