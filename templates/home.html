@@ -91,6 +91,32 @@
 </section>
 {% endif %}
 
+<section class="block dark crenel-top bottle3d-sec" id="bottle">
+  <div class="wrap b3-grid">
+    <div class="b3-stage">
+      <img class="b3-fallback" src="{{ url_for('static', filename='img/product-single.webp') }}" alt="غرشة سمن عُماني أصلي" loading="lazy">
+      <canvas id="bottle3d" aria-label="غرشة سمن ثلاثية الأبعاد، اسحب لتدويرها"></canvas>
+      <span class="b3-hint">↻ اسحب لتدوير الغرشة</span>
+    </div>
+    <div class="b3-copy">
+      <div class="sec-head reveal"><small>بتقنية ثلاثية الأبعاد</small><h2>غرشتك من كل زاوية</h2><p>دوّرها بإصبعك وشوف لون السمن الذهبي من خلف البلاستيك الشفاف، والملصق اللي يضمن لك إنه أصلي من أرض عُمان.</p></div>
+      {% if p %}
+      <div class="b3-sizes reveal d1" role="group" aria-label="الحجم">
+        {% for v in p.variants[:2] %}
+        <button type="button" data-b3-size="{{ '1' if loop.first else '0.78' }}" aria-pressed="{{ 'true' if loop.first else 'false' }}"><b>{{ v.label }}</b><span class="price">{{ v.price|omr }}<small>ر.ع</small></span></button>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <ul class="b3-points reveal d2">
+        <li><span>◉</span>بلاستيك شفاف يبيّن لون السمن الحقيقي</li>
+        <li><span>◉</span>غطاء محكم يحفظ الريحة</li>
+        <li><span>◉</span>ملصق «أصلي ١٠٠٪ · من أرض عُمان»</li>
+      </ul>
+      <a class="btn btn-gold btn-lg reveal d3" href="#shop">اطلبها الحين</a>
+    </div>
+  </div>
+</section>
+
 <section class="block dark crenel-top">
   <div class="wrap">
     <div class="sec-head center reveal"><small>ليش سمن {{ store_name }}؟</small><h2>الأصلي يبان من ريحته</h2><div class="ornament"></div></div>
@@ -166,4 +192,22 @@
 {% if p and p.variants %}
 <div class="mbar"><div><b>{{ p.name }}</b><span>من {{ p.from_price|omr }} ر.ع</span></div><a class="btn btn-gold" href="#shop">اطلب الحين</a></div>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script type="importmap">{"imports": {"three": "{{ url_for('static', filename='vendor/three/three.module.min.js') }}", "three/addons/": "{{ url_for('static', filename='vendor/three/addons/') }}"}}</script>
+<script>
+  // يحمّل الغرشة ثلاثية الأبعاد فقط لما يقترب قسمها، وإذا الجهاز ما يدعم WebGL تبقى الصورة
+  (function () {
+    var stage = document.querySelector('.b3-stage');
+    if (!stage) return;
+    var gl = (function () { try { var c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; } })();
+    if (!gl || !('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function (e) {
+      if (!e[0].isIntersecting) return; io.disconnect();
+      var s = document.createElement('script'); s.type = 'module'; s.src = "{{ url_for('static', filename='bottle3d.js') }}?v=3"; document.body.appendChild(s);
+    }, { rootMargin: '400px 0px' });
+    io.observe(stage);
+  })();
+</script>
 {% endblock %}
