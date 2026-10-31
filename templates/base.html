@@ -4,21 +4,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>{% block title %}{{ store_name }} | سمن عماني بلدي{% endblock %}</title>
-<meta name="description" content="{{ store_name }}: سمن عماني بلدي، اطلب أونلاين وادفع بالتحويل البنكي، والتوصيل لكل محافظات السلطنة.">
+<title>{% block title %}{{ store_name }} | سمن عُماني أصلي{% endblock %}</title>
+<meta name="description" content="{{ store_name }}: سمن عُماني أصلي من أرض عُمان، اطلب أونلاين وادفع بالتحويل البنكي، والتوصيل لكل محافظات السلطنة.">
 <meta name="theme-color" content="#1d4a36">
 <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Readex+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=1">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=2">
 </head>
 <body>
 {% block header %}
 <div class="topnote">التوصيل لكل محافظات السلطنة{% if free_over %} · <b>توصيل مجاني للطلبات فوق {{ free_over|omr }} ر.ع</b>{% endif %}</div>
 <header class="site">
   <div class="wrap">
-    <a class="logo" href="{{ url_for('home') }}"><div><b>{{ store_name }}</b><span>سمن عماني بلدي</span></div></a>
+    <a class="logo" href="{{ url_for('home') }}"><div><b>{{ store_name }}</b><span>سمن عُماني أصلي</span></div></a>
     <nav class="main" aria-label="القائمة">
       <a href="{{ url_for('home') }}#products">المنتجات</a>
       <a href="{{ url_for('home') }}#how">طريقة الطلب</a>
@@ -37,7 +37,7 @@
 {% block footer %}
 <footer class="site">
   <div class="wrap">
-    <a class="logo" href="{{ url_for('home') }}"><div><b>{{ store_name }}</b><span>سمن عماني بلدي</span></div></a>
+    <a class="logo" href="{{ url_for('home') }}"><div><b>{{ store_name }}</b><span>سمن عُماني أصلي</span></div></a>
     <div>
       <a href="{{ url_for('home') }}#products">المنتجات</a>
       <a href="{{ url_for('track') }}">تتبّع طلبك</a>

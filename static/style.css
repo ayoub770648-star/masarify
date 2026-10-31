@@ -1,13 +1,15 @@
-/* أبو ميثه — هوية مستوحاة من السمن العماني: أخضر الجبل الأخضر، ذهبي السمن، وخط الرقعة */
+/* أبو ميثه — من إعلان المتجر: ورق كريمي، بني القهوة، أحمر وأخضر علم عُمان، وذهبي السمن */
 :root {
-  --paper: #fbfaf6;
-  --white: #ffffff;
-  --ink: #1c1912;
-  --text: #3d382d;
-  --muted: #6f6858;
-  --line: #e9e2d4;
-  --green: #1d4a36;
-  --green-2: #0f2c1f;
+  --paper: #f8f2e5;
+  --white: #fffdf8;
+  --ink: #3a2212;
+  --text: #4b3626;
+  --muted: #7d6a55;
+  --line: #e7d9bd;
+  --green: #1f5a37;
+  --green-2: #143d25;
+  --red: #a3202a;
+  --brown: #2b1a0f;
   --gold: #d8962a;
   --gold-2: #f2bd52;
   --gold-soft: #f8edd4;
@@ -29,13 +31,13 @@ p { margin: 0; }
 .wrap { max-width: 1140px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .muted { color: var(--muted); }
 .num { font-variant-numeric: tabular-nums; direction: ltr; unicode-bidi: isolate; }
-.price { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.price { font-weight: 700; color: var(--red); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .price small { font-weight: 500; color: var(--muted); font-size: .8em; margin-inline-start: 3px; }
 
 /* الشريط العلوي */
 .topnote { background: var(--green-2); color: #e9dcbf; font-size: .84rem; text-align: center; padding: 6px 16px; }
 .topnote b { color: var(--gold-2); font-weight: 600; }
-header.site { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: rgba(251, 250, 246, .92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+header.site { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: rgba(248, 242, 229, .92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 21; background: var(--paper); }
 header.site .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 10px; }
 .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
@@ -63,26 +65,30 @@ nav.main a.cart:hover { background: var(--green-2); }
 .btn svg { width: 20px; height: 20px; flex: none; }
 .link-btn { background: none; border: 0; color: var(--muted); cursor: pointer; font: inherit; padding: 4px; text-decoration: underline; }
 
-/* البطل */
-.hero { background: radial-gradient(900px 500px at 15% 0%, #2c6a4e 0%, transparent 60%), var(--green); color: #f3ead6; position: relative; overflow: hidden; }
-.hero::after { content: ""; position: absolute; inset: auto 0 0; height: 24px; background: var(--pattern) center/48px 24px repeat-x; opacity: .9; }
-.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 32px; align-items: center; padding-block: 56px 72px; }
-.hero .eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--gold-2); font-weight: 600; font-size: .92rem; }
-.hero .eyebrow::before { content: ""; width: 28px; height: 2px; background: var(--gold-2); }
-.hero h1 { font: 700 clamp(3rem, 7vw, 5.2rem)/1.2 var(--display); color: #fff; margin: 12px 0 14px; }
-.hero h1 em { font-style: normal; color: var(--gold-2); }
-.hero p.lede { font-size: 1.1rem; color: #d9cfb8; max-width: 44ch; }
-.hero .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-.hero .btn-line { background: transparent; color: #fff; border-color: rgba(255,255,255,.3); }
-.hero .btn-line:hover { border-color: var(--gold-2); }
-.facts { display: flex; flex-wrap: wrap; gap: 10px 26px; margin-top: 34px; font-size: .9rem; color: #d9cfb8; }
-.facts span { display: inline-flex; align-items: center; gap: 8px; }
-.facts svg { width: 18px; height: 18px; color: var(--gold-2); }
-.hero-art { position: relative; display: grid; place-items: center; min-height: 360px; }
-.hero-art .halo { position: absolute; width: 78%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(242,189,82,.35), rgba(242,189,82,0) 70%); }
-.hero-art .ring { position: absolute; width: 88%; aspect-ratio: 1; border-radius: 50%; border: 1px dashed rgba(242,189,82,.4); animation: spin 60s linear infinite; }
-.hero-art svg.jar { width: min(320px, 80%); position: relative; filter: drop-shadow(0 30px 40px rgba(0,0,0,.35)); }
-.hero-art img { width: min(360px, 85%); border-radius: 28px; position: relative; box-shadow: 0 30px 60px -20px rgba(0,0,0,.5); }
+/* البطل: خلفية خشبية دافئة، صورة الغراش الحقيقية، وبطاقة ورق مثل الإعلان */
+.hero { background: radial-gradient(800px 480px at 80% 10%, rgba(216,150,42,.28), transparent 60%), linear-gradient(160deg, #3b2414, var(--brown) 70%); color: #f3e6cc; position: relative; overflow: hidden; }
+.hero::after { content: ""; position: absolute; inset: auto 0 0; height: 24px; background: var(--pattern) center/48px 24px repeat-x; opacity: .8; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: center; padding-block: 48px 72px; }
+.paper { background: var(--paper); color: var(--ink); border-radius: 6px; padding: 34px 32px 30px; position: relative; box-shadow: 0 30px 60px -24px rgba(0,0,0,.6); transform: rotate(-1deg);
+  -webkit-mask: radial-gradient(6px at 50% 6px, #0000 98%, #000) 50% -6px / 18px 100% repeat-x; }
+.paper .flag { display: inline-block; width: 46px; height: 30px; vertical-align: middle; border-radius: 3px; box-shadow: 0 2px 6px rgba(0,0,0,.25); margin-inline-start: 6px; }
+.hero h1 { font: 700 clamp(2.8rem, 6vw, 4.6rem)/1.15 var(--display); color: var(--ink); margin: 0 0 6px; }
+.hero h1 em { font-style: normal; color: var(--red); }
+.hero p.lede { font-size: clamp(1.15rem, 2vw, 1.45rem); font-weight: 600; color: var(--ink); }
+.hero .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 22px; }
+.ribbon-prices { display: flex; flex-wrap: wrap; gap: 14px 22px; margin-top: 26px; transform: rotate(1deg); }
+.rp { display: grid; justify-items: center; gap: 8px; }
+.rp .ribbon { background: var(--green); color: #fff; font-weight: 700; font-size: .92rem; padding: 6px 16px; clip-path: polygon(4% 0, 100% 6%, 96% 100%, 0 92%); }
+.seal-price { width: 118px; height: 76px; border-radius: 50%; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 800; font-size: 1.7rem; box-shadow: inset 0 0 0 4px var(--red), inset 0 0 0 6px #fff4; outline: 2px dashed rgba(255,255,255,.8); outline-offset: -9px; }
+.seal-price small { font-size: .9rem; font-weight: 600; margin-inline-start: 4px; }
+.hero-photo { position: relative; display: grid; place-items: center; }
+.hero-photo img { width: min(440px, 100%); border-radius: 22px; box-shadow: 0 40px 70px -30px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.08); }
+.hero-photo .tag { position: absolute; bottom: 18px; inset-inline-start: 18px; background: var(--brown); color: #f3e6cc; border-radius: 999px; padding: 6px 16px; font-weight: 600; font-size: .92rem; box-shadow: 0 8px 20px -8px #000; }
+.perks { background: var(--white); border-bottom: 1px solid var(--line); }
+.perks .wrap { display: grid; grid-template-columns: repeat(3, 1fr); padding-block: 18px; }
+.perks div { display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; color: var(--ink); padding: 6px 10px; }
+.perks div + div { border-inline-start: 1px solid var(--line); }
+.perks svg { width: 24px; height: 24px; color: var(--red); }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* الأقسام */
@@ -99,7 +105,8 @@ section.block { padding-block: 72px; }
 .product-card .media { background: linear-gradient(160deg, var(--gold-soft), #fff6e3); aspect-ratio: 4/3; display: grid; place-items: center; position: relative; }
 .product-card .media::after { content: ""; position: absolute; inset: auto 0 0; height: 12px; background: var(--pattern) center/24px 12px repeat-x; opacity: .45; }
 .product-card .media svg.jar { width: 46%; }
-.product-card .media img { width: 100%; height: 100%; object-fit: cover; }
+.product-card .media { overflow: hidden; }
+.product-card .media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 35%; }
 .product-card .body { padding: 20px 22px 22px; display: grid; gap: 10px; }
 .product-card h3 { font-size: 1.3rem; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -283,7 +290,9 @@ tr.click:hover td { background: #fbf6ea; }
 
 @media (max-width: 900px) {
   .hero .wrap, .product-page, .grid-2 { grid-template-columns: 1fr; }
-  .hero-art { min-height: 260px; order: -1; }
+  .hero-photo { order: -1; }
+  .hero-photo img { width: min(320px, 80%); }
+  .paper { transform: none; padding: 26px 20px 24px; }
   .hero .wrap { padding-block: 32px 60px; gap: 8px; }
   .steps, .use-list { grid-template-columns: 1fr 1fr; }
   .product-page .media, .panel.sticky { position: static; }
@@ -292,9 +301,21 @@ tr.click:hover td { background: #fbf6ea; }
 }
 @media (max-width: 520px) {
   .steps, .use-list { grid-template-columns: 1fr; }
+  .perks .wrap { grid-template-columns: 1fr; gap: 4px; }
+  .perks div + div { border-inline-start: 0; }
+  .perks div { justify-content: flex-start; }
   .field-row { grid-template-columns: 1fr; }
   .variant-row { grid-template-columns: 1fr 1fr; }
   section.block { padding-block: 52px; }
   .logo b { font-size: 1.7rem; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* منتج واحد: بطاقة عرضية بدل بطاقة صغيرة في زاوية القسم */
+@media (min-width: 760px) {
+  .products:has(> .product-card:only-child) { grid-template-columns: 1fr; }
+  .product-card:only-child { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .product-card:only-child .media { aspect-ratio: auto; min-height: 340px; }
+  .product-card:only-child .body { align-content: center; padding: 32px 36px; gap: 14px; }
+  .product-card:only-child h3 { font: 700 2.2rem/1.3 var(--display); color: var(--green); }
+}

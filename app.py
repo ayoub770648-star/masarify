@@ -1,6 +1,7 @@
 import json
 import os
 import secrets
+import shutil
 import sqlite3
 import urllib.parse
 from datetime import datetime
@@ -106,15 +107,17 @@ def init_db():
     """)
     for k, v in DEFAULT_SETTINGS.items():
         conn.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (k, v))
-    # أول تشغيل: منتج السمن بثلاثة أحجام (الأسعار مبدئية وتتعدل من لوحة التحكم)
+    # أول تشغيل: السمن العماني بحجمين وأسعار إعلان المتجر، مع صورة الغراش الحقيقية
     if conn.execute("SELECT COUNT(*) FROM products").fetchone()[0] == 0:
+        image = "ghee-bottles.jpg"
+        shutil.copyfile(os.path.join(BASE_DIR, "static", "img", image), os.path.join(UPLOAD_DIR, image))
         pid = conn.execute(
-            "INSERT INTO products (name, tagline, description, sort) VALUES (?, ?, ?, 0)",
-            ("السمن العماني", "سمن بلدي من بيت أبو ميثه",
-             "سمن عماني بلدي يُحضَّر على دفعات صغيرة بالطريقة التقليدية، بلونه الذهبي ورائحته اللي تعرفها من بيوت عُمان. "
-             "مناسب للعيش واللقيمات والهريس والخبز العماني."),
+            "INSERT INTO products (name, tagline, description, image, sort) VALUES (?, ?, ?, ?, 0)",
+            ("سمن عُماني أصلي", "ميه بالميه ولذيذ، والريحة خيال",
+             "سمن عُماني أصلي ١٠٠٪ من أرض عُمان. طعم لذيذ وجودة عالية، ومناسب لجميع الأكلات: "
+             "العرسية والهريس واللقيمات والخبز والعيش.", image),
         ).lastrowid
-        for i, (label, price) in enumerate([("ربع كيلو", 3500), ("نص كيلو", 6500), ("كيلو", 12000)]):
+        for i, (label, price) in enumerate([("غرشة كبيرة (فيمتو أو تانج)", 5000), ("غرشة صغيرة", 3000)]):
             conn.execute("INSERT INTO variants (product_id, label, price, sort) VALUES (?, ?, ?, ?)", (pid, label, price, i))
     conn.commit()
     conn.close()
