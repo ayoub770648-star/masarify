@@ -3,7 +3,8 @@
 <div class="wrap page">
   {% if setup_missing %}<div class="setup">قبل ما تستقبل طلبات: أضف رقم واتساب المتجر وبيانات الحساب البنكي من <a href="{{ url_for('admin_settings') }}">الإعدادات</a>.</div>{% endif %}
   <div class="kpis">
-    <div class="kpi warn"><span>بانتظار التحويل</span><b>{{ counts['بانتظار التحويل'] }}</b></div>
+    <a class="kpi warn" href="{{ url_for('admin_orders', status='تم إرسال الإيصال') }}" style="text-decoration:none"><span>إيصالات تحتاج مراجعة</span><b>{{ counts['تم إرسال الإيصال'] }}</b></a>
+    <div class="kpi"><span>بانتظار التحويل</span><b>{{ counts['بانتظار التحويل'] }}</b></div>
     <div class="kpi"><span>تحتاج تجهيز</span><b>{{ counts['تم استلام التحويل'] + counts['قيد التجهيز'] }}</b></div>
     <div class="kpi"><span>طلبات اليوم</span><b>{{ stats.today }}</b></div>
     <div class="kpi"><span>المبيعات المؤكدة</span><b>{{ stats.sales|omr }} <small class="muted" style="font-size:.9rem">ر.ع</small></b></div>
@@ -28,7 +29,7 @@
           <td><b>{{ o.name }}</b><div class="muted num" style="font-size:.85rem">{{ o.phone }}</div></td>
           <td>{{ o.wilaya }}<div class="muted" style="font-size:.85rem">{{ o.governorate }}</div></td>
           <td class="price">{{ o.total|omr }}</td>
-          <td><span class="status s-{{ STATUS_KEY[o.status] }}">{{ o.status }}</span></td>
+          <td><span class="status s-{{ STATUS_KEY[o.status] }}">{{ o.status }}</span>{% if o.receipt %}<div class="receipt-flag" style="margin-top:4px">📎 فيه إيصال</div>{% endif %}</td>
         </tr>
         {% else %}
         <tr><td colspan="6" class="muted" style="text-align:center;padding:36px">لا توجد طلبات{% if status or q %} بهذا الفلتر{% else %} بعد{% endif %}</td></tr>

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon with context %}
+{% from "_macros.html" import icon, receipt_box with context %}
 {% block title %}طلبك {{ code }} | {{ store_name }}{% endblock %}
 {% block content %}
 <div class="wrap page" style="max-width:760px">
@@ -21,19 +21,16 @@
       {% if bank.account_number %}<div class="bank-row"><span>رقم الحساب</span><b class="num">{{ bank.account_number }}</b><button type="button" class="copy" data-copy="{{ bank.account_number }}">نسخ</button></div>{% endif %}
       {% if bank.iban %}<div class="bank-row"><span>IBAN</span><b class="num">{{ bank.iban }}</b><button type="button" class="copy" data-copy="{{ bank.iban }}">نسخ</button></div>{% endif %}
     </div>
+    <div class="ref-note"><span>اكتب في <b>ملاحظة التحويل</b> رقم طلبك:</span><b class="num">{{ code }}</b><button type="button" class="copy" data-copy="{{ code }}">نسخ</button></div>
     {% else %}
     <p class="notice">بيانات الحساب البنكي بنرسلها لك على واتساب. اضغط الزر تحت وراسلنا برقم طلبك.</p>
     {% endif %}
   </div>
 
   <div class="panel" style="margin-bottom:18px">
-    <h2>٢. أرسل صورة الإيصال على واتساب</h2>
-    <p class="muted" style="margin-bottom:14px">الزر يفتح واتساب برسالة فيها رقم طلبك والمبلغ. أرفق صورة الإيصال وأرسلها.</p>
-    {% if wa %}
-    <a class="btn btn-wa btn-block" href="{{ wa }}" target="_blank" rel="noopener">{{ icon('wa') }}أرسل الإيصال عبر واتساب</a>
-    {% else %}
-    <p class="notice">رقم واتساب المتجر غير مضبوط بعد.</p>
-    {% endif %}
+    <h2>٢. ارفع صورة الإيصال</h2>
+    {% if not order.receipt %}<p class="muted" style="margin-bottom:14px">بعد التحويل، ارفع صورة الإيصال هنا وتنربط بطلبك مباشرة.</p>{% endif %}
+    {{ receipt_box(order, code, url_for('order_done', code=code), wa) }}
   </div>
 
   <div class="panel">

@@ -19,23 +19,26 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get("DATA_DIR", BASE_DIR)          # على Railway: /data (الـ Volume)
 DB_PATH = os.path.join(DATA_DIR, "store.db")
 UPLOAD_DIR = os.path.join(DATA_DIR, "uploads")
+RECEIPT_DIR = os.path.join(DATA_DIR, "receipts")         # خارج /media: لا يفتحها إلا صاحب المتجر
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")    # بدونها تبقى لوحة التحكم مقفلة
 STORE_NAME = os.environ.get("STORE_NAME", "أبو ميثه")
 TZ = ZoneInfo("Asia/Muscat")
 ALLOWED_IMAGES = {"jpg", "jpeg", "png", "webp"}
+ALLOWED_RECEIPTS = ALLOWED_IMAGES | {"heic", "pdf"}
 # صور إضافية للمعرض: لقطات مقرّبة من صورة المنتج الأصلية
 EXTRA_GALLERY = {"ghee-bottles.jpg": [("img/detail-label.jpg", "الملصق"), ("img/bottle-tall.jpg", "الغرشة"),
                                       ("img/detail-caps.jpg", "اللون الذهبي")]}
 
 # حالات الطلب بالترتيب
 PENDING = "بانتظار التحويل"
+RECEIPT = "تم إرسال الإيصال"
 PAID = "تم استلام التحويل"
 PREPARING = "قيد التجهيز"
 SHIPPED = "خرج للتوصيل"
 DELIVERED = "تم التسليم"
 CANCELLED = "ملغي"
-STATUSES = [PENDING, PAID, PREPARING, SHIPPED, DELIVERED, CANCELLED]
-STATUS_KEY = {PENDING: "pending", PAID: "paid", PREPARING: "preparing",
+STATUSES = [PENDING, RECEIPT, PAID, PREPARING, SHIPPED, DELIVERED, CANCELLED]
+STATUS_KEY = {PENDING: "pending", RECEIPT: "receipt", PAID: "paid", PREPARING: "preparing",
               SHIPPED: "shipped", DELIVERED: "delivered", CANCELLED: "cancelled"}
 
 OMAN = {
@@ -89,6 +92,7 @@ def close_db(_exc):
 
 def init_db():
     os.makedirs(UPLOAD_DIR, exist_ok=True)
+    os.makedirs(RECEIPT_DIR, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.executescript("""
         CREATE TABLE IF NOT EXISTS products (
@@ -108,6 +112,11 @@ def init_db():
             price INTEGER NOT NULL, qty INTEGER NOT NULL);
         CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT);
     """)
+    # أعمدة الإيصال (تُضاف لقواعد البيانات القديمة بدون ما تضيع الطلبات)
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(orders)")}
+    for col in ("receipt", "receipt_at", "sender_name"):
+        if col not in cols:
+            conn.execute(f"ALTER TABLE orders ADD COLUMN {col} TEXT DEFAULT ''")
     for k, v in DEFAULT_SETTINGS.items():
         conn.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (k, v))
     # أول تشغيل: السمن العماني بحجمين وأسعار إعلان المتجر، مع صورة الغراش الحقيقية
@@ -382,6 +391,34 @@ def order_done(code):
     return render_template("order_done.html", order=order, items=items, code=order_code(oid), bank=bank, wa=wa)
 
 
+@app.route("/order/<code>/receipt", methods=["POST"])
+def upload_receipt(code):
+    """الزبون يرفق صورة الإيصال، فتنربط بالطلب وتتغير حالته إلى «تم إرسال الإيصال»"""
+    oid = code_to_id(code)
+    if oid is None or oid not in session.get("my_orders", []):
+        abort(403)
+    order, _ = load_order(oid)
+    if not order:
+        abort(404)
+    back = request.form.get("back") or url_for("order_done", code=order_code(oid))
+    file = request.files.get("receipt")
+    ext = file.filename.rsplit(".", 1)[-1].lower() if file and "." in file.filename else ""
+    if not file or not file.filename:
+        flash("اختر صورة الإيصال أولاً")
+        return redirect(back)
+    if ext not in ALLOWED_RECEIPTS:
+        flash("الإيصال لازم يكون صورة (JPG أو PNG) أو ملف PDF")
+        return redirect(back)
+    name = f"{order_code(oid)}-{secrets.token_hex(6)}.{ext}"
+    file.save(os.path.join(RECEIPT_DIR, name))
+    new_status = RECEIPT if order["status"] == PENDING else order["status"]
+    db().execute("UPDATE orders SET receipt = ?, receipt_at = ?, sender_name = ?, status = ? WHERE id = ?",
+                 (name, now_oman(), request.form.get("sender_name", "").strip()[:80], new_status, oid))
+    db().commit()
+    flash("استلمنا الإيصال، بنراجع التحويل ونأكد طلبك قريباً")
+    return redirect(back)
+
+
 @app.route("/track", methods=["GET", "POST"])
 def track():
     order, items, code = None, [], request.values.get("code", "")
@@ -391,6 +428,7 @@ def track():
         # رقم الطلب + آخر ٤ أرقام من الهاتف، حتى لا يطّلع أحد على طلب غيره
         if found and clean_phone(found["phone"])[-4:] == clean_phone(request.form.get("phone", ""))[-4:]:
             order, items = found, found_items
+            session["my_orders"] = (session.get("my_orders", []) + [oid])[-20:]   # يقدر يرفق الإيصال من هنا
         else:
             flash("ما لقينا طلب بهذا الرقم والهاتف. تأكد من رقم الطلب (مثل AM-1001) ورقم الهاتف اللي طلبت فيه.")
     return render_template("track.html", order=order, items=items, code=code,
@@ -570,6 +608,12 @@ def admin_settings():
     values = {k: setting(k) for k in DEFAULT_SETTINGS}
     return render_template("admin/settings.html", s=values, oman=OMAN,
                            fees=json.loads(values["delivery_fees"] or "{}"))
+
+
+@app.route("/admin/receipt/<path:name>")
+@admin_required
+def admin_receipt(name):
+    return send_from_directory(RECEIPT_DIR, name)
 
 
 @app.route("/media/<path:name>")

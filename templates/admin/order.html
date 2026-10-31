@@ -18,6 +18,33 @@
           <div class="total"><span>الإجمالي</span><span class="price">{{ order.total|omr }}<small>ر.ع</small></span></div>
         </div>
       </div>
+      <div class="panel" style="margin-bottom:18px">
+        <h2>إيصال التحويل</h2>
+        {% if order.receipt %}
+        <div class="receipt-view">
+          {% if order.receipt.lower().endswith('.pdf') %}
+          <a class="btn btn-line" href="{{ url_for('admin_receipt', name=order.receipt) }}" target="_blank">فتح الإيصال (PDF)</a>
+          {% else %}
+          <a href="{{ url_for('admin_receipt', name=order.receipt) }}" target="_blank"><img src="{{ url_for('admin_receipt', name=order.receipt) }}" alt="إيصال {{ code }}"></a>
+          {% endif %}
+          <div class="bank">
+            <div class="bank-row"><span>وقت الإرسال</span><b class="num">{{ order.receipt_at }}</b></div>
+            {% if order.sender_name %}<div class="bank-row"><span>اسم المحوِّل</span><b>{{ order.sender_name }}</b></div>{% endif %}
+            <div class="bank-row"><span>المبلغ المطلوب</span><b class="price">{{ order.total|omr }} ر.ع</b></div>
+          </div>
+          {% if order.status == 'تم إرسال الإيصال' %}
+          <form method="post">
+            <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="status" value="تم استلام التحويل">
+            <input type="hidden" name="admin_note" value="{{ order.admin_note }}">
+            <button class="btn btn-green btn-block btn-lg" type="submit">✓ تأكيد استلام التحويل</button>
+          </form>
+          <p class="hint">تأكد إن المبلغ وصل حسابك قبل ما تأكد.</p>
+          {% endif %}
+        </div>
+        {% else %}
+        <p class="muted">العميل ما رفع إيصال للحين. إذا وصلك على واتساب، طابق رقم الطلب {{ code }}.</p>
+        {% endif %}
+      </div>
       <div class="panel">
         <h2>العميل والتوصيل</h2>
         <div class="bank">

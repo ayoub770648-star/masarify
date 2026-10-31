@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Readex+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
 <script>document.documentElement.classList.add('js')</script>
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -69,7 +69,7 @@
 </aside>
 <div class="toast" id="toast" role="status" aria-live="polite">{{ icon('check') }}<span></span></div>
 {% endblock %}
-<script src="{{ url_for('static', filename='app.js') }}?v=5" defer></script>
+<script src="{{ url_for('static', filename='app.js') }}?v=6" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

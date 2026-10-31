@@ -36,6 +36,15 @@
     input.value = Math.max(1, Math.min(50, (+input.value || 1) + (+b.dataset.step)));
   });
 
+  /* اسم ملف الإيصال المختار */
+  document.addEventListener('change', function (e) {
+    var input = e.target.closest('.drop input[type=file]');
+    if (!input || !input.files.length) return;
+    var drop = input.closest('.drop');
+    drop.classList.add('has-file');
+    drop.querySelector('[data-file-label]').textContent = '✓ ' + input.files[0].name;
+  });
+
   /* اختيار الحجم الأول المتوفر افتراضياً */
   $$('.sizes').forEach(function (g) {
     if (!g.querySelector('input:checked')) { var o = g.querySelector('input:not(:disabled)'); if (o) o.checked = true; }

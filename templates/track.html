@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_macros.html" import icon with context %}
+{% from "_macros.html" import icon, receipt_box with context %}
 {% block title %}تتبّع طلبك | {{ store_name }}{% endblock %}
 {% block content %}
 <div class="wrap page" style="max-width:720px">
@@ -27,6 +27,12 @@
     <ol class="timeline">
       {% for s in steps %}<li class="{{ 'done' if loop.index0 < cur else ('now' if loop.index0 == cur else 'todo') }}"><span class="pin"></span><b>{{ s }}</b></li>{% endfor %}
     </ol>
+    {% endif %}
+    {% if order.status in ('بانتظار التحويل', 'تم إرسال الإيصال') %}
+    <div style="margin:6px 0 20px">
+      <h2 style="font-size:1.05rem;margin-bottom:10px">{{ 'إيصال التحويل' if order.receipt else 'حوّلت المبلغ؟ ارفع الإيصال' }}</h2>
+      {{ receipt_box(order, 'AM-' ~ (1000 + order.id), url_for('track', code='AM-' ~ (1000 + order.id))) }}
+    </div>
     {% endif %}
     <div class="sum" style="margin-top:8px">
       {% for i in items %}<div><span>{{ i.product_name }} · {{ i.variant_label }} × {{ i.qty }}</span></div>{% endfor %}
