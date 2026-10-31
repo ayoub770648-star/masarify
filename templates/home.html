@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% from "_macros.html" import jar, media, icon with context %}
+{% block content %}
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="eyebrow">من بيت {{ store_name }}</span>
+      <h1>سمن عُماني<br><em>بلدي</em></h1>
+      <p class="lede">سمن بلدي بلونه الذهبي ورائحته اللي تعرفها من بيوت عُمان. اطلب من هنا، حوّل المبلغ، ونوصله لين بابك.</p>
+      <div class="ctas">
+        {% if products %}<a class="btn btn-gold" href="{{ url_for('product', pid=products[0].id) }}">اطلب الآن</a>{% endif %}
+        <a class="btn btn-line" href="#how">كيف أطلب؟</a>
+      </div>
+      <div class="facts">
+        <span>{{ icon('truck') }}التوصيل لكل المحافظات</span>
+        <span>{{ icon('bank') }}الدفع بالتحويل البنكي</span>
+        <span>{{ icon('wa') }}تأكيد الطلب عبر واتساب</span>
+      </div>
+    </div>
+    <div class="hero-art">
+      <div class="halo"></div><div class="ring"></div>
+      {% if products and products[0].image %}<img src="{{ url_for('media', name=products[0].image) }}" alt="{{ products[0].name }}">{% else %}{{ jar() }}{% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="block" id="products">
+  <div class="wrap">
+    <div class="sec-head">
+      <small>المنتجات</small>
+      <h2>اختر حجمك</h2>
+      <p>كل الأسعار بالريال العماني.</p>
+    </div>
+    <div class="products">
+      {% for p in products %}
+      <a class="product-card" href="{{ url_for('product', pid=p.id) }}">
+        <div class="media">{{ media(p) }}</div>
+        <div class="body">
+          <h3>{{ p.name }}</h3>
+          {% if p.tagline %}<p class="muted">{{ p.tagline }}</p>{% endif %}
+          <div class="chips">{% for v in p.variants %}<span class="chip">{{ v.label }}</span>{% endfor %}</div>
+          <div class="foot">
+            <span class="price">{% if p.variants|length > 1 %}<small>من</small> {% endif %}{{ p.from_price|omr }}<small>ر.ع</small></span>
+            <span class="btn btn-green">اطلب</span>
+          </div>
+        </div>
+      </a>
+      {% else %}
+      <p class="muted">المنتجات قيد التجهيز، ارجع لنا قريباً.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="block" id="how" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <small>طريقة الطلب</small>
+      <h2>أربع خطوات وطلبك عندك</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><h3>اختر الحجم</h3><p>حدد الحجم والكمية وأضفها للسلة.</p></div>
+      <div class="step"><h3>اكتب عنوانك</h3><p>الاسم ورقم الهاتف والولاية وعنوان التوصيل.</p></div>
+      <div class="step"><h3>حوّل المبلغ</h3><p>تطلع لك بيانات الحساب البنكي والمبلغ مع رقم طلبك.</p></div>
+      <div class="step wa"><h3>أرسل الإيصال</h3><p>بضغطة زر يفتح واتساب برسالة جاهزة، أرفق صورة الإيصال وأرسل.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block uses">
+  <div class="wrap">
+    <div class="sec-head">
+      <small style="color:var(--gold-2)">على السفرة العمانية</small>
+      <h2>وين يدخل السمن؟</h2>
+      <p>من فطور الصبح لين عزايم العيد.</p>
+    </div>
+    <div class="use-list">
+      <div class="use"><b>العرسية والهريس</b><p>ملعقة سمن فوق الصحن تكمّل الطعم.</p></div>
+      <div class="use"><b>اللقيمات</b><p>للعجينة وللقلي، مع الدبس أو العسل.</p></div>
+      <div class="use"><b>الخبز الرخال</b><p>على الخبز وهو حار مع البيض أو العسل.</p></div>
+      <div class="use"><b>العيش والمشاكيك</b><p>للطبخ اليومي وعزايم الأعياد.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <div class="sec-head"><small>أسئلة متكررة</small><h2>قبل ما تطلب</h2></div>
+    <div class="faq">
+      <details><summary>كيف أدفع؟</summary><p>بعد ما تأكد الطلب تطلع لك بيانات الحساب البنكي. حوّل المبلغ من تطبيق بنكك، وأرسل صورة الإيصال على واتساب من زر جاهز في صفحة الطلب.</p></details>
+      <details><summary>متى يوصل طلبي؟</summary><p>نبدأ التجهيز بعد ما نستلم التحويل، ونتواصل معك على رقمك لترتيب موعد التوصيل.</p></details>
+      <details><summary>كم رسوم التوصيل؟</summary><p>تختلف حسب المحافظة وتظهر لك قبل تأكيد الطلب{% if free_over %}، والتوصيل مجاني للطلبات فوق {{ free_over|omr }} ر.ع{% endif %}.</p></details>
+      <details><summary>كيف أعرف وين وصل طلبي؟</summary><p>من صفحة <a href="{{ url_for('track') }}">تتبّع طلبك</a> برقم الطلب (مثل AM-1001) ورقم هاتفك.</p></details>
+    </div>
+  </div>
+</section>
+{% endblock %}

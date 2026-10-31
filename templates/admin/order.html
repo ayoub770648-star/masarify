@@ -1,0 +1,51 @@
+{% extends "admin/layout.html" %}
+{% from "_macros.html" import icon with context %}
+{% block content %}
+<div class="wrap page">
+  <p><a href="{{ url_for('admin_orders') }}">→ كل الطلبات</a></p>
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:8px 0 20px">
+    <h1 class="page-title num" style="margin:0">{{ code }}</h1>
+    <span class="status s-{{ STATUS_KEY[order.status] }}">{{ order.status }}</span>
+    <span class="muted num">{{ order.created_at }}</span>
+  </div>
+  <div class="grid-2">
+    <div>
+      <div class="panel" style="margin-bottom:18px">
+        <h2>المنتجات</h2>
+        <div class="sum">
+          {% for i in items %}<div><span>{{ i.product_name }} · {{ i.variant_label }} × {{ i.qty }}</span><span class="price">{{ (i.price * i.qty)|omr }}</span></div>{% endfor %}
+          <div><span>التوصيل</span><span class="price">{{ order.delivery|omr }}</span></div>
+          <div class="total"><span>الإجمالي</span><span class="price">{{ order.total|omr }}<small>ر.ع</small></span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>العميل والتوصيل</h2>
+        <div class="bank">
+          <div class="bank-row"><span>الاسم</span><b>{{ order.name }}</b></div>
+          <div class="bank-row"><span>الهاتف</span><b class="num">{{ order.phone }}</b></div>
+          <div class="bank-row"><span>الولاية</span><b>{{ order.wilaya }}، {{ order.governorate }}</b></div>
+          <div class="bank-row"><span>العنوان</span><b>{{ order.address }}</b></div>
+          {% if order.notes %}<div class="bank-row"><span>ملاحظات</span><b>{{ order.notes }}</b></div>{% endif %}
+        </div>
+        <a class="btn btn-wa" style="margin-top:14px" href="{{ wa_customer }}" target="_blank" rel="noopener">{{ icon('wa') }}راسل العميل على واتساب</a>
+      </div>
+    </div>
+    <form method="post" class="panel sticky">
+      <input type="hidden" name="csrf" value="{{ csrf }}">
+      <h2>حالة الطلب</h2>
+      <div class="field">
+        {% for s in statuses %}
+        <label style="display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer">
+          <input type="radio" name="status" value="{{ s }}" {% if s == order.status %}checked{% endif %}>
+          <span class="status s-{{ STATUS_KEY[s] }}">{{ s }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      <div class="field"><label class="f" for="note">ملاحظة داخلية</label>
+        <textarea id="note" name="admin_note" placeholder="مثلاً: وصل الإيصال 12:30">{{ order.admin_note }}</textarea></div>
+      <button class="btn btn-gold btn-block" type="submit">حفظ</button>
+      <p class="hint">إلغاء الطلب يرجّع الكميات للمخزون تلقائياً.</p>
+    </form>
+  </div>
+</div>
+{% endblock %}

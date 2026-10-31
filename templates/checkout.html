@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon with context %}
+{% block title %}إتمام الطلب | {{ store_name }}{% endblock %}
+{% block content %}
+<div class="wrap page">
+  <h1 class="page-title">إتمام الطلب</h1>
+  <form method="post" class="grid-2" novalidate id="checkout">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="panel">
+      <h2>بيانات التوصيل</h2>
+      <div class="field-row">
+        <div class="field"><label class="f" for="name">الاسم</label>
+          <input type="text" id="name" name="name" value="{{ form.get('name', '') }}" autocomplete="name" required></div>
+        <div class="field"><label class="f" for="phone">رقم الهاتف</label>
+          <input type="tel" id="phone" name="phone" value="{{ form.get('phone', '') }}" inputmode="tel" placeholder="9XXXXXXX" autocomplete="tel" required>
+          <p class="hint">نتواصل معك عليه لترتيب التوصيل</p></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label class="f" for="gov">المحافظة</label>
+          <select id="gov" name="governorate" required>
+            <option value="">— اختر —</option>
+            {% for g in oman %}<option value="{{ g }}" {% if form.get('governorate') == g %}selected{% endif %}>{{ g }}</option>{% endfor %}
+          </select></div>
+        <div class="field"><label class="f" for="wil">الولاية</label>
+          <select id="wil" name="wilaya" required data-selected="{{ form.get('wilaya', '') }}"><option value="">— اختر المحافظة أولاً —</option></select></div>
+      </div>
+      <div class="field"><label class="f" for="address">العنوان</label>
+        <input type="text" id="address" name="address" value="{{ form.get('address', '') }}" placeholder="المنطقة، رقم البيت أو السكة، أقرب معلم" required></div>
+      <div class="field"><label class="f" for="notes">ملاحظات <span class="muted">(اختياري)</span></label>
+        <textarea id="notes" name="notes" placeholder="مثلاً: الوقت المناسب للتوصيل">{{ form.get('notes', '') }}</textarea></div>
+      <div class="hp" aria-hidden="true"><label>الموقع<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+      <div class="notice">{{ icon('bank') }} الدفع <b>بالتحويل البنكي</b>: بعد تأكيد الطلب تطلع لك بيانات الحساب، وترسل صورة الإيصال على واتساب.</div>
+    </div>
+    <div class="panel sticky">
+      <h2>طلبك</h2>
+      {% for l in lines %}
+      <div class="sum" style="margin-bottom:8px"><div><span>{{ l.name }} · {{ l.label }} × {{ l.qty }}</span><span class="price">{{ l.total|omr }}</span></div></div>
+      {% endfor %}
+      <div class="sum" style="border-top:1px solid var(--line);padding-top:12px;margin-top:6px">
+        <div><span>المجموع</span><span class="price">{{ subtotal|omr }}<small>ر.ع</small></span></div>
+        <div><span>التوصيل</span><span class="price" id="fee">—</span></div>
+        <div class="total"><span>الإجمالي</span><span class="price" id="total">{{ subtotal|omr }}<small>ر.ع</small></span></div>
+      </div>
+      <button class="btn btn-gold btn-block" style="margin-top:18px" type="submit">تأكيد الطلب</button>
+      <p class="hint" style="text-align:center">بتأكيد الطلب تطلع لك بيانات التحويل ورقم طلبك</p>
+    </div>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  (function () {
+    var OMAN = {{ oman|tojson }}, FEES = {{ fees|tojson }}, SUB = {{ subtotal }};
+    var gov = document.getElementById('gov'), wil = document.getElementById('wil');
+    var fmt = function (b) { return (b / 1000).toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 }); };
+    function fill() {
+      var list = OMAN[gov.value] || [], keep = wil.dataset.selected;
+      wil.innerHTML = '<option value="">' + (gov.value ? '— اختر —' : '— اختر المحافظة أولاً —') + '</option>' +
+        list.map(function (w) { return '<option' + (w === keep ? ' selected' : '') + '>' + w + '</option>'; }).join('');
+      var fee = gov.value ? FEES[gov.value] : null;
+      document.getElementById('fee').innerHTML = fee === null ? '—' : (fee === 0 ? '<span style="color:var(--ok)">مجاني</span>' : fmt(fee) + '<small>ر.ع</small>');
+      document.getElementById('total').innerHTML = fmt(SUB + (fee || 0)) + '<small>ر.ع</small>';
+    }
+    gov.addEventListener('change', function () { wil.dataset.selected = ''; fill(); });
+    fill();
+  })();
+</script>
+{% endblock %}

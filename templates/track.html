@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "_macros.html" import icon with context %}
+{% block title %}تتبّع طلبك | {{ store_name }}{% endblock %}
+{% block content %}
+<div class="wrap page" style="max-width:720px">
+  <h1 class="page-title">تتبّع طلبك</h1>
+  <form method="post" class="panel" style="margin-bottom:18px">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="field-row">
+      <div class="field"><label class="f" for="code">رقم الطلب</label>
+        <input type="text" id="code" name="code" class="ltr" value="{{ code }}" placeholder="AM-1001" required></div>
+      <div class="field"><label class="f" for="phone">رقم الهاتف</label>
+        <input type="tel" id="phone" name="phone" placeholder="9XXXXXXX" required></div>
+    </div>
+    <button class="btn btn-green" type="submit">عرض حالة الطلب</button>
+  </form>
+  {% if order %}
+  <div class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <h2 style="margin:0" class="num">AM-{{ 1000 + order.id }}</h2>
+      <span class="status s-{{ STATUS_KEY[order.status] }}">{{ order.status }}</span>
+    </div>
+    {% if order.status == 'ملغي' %}
+    <p class="notice" style="margin-top:14px">هذا الطلب ملغي. إذا عندك استفسار راسلنا على واتساب.</p>
+    {% else %}
+    {% set cur = steps.index(order.status) %}
+    <ol class="timeline">
+      {% for s in steps %}<li class="{{ 'done' if loop.index0 < cur else ('now' if loop.index0 == cur else 'todo') }}"><span class="pin"></span><b>{{ s }}</b></li>{% endfor %}
+    </ol>
+    {% endif %}
+    <div class="sum" style="margin-top:8px">
+      {% for i in items %}<div><span>{{ i.product_name }} · {{ i.variant_label }} × {{ i.qty }}</span></div>{% endfor %}
+      <div class="total"><span>الإجمالي</span><span class="price">{{ order.total|omr }}<small>ر.ع</small></span></div>
+    </div>
+    {% if wa_store %}<a class="btn btn-wa" style="margin-top:16px" href="https://wa.me/{{ wa_store }}" target="_blank" rel="noopener">{{ icon('wa') }}راسلنا على واتساب</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

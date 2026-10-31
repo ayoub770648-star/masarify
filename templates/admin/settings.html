@@ -1,0 +1,34 @@
+{% extends "admin/layout.html" %}
+{% block content %}
+<div class="wrap page" style="max-width:860px">
+  <h1 class="page-title">الإعدادات</h1>
+  <form method="post" class="panel">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <h2>واتساب المتجر</h2>
+    <div class="field"><label class="f" for="wa">الرقم اللي يستقبل الإيصالات</label>
+      <input type="tel" id="wa" name="whatsapp" value="{{ s.whatsapp }}" placeholder="9XXXXXXX" required>
+      <p class="hint">٨ أرقام عماني، أو الرقم كامل مع رمز الدولة.</p></div>
+
+    <h2 style="margin-top:12px">الحساب البنكي (يظهر للعميل بعد الطلب)</h2>
+    <div class="field-row">
+      <div class="field"><label class="f" for="bn">البنك</label><input type="text" id="bn" name="bank_name" value="{{ s.bank_name }}" placeholder="مثل: بنك مسقط"></div>
+      <div class="field"><label class="f" for="an">اسم صاحب الحساب</label><input type="text" id="an" name="account_name" value="{{ s.account_name }}"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label class="f" for="acc">رقم الحساب</label><input type="text" id="acc" name="account_number" class="ltr" value="{{ s.account_number }}"></div>
+      <div class="field"><label class="f" for="iban">IBAN</label><input type="text" id="iban" name="iban" class="ltr" value="{{ s.iban }}" placeholder="OM.."></div>
+    </div>
+
+    <h2 style="margin-top:12px">رسوم التوصيل (ر.ع)</h2>
+    <div class="field-row">
+      <div class="field"><label class="f" for="dd">الرسوم العامة</label><input type="text" id="dd" name="delivery_default" class="ltr" inputmode="decimal" value="{{ '%.3f'|format((s.delivery_default|int) / 1000) }}"></div>
+      <div class="field"><label class="f" for="fo">توصيل مجاني للطلبات فوق</label><input type="text" id="fo" name="free_over" class="ltr" inputmode="decimal" value="{{ '%.3f'|format((s.free_over|int) / 1000) }}"><p class="hint">اكتب 0 لإلغاء التوصيل المجاني.</p></div>
+    </div>
+    <p class="hint" style="margin-bottom:10px">رسوم خاصة لكل محافظة (اتركها فاضية لتطبيق الرسوم العامة):</p>
+    <div class="fees">
+      {% for g in oman %}<label>{{ g }}<input type="text" name="fee_{{ g }}" class="ltr" inputmode="decimal" value="{{ '%.3f'|format(fees[g] / 1000) if g in fees else '' }}"></label>{% endfor %}
+    </div>
+    <button class="btn btn-gold" style="margin-top:20px" type="submit">حفظ الإعدادات</button>
+  </form>
+</div>
+{% endblock %}

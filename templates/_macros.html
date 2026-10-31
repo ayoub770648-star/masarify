@@ -1,0 +1,34 @@
+{% macro jar(cls='jar') -%}
+<svg class="{{ cls }}" viewBox="0 0 200 250" aria-hidden="true">
+  <defs>
+    <linearGradient id="ghee" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7cf6a"/><stop offset=".55" stop-color="#e6a532"/><stop offset="1" stop-color="#c47f17"/></linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".25" stop-color="#fff" stop-opacity=".08"/><stop offset=".8" stop-color="#fff" stop-opacity=".02"/><stop offset="1" stop-color="#fff" stop-opacity=".3"/></linearGradient>
+    <linearGradient id="lid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c6a4e"/><stop offset="1" stop-color="#14382a"/></linearGradient>
+  </defs>
+  <rect x="38" y="62" width="124" height="172" rx="30" fill="#f3e3bd" opacity=".35"/>
+  <path d="M44 96h112v104a32 32 0 0 1-32 32H76a32 32 0 0 1-32-32z" fill="url(#ghee)"/>
+  <path d="M44 96c18 8 34-6 56 0s38 8 56 0" fill="none" stroke="#fbe2a0" stroke-width="3" opacity=".8"/>
+  <rect x="38" y="62" width="124" height="172" rx="30" fill="url(#glass)" stroke="#e9d3a0" stroke-width="2"/>
+  <rect x="58" y="134" width="84" height="54" rx="10" fill="#fbfaf6" stroke="#d8962a" stroke-width="1.5"/>
+  <path d="M58 146h84M58 176h84" stroke="#d8962a" stroke-width=".8" opacity=".6"/>
+  <text x="100" y="168" text-anchor="middle" font-size="22" font-weight="700" fill="#1d4a36" style="font-family:'Aref Ruqaa',serif">أبو ميثه</text>
+  <rect x="32" y="34" width="136" height="34" rx="10" fill="url(#lid)"/>
+  <rect x="32" y="60" width="136" height="8" rx="4" fill="#d8962a"/>
+  <path d="M44 44h112" stroke="#fff" stroke-opacity=".18" stroke-width="3" stroke-linecap="round"/>
+  <path d="M60 96v-6M78 96v-4" stroke="#f7cf6a" stroke-width="5" stroke-linecap="round"/>
+</svg>
+{%- endmacro %}
+
+{% macro media(p, cls='jar') -%}
+  {%- if p.image -%}<img src="{{ url_for('media', name=p.image) }}" alt="{{ p.name }}" loading="lazy">{%- else -%}{{ jar(cls) }}{%- endif -%}
+{%- endmacro %}
+
+{% macro icon(name) -%}
+  {%- if name == 'truck' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11v10H3zM14 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>
+  {%- elif name == 'bank' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg>
+  {%- elif name == 'wa' -%}<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.1.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.2c0-.1-.2-.2-.4-.3z"/></svg>
+  {%- elif name == 'leaf' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c8 0 14-6 14-15C10 4 5 9 5 15v4zM5 19l7-7"/></svg>
+  {%- elif name == 'check' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+  {%- elif name == 'bag' -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2"/></svg>
+  {%- endif -%}
+{%- endmacro %}

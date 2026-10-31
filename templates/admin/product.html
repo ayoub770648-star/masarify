@@ -1,0 +1,60 @@
+{% extends "admin/layout.html" %}
+{% from "_macros.html" import media with context %}
+{% block content %}
+<div class="wrap page" style="max-width:860px">
+  <p><a href="{{ url_for('admin_products') }}">→ المنتجات</a></p>
+  <h1 class="page-title">{{ p.name if p else 'منتج جديد' }}</h1>
+  <form method="post" enctype="multipart/form-data" class="panel">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="field"><label class="f" for="name">اسم المنتج</label><input type="text" id="name" name="name" value="{{ p.name if p else '' }}" required></div>
+    <div class="field"><label class="f" for="tagline">سطر قصير تحت الاسم</label><input type="text" id="tagline" name="tagline" value="{{ p.tagline if p else '' }}"></div>
+    <div class="field"><label class="f" for="desc">الوصف</label><textarea id="desc" name="description" rows="4">{{ p.description if p else '' }}</textarea></div>
+    <div class="field">
+      <label class="f" for="image">صورة المنتج</label>
+      {% if p and p.image %}<div class="thumb" style="width:96px;height:96px;margin-bottom:8px">{{ media(p) }}</div>{% endif %}
+      <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp">
+      <p class="hint">صورة مربعة واضحة تطلع أحلى. بدون صورة يظهر رسم برطمان السمن.</p>
+    </div>
+
+    <h2 style="margin-top:8px">الأحجام والأسعار</h2>
+    <p class="hint" style="margin:-8px 0 12px">السعر بالريال (مثل 6.500). اترك المخزون فاضي إذا ما تبي تتابعه. لحذف حجم امسح اسمه.</p>
+    <div id="variants">
+      {% for v in (p.variants if p else []) %}
+      <div class="variant-row">
+        <input type="hidden" name="v_id" value="{{ v.id }}">
+        <input type="text" name="v_label" value="{{ v.label }}" placeholder="الحجم" aria-label="الحجم">
+        <input type="text" name="v_price" value="{{ '%.3f'|format(v.price / 1000) }}" inputmode="decimal" class="ltr" placeholder="السعر" aria-label="السعر">
+        <input type="text" name="v_stock" value="{{ v.stock if v.stock is not none else '' }}" inputmode="numeric" class="ltr" placeholder="المخزون" aria-label="المخزون">
+        <label><select name="v_active" aria-label="الحالة"><option value="1" {% if v.active %}selected{% endif %}>ظاهر</option><option value="0" {% if not v.active %}selected{% endif %}>مخفي</option></select></label>
+      </div>
+      {% endfor %}
+    </div>
+    <button type="button" class="btn btn-line" id="addv" style="margin-bottom:18px">+ إضافة حجم</button>
+
+    <div class="field-row">
+      <div class="field"><label class="f" for="sort">الترتيب في المتجر</label><input type="number" id="sort" name="sort" value="{{ p.sort if p else 0 }}"></div>
+      <div class="field"><label class="f">&nbsp;</label><label style="display:flex;gap:8px;align-items:center;padding-top:10px"><input type="checkbox" name="active" {% if not p or p.active %}checked{% endif %}> ظاهر في المتجر</label></div>
+    </div>
+    <button class="btn btn-gold" type="submit">حفظ المنتج</button>
+  </form>
+</div>
+<template id="vrow">
+  <div class="variant-row">
+    <input type="hidden" name="v_id" value="">
+    <input type="text" name="v_label" placeholder="الحجم (مثل: كيلو)" aria-label="الحجم">
+    <input type="text" name="v_price" inputmode="decimal" class="ltr" placeholder="السعر" aria-label="السعر">
+    <input type="text" name="v_stock" inputmode="numeric" class="ltr" placeholder="المخزون" aria-label="المخزون">
+    <label><select name="v_active" aria-label="الحالة"><option value="1">ظاهر</option><option value="0">مخفي</option></select></label>
+  </div>
+</template>
+{% endblock %}
+{% block scripts %}
+<script>
+  (function () {
+    var box = document.getElementById('variants'), tpl = document.getElementById('vrow');
+    function add() { box.appendChild(tpl.content.cloneNode(true)); }
+    document.getElementById('addv').addEventListener('click', add);
+    if (!box.children.length) add();
+  })();
+</script>
+{% endblock %}

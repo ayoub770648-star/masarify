@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% from "_macros.html" import jar, icon with context %}
+{% block title %}السلة | {{ store_name }}{% endblock %}
+{% block content %}
+<div class="wrap page">
+  <h1 class="page-title">السلة</h1>
+  {% if not lines %}
+  <div class="panel empty-state">
+    {{ jar() }}
+    <h2>السلة فاضية</h2>
+    <p class="muted">اختر حجم السمن اللي يناسبك وأضفه للسلة.</p>
+    <a class="btn btn-gold" href="{{ url_for('home') }}#products">تصفّح المنتجات</a>
+  </div>
+  {% else %}
+  <div class="grid-2">
+    <div class="panel">
+      {% for l in lines %}
+      <div class="line">
+        <div class="thumb">{% if l.image %}<img src="{{ url_for('media', name=l.image) }}" alt="">{% else %}{{ jar() }}{% endif %}</div>
+        <div class="meta"><b>{{ l.name }}</b><small>{{ l.label }} · {{ l.price|omr }} ر.ع</small></div>
+        <div class="side">
+          <form method="post" action="{{ url_for('cart_update') }}" class="qty">
+            <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="variant" value="{{ l.id }}">
+            <button name="qty" value="{{ l.qty - 1 }}" aria-label="أنقص">−</button>
+            <input type="number" value="{{ l.qty }}" readonly aria-label="الكمية">
+            <button name="qty" value="{{ l.qty + 1 }}" aria-label="زِد">+</button>
+          </form>
+          <span class="price">{{ l.total|omr }}<small>ر.ع</small></span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="panel sticky">
+      <h2>ملخص الطلب</h2>
+      <div class="sum">
+        <div><span>المجموع</span><span class="price">{{ subtotal|omr }}<small>ر.ع</small></span></div>
+        <div class="muted"><span>التوصيل</span><span>يُحسب حسب المحافظة</span></div>
+      </div>
+      {% if free_over %}
+        {% if subtotal >= free_over %}
+        <p class="hint" style="color:var(--ok);font-weight:600;margin-top:14px">طلبك يستاهل توصيل مجاني</p>
+        {% else %}
+        <div class="progress" style="margin-top:16px"><span style="width:{{ (subtotal * 100 / free_over)|round|int }}%"></span></div>
+        <p class="hint">باقي {{ (free_over - subtotal)|omr }} ر.ع على التوصيل المجاني</p>
+        {% endif %}
+      {% endif %}
+      <a class="btn btn-gold btn-block" style="margin-top:18px" href="{{ url_for('checkout') }}">إتمام الطلب</a>
+      <a class="btn btn-line btn-block" style="margin-top:8px" href="{{ url_for('home') }}#products">أضف منتجات</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

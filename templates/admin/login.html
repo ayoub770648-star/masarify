@@ -1,0 +1,15 @@
+{% extends "admin/layout.html" %}
+{% block content %}
+<div class="wrap page" style="max-width:440px">
+  <h1 class="page-title">دخول لوحة التحكم</h1>
+  {% if locked %}
+  <div class="setup">لوحة التحكم مقفلة لأن كلمة المرور غير مضبوطة. أضف المتغير <b class="num">ADMIN_PASSWORD</b> في Railway ← Variables ثم أعد التشغيل.</div>
+  {% else %}
+  <form method="post" class="panel">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="field"><label class="f" for="pw">كلمة المرور</label><input type="password" id="pw" name="password" autofocus required></div>
+    <button class="btn btn-green btn-block" type="submit">دخول</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

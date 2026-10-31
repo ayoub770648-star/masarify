@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% from "_macros.html" import jar with context %}
+{% block content %}
+<div class="wrap page"><div class="panel empty-state">{{ jar() }}<h1 class="page-title" style="margin:0">{{ title }}</h1><p class="muted">{{ text }}</p><a class="btn btn-gold" href="{{ url_for('home') }}">ارجع للمتجر</a></div></div>
+{% endblock %}

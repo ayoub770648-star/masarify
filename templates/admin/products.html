@@ -1,0 +1,22 @@
+{% extends "admin/layout.html" %}
+{% from "_macros.html" import media with context %}
+{% block content %}
+<div class="wrap page">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px">
+    <h1 class="page-title" style="margin:0">المنتجات</h1>
+    <a class="btn btn-gold" href="{{ url_for('admin_product') }}">+ منتج جديد</a>
+  </div>
+  <div class="panel">
+    {% for p in products %}
+    <a class="line" href="{{ url_for('admin_product', pid=p.id) }}" style="text-decoration:none;color:inherit">
+      <div class="thumb">{{ media(p) }}</div>
+      <div class="meta"><b>{{ p.name }}{% if not p.active %} <span class="status s-cancelled">مخفي</span>{% endif %}</b>
+        <small>{% for v in p.variants %}{{ v.label }}: {{ v.price|omr }} ر.ع{% if v.stock is not none %} (المخزون {{ v.stock }}){% endif %}{% if not loop.last %} · {% endif %}{% endfor %}</small></div>
+      <div class="side"><span class="btn btn-line">تعديل</span></div>
+    </a>
+    {% else %}
+    <p class="muted">لا توجد منتجات بعد.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
