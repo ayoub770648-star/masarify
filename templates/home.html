@@ -4,15 +4,14 @@
 {% block flashes %}{% endblock %}
 {% block content %}
 {% set p = products[0] if products else none %}
-<section class="hero heritage" id="top">
-  <canvas class="sky" aria-hidden="true"></canvas>
-  <div class="moon" data-depth="0.6" aria-hidden="true"></div>
-  <div class="fort-layer" data-depth="0.25">{% include "_fort.svg" %}</div>
+<section class="hero heritage photo" id="top">
+  <div class="hero-bg" aria-hidden="true"></div>
+  <canvas class="sparks" aria-hidden="true"></canvas>
   <div class="wrap">
     <div class="hero-copy">
-      <span class="kicker reveal">من أرض عُمان · منذ القِدم</span>
+      <span class="kicker reveal">من أرض عُمان · بروح البيوت القديمة</span>
       <h1 class="reveal d1"><span class="hl">سمن عُماني</span><span class="hl"><em class="shimmer">أصلي</em><svg class="flag" viewBox="0 0 30 20" aria-label="علم عُمان"><rect width="30" height="20" fill="#fff"/><rect y="13.3" width="30" height="6.7" fill="#007a3d"/><rect width="9" height="20" fill="#c8102e"/><rect x="9" y="6.7" width="21" height="6.6" fill="#c8102e"/></svg></span></h1>
-      <p class="lede reveal d2">من خيرات القلاع والواحات إلى سفرتك. <b>ميه بالميه</b> ولذيذ، والريحة خيال، ونوصله لين بابك في أي محافظة.</p>
+      <p class="lede reveal d2">من خلف الأبواب العمانية العتيقة إلى سفرتك. <b>ميه بالميه</b> ولذيذ، والريحة خيال، ونوصله لين بابك في أي محافظة.</p>
       {% if p %}
       <div class="seals reveal d3">
         {% for v in p.variants[:2] %}
@@ -25,14 +24,13 @@
       </div>
       {% endif %}
     </div>
-    <div class="hero-stage reveal d2">
-      <div class="door" data-depth="0.12">
-        <div class="door-arch"></div>
+    <div class="hero-visual reveal d2" data-depth="0.12">
+      <div class="arch-photo">
+        <div class="frame"></div>
+        <div class="photo"><img src="{{ url_for('static', filename='img/hero-group.webp') }}" width="921" height="1152" alt="غراش سمن عُماني أصلي أمام باب عماني منحوت" fetchpriority="high"></div>
       </div>
-      <img class="bottles" data-depth="0.35" src="{{ url_for('static', filename='img/bottles-cutout.webp') }}" width="519" height="897" alt="غراش سمن عُماني أصلي من {{ store_name }}" fetchpriority="high">
-      <div class="burner" data-depth="0.5">{% include "_mabkhara.svg" %}</div>
-      <canvas class="smoke" aria-hidden="true"></canvas>
-      <div class="badge-round"><div><b>١٠٠٪</b><small>أصلي</small></div></div>
+      <div class="badge-round" data-depth="0.3"><div><b>١٠٠٪</b><small>أصلي</small></div></div>
+      <span class="tag" data-depth="0.25">الريحة خيال ♡</span>
     </div>
   </div>
   <a class="scroll-cue" href="#shop" aria-label="انزل للمتجر"></a>
@@ -45,9 +43,9 @@
 {% if p %}
 <section class="block" id="shop">
   <div class="wrap showcase">
-    <div class="showcase-door reveal">
-      <div class="door small"><div class="door-arch"></div></div>
-      <img class="bottles" src="{{ url_for('static', filename='img/bottles-cutout.webp') }}" alt="{{ p.name }}" loading="lazy" width="519" height="897">
+    <div class="showcase-photo reveal">
+      <figure class="main"><img src="{{ url_for('static', filename='img/product-single.webp') }}" alt="{{ p.name }}" loading="lazy" width="921" height="1152"></figure>
+      <figure class="inset"><img src="{{ url_for('static', filename='img/close-label.webp') }}" alt="ملصق سمن عُماني أصلي" loading="lazy"></figure>
       <span class="ribbon-tag">من أرض عُمان ♡</span>
     </div>
     <div class="buybox reveal d1" data-mbar-after>
@@ -154,6 +152,7 @@
 </section>
 
 <section class="cta-band crenel-top">
+  <div class="cta-fort" aria-hidden="true">{% include "_fort.svg" %}</div>
   <div class="wrap reveal">
     <h2>ريحة السمن العماني<br><span class="gold-text">لين باب بيتك</span></h2>
     <p>اطلب الحين، حوّل المبلغ، وأرسل الإيصال على واتساب. الباقي علينا.</p>

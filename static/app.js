@@ -169,11 +169,13 @@
   /* السماء: نجوم تومض وشهاب بين فترة وفترة */
   var sky = hero.querySelector('canvas.sky'), S, stars = [], meteor = null;
   function initSky() {
+    if (!sky) return;
     S = fit(sky); stars = [];
     for (var i = 0, n = Math.round(S.w * S.h / 2600); i < n; i++)
       stars.push({ x: Math.random() * S.w, y: Math.random() * S.h * .7, r: Math.random() * 1.3 + .2, t: Math.random() * 6.3, s: Math.random() * .8 + .4 });
   }
   function drawSky(t) {
+    if (!sky) return;
     var c = S.ctx; c.clearRect(0, 0, S.w, S.h);
     for (var i = 0; i < stars.length; i++) {
       var p = stars[i], a = .35 + .65 * Math.abs(Math.sin(p.t + t / 1000 * p.s));
@@ -192,12 +194,13 @@
 
   /* دخان اللبان: خيوط ناعمة تتلوّى وهي تصعد من فوهة المبخرة */
   var smokeCv = hero.querySelector('canvas.smoke'), burner = hero.querySelector('.burner'), M, puffs = [];
-  function initSmoke() { M = fit(smokeCv); }
+  function initSmoke() { if (smokeCv && burner) M = fit(smokeCv); }
   function emitter() {
     var a = smokeCv.getBoundingClientRect(), b = burner.getBoundingClientRect();
     return { x: b.left - a.left + b.width / 2, y: b.top - a.top + b.height * .48 };
   }
   function drawSmoke(t) {
+    if (!M) return;
     var c = M.ctx, e = emitter(); c.clearRect(0, 0, M.w, M.h);
     if (puffs.length < 70 && Math.random() < .5) puffs.push({ x: e.x + (Math.random() - .5) * 6, y: e.y, r: 4 + Math.random() * 4, life: 0, max: 160 + Math.random() * 90, seed: Math.random() * 6.3 });
     for (var i = puffs.length - 1; i >= 0; i--) {

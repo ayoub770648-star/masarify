@@ -28,8 +28,9 @@ TZ = ZoneInfo("Asia/Muscat")
 ALLOWED_IMAGES = {"jpg", "jpeg", "png", "webp"}
 ALLOWED_RECEIPTS = ALLOWED_IMAGES | {"heic", "pdf"}
 # صور إضافية للمعرض: لقطات مقرّبة من صورة المنتج الأصلية
-EXTRA_GALLERY = {"ghee-bottles.jpg": [("img/detail-label.jpg", "الملصق"), ("img/bottle-tall.jpg", "الغرشة"),
-                                      ("img/detail-caps.jpg", "اللون الذهبي")]}
+# صور إضافية لمعرض المنتج الأول (السمن): صورة الغراش الأربع ولقطات مقرّبة
+EXTRA_GALLERY = [("img/hero-group.webp", "الغراش"), ("img/close-label.webp", "الملصق"),
+                 ("img/close-smoke.webp", "دخان اللبان")]
 
 # حالات الطلب بالترتيب
 PENDING = "بانتظار التحويل"
@@ -123,7 +124,7 @@ def init_db():
         conn.execute("INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)", (k, v))
     # أول تشغيل: السمن العماني بحجمين وأسعار إعلان المتجر، مع صورة الغراش الحقيقية
     if conn.execute("SELECT COUNT(*) FROM products").fetchone()[0] == 0:
-        image = "ghee-bottles.jpg"
+        image = "product-single.webp"
         shutil.copyfile(os.path.join(BASE_DIR, "static", "img", image), os.path.join(UPLOAD_DIR, image))
         pid = conn.execute(
             "INSERT INTO products (name, tagline, description, image, sort) VALUES (?, ?, ?, ?, 0)",
@@ -303,7 +304,7 @@ def products_with_variants(only_active=True):
 @app.route("/")
 def home():
     products = products_with_variants()
-    extras = [(url_for("static", filename=f), cap) for f, cap in EXTRA_GALLERY.get(products[0]["image"], [])] if products else []
+    extras = [(url_for("static", filename=f), cap) for f, cap in EXTRA_GALLERY]
     return render_template("home.html", products=products, extras=extras)
 
 
@@ -313,7 +314,7 @@ def product(pid):
     if not p:
         abort(404)
     gallery = ([(url_for("media", name=p["image"]), p["name"])] if p["image"] else []) + \
-              [(url_for("static", filename=f), cap) for f, cap in EXTRA_GALLERY.get(p["image"], [])]
+              ([(url_for("static", filename=f), cap) for f, cap in EXTRA_GALLERY] if p == products_with_variants()[0] else [])
     return render_template("product.html", p=p, gallery=gallery)
 
 

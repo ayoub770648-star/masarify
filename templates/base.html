@@ -9,12 +9,12 @@
 <meta name="theme-color" content="#1c1109">
 <meta property="og:title" content="{{ store_name }} | سمن عُماني أصلي">
 <meta property="og:description" content="ميه بالميه ولذيذ، والريحة خيال. اطلب الحين والتوصيل لكل المحافظات.">
-<meta property="og:image" content="{{ url_for('static', filename='img/ghee-bottles.jpg', _external=True) }}">
+<meta property="og:image" content="{{ url_for('static', filename='img/hero-group.webp', _external=True) }}">
 <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Readex+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=8">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=9">
 <script>document.documentElement.classList.add('js')</script>
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -69,7 +69,7 @@
 </aside>
 <div class="toast" id="toast" role="status" aria-live="polite">{{ icon('check') }}<span></span></div>
 {% endblock %}
-<script src="{{ url_for('static', filename='app.js') }}?v=8" defer></script>
+<script src="{{ url_for('static', filename='app.js') }}?v=9" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
