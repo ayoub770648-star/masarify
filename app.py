@@ -171,10 +171,17 @@ def init_db():
         ).lastrowid
         for i, (label, price) in enumerate([("غرشة كبيرة (فيمتو أو تانج)", 5000), ("غرشة صغيرة", 3000)]):
             conn.execute("INSERT INTO variants (product_id, label, price, sort) VALUES (?, ?, ?, ?)", (pid, label, price, i))
-    # متجر قائم بصورة الغرشة القديمة: بدّلها بالجديدة (الصور اللي رفعها التاجر بنفسه ما تنلمس)
-    elif conn.execute("SELECT 1 FROM products WHERE image = 'product-single.webp'").fetchone():
-        shutil.copyfile(seed_src, os.path.join(UPLOAD_DIR, image))
-        conn.execute("UPDATE products SET image = ? WHERE image = 'product-single.webp'", (image,))
+    # متجر قائم بصورة الغرشة القديمة (الافتراضية أو نفس الصورة القديمة مرفوعة من اللوحة): بدّلها بالجديدة.
+    # المطابقة بالبصمة، فأي صورة ثانية يرفعها التاجر ما تنلمس
+    else:
+        old_photos = {"4494cc8484776d436375ccf837d008f0ebd3057693c97208c94b62628bd1273d"}
+        for pid, img in conn.execute("SELECT id, image FROM products").fetchall():
+            path = os.path.join(UPLOAD_DIR, img or "")
+            if img == "product-single.webp" or (img and os.path.isfile(path) and
+                                                hashlib.sha256(open(path, "rb").read()).hexdigest() in old_photos):
+                if not os.path.isfile(os.path.join(UPLOAD_DIR, image)):
+                    shutil.copyfile(seed_src, os.path.join(UPLOAD_DIR, image))
+                conn.execute("UPDATE products SET image = ? WHERE id = ?", (image, pid))
     conn.commit()
     conn.close()
 
