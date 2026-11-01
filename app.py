@@ -395,9 +395,13 @@ def checkout():
         else:
             delivery = delivery_fee(gov, subtotal)
             conn = db()
+            # الرقم يكمل بعد أكبر رقم انحذف، عشان رقم طلب قديم محفوظ عند أحد ما يفتح طلب زبون جديد
             oid = conn.execute(
-                """INSERT INTO orders (created_at, name, phone, governorate, wilaya, address, notes,
-                   subtotal, delivery, total, status) VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+                """INSERT INTO orders (id, created_at, name, phone, governorate, wilaya, address, notes,
+                   subtotal, delivery, total, status) VALUES (
+                   MAX(COALESCE((SELECT MAX(id) FROM orders), 0),
+                       COALESCE((SELECT CAST(value AS INTEGER) FROM settings WHERE key = 'last_order_id'), 0)) + 1,
+                   ?,?,?,?,?,?,?,?,?,?,?)""",
                 (now_oman(), name, phone, gov, wilaya, address, notes, subtotal, delivery, subtotal + delivery, PENDING),
             ).lastrowid
             for line in lines:
@@ -632,6 +636,54 @@ def admin_order(oid):
     return render_template("admin/order.html", order=order, items=items, code=code, statuses=STATUSES,
                            conflicts=receipt_conflicts(order), code_of=order_code,
                            wa_customer=wa_link(order["phone"], customer_msg))
+
+
+# حذف الطلب يرجّع الكمية للمخزون إذا الغرشة ما طلعت من عندك بعد
+RESTOCK_ON_DELETE = (PENDING, RECEIPT, PAID, PREPARING)
+
+
+def purge_orders(ids):
+    """حذف نهائي للطلبات مع أصنافها وصور إيصالاتها، ويحفظ أكبر رقم انحذف عشان الترقيم ما يرجع"""
+    conn = db()
+    rows = conn.execute(f"SELECT id, status, receipt FROM orders WHERE id IN ({','.join('?' * len(ids))})",
+                        ids).fetchall() if ids else []
+    for r in rows:
+        if r["status"] in RESTOCK_ON_DELETE:
+            for i in conn.execute("SELECT variant_id, qty FROM order_items WHERE order_id = ?", (r["id"],)).fetchall():
+                conn.execute("UPDATE variants SET stock = stock + ? WHERE id = ? AND stock IS NOT NULL",
+                             (i["qty"], i["variant_id"]))
+        conn.execute("DELETE FROM order_items WHERE order_id = ?", (r["id"],))
+        conn.execute("DELETE FROM orders WHERE id = ?", (r["id"],))
+    if rows:
+        top = max([r["id"] for r in rows] + [int(setting("last_order_id") or 0)])
+        conn.execute("INSERT OR REPLACE INTO settings (key, value) VALUES ('last_order_id', ?)", (str(top),))
+    conn.commit()
+    for r in rows:   # الملفات بعد ما ينحفظ الحذف
+        if r["receipt"]:
+            try:
+                os.remove(os.path.join(RECEIPT_DIR, os.path.basename(r["receipt"])))
+            except OSError:
+                pass
+    return len(rows)
+
+
+@app.route("/admin/order/<int:oid>/delete", methods=["POST"])
+@admin_required
+def admin_order_delete(oid):
+    if purge_orders([oid]):
+        flash(f"انحذف الطلب {order_code(oid)} نهائياً")
+    return redirect(url_for("admin_orders"))
+
+
+@app.route("/admin/orders/delete-all", methods=["POST"])
+@admin_required
+def admin_orders_delete_all():
+    if request.form.get("confirm", "").strip() != "حذف":
+        flash("ما انحذف شي. اكتب كلمة «حذف» في الخانة للتأكيد")
+        return redirect(url_for("admin_settings"))
+    n = purge_orders([r["id"] for r in db().execute("SELECT id FROM orders").fetchall()])
+    flash(f"انحذفت كل الطلبات ({n})")
+    return redirect(url_for("admin_orders"))
 
 
 @app.route("/admin/stats")

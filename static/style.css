@@ -1072,3 +1072,11 @@ body.glass.pearl footer.site::before { opacity: .25; }
 body.glass.pearl footer.site .bottom { border-color: rgba(107,90,58,.18); }
 body.glass.pearl .cta-band p { color: var(--p-mute); }
 body.glass.pearl .btn-wa { background: #1f9d55; color: #fff; box-shadow: 0 14px 30px -16px #1f9d55; }
+
+/* الحذف النهائي في لوحة التحكم */
+.side-stack { position: sticky; top: 96px; align-self: start; display: grid; gap: 14px; }
+@media (max-width: 960px) { .side-stack { position: static; } }
+.danger-zone .hint { margin-top: 10px; }
+.btn-danger { background: transparent; color: #a3202a; box-shadow: inset 0 0 0 1.5px rgba(163, 32, 42, .55); }
+.btn-danger:hover { background: #a3202a; color: #fff; }
+body.glass.pearl .danger-zone.panel { box-shadow: var(--g-hi), var(--g-shadow), inset 0 0 0 1px rgba(163, 32, 42, .25); }

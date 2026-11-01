@@ -31,5 +31,15 @@
     </div>
     <button class="btn btn-gold" style="margin-top:20px" type="submit">حفظ الإعدادات</button>
   </form>
+
+  <form method="post" action="{{ url_for('admin_orders_delete_all') }}" class="panel danger-zone" style="margin-top:22px"
+        onsubmit="return confirm('حذف كل الطلبات نهائياً؟ ما يمديك ترجعها بعدين.')">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <h2>حذف كل الطلبات</h2>
+    <p class="hint" style="margin-bottom:12px">يمسح كل الطلبات وإيصالاتها نهائياً، مفيد قبل الافتتاح عشان تمسح الطلبات التجريبية. ترقيم الطلبات الجديدة يكمل من بعد آخر رقم.</p>
+    <div class="field"><label class="f" for="cf">للتأكيد اكتب كلمة «حذف»</label>
+      <input type="text" id="cf" name="confirm" autocomplete="off" placeholder="حذف"></div>
+    <button class="btn btn-danger" type="submit">حذف كل الطلبات</button>
+  </form>
 </div>
 {% endblock %}
